@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>할 일 생성</title>
+<link rel="stylesheet" href="/assets/css/todo/addTodo.css">
+</head>
+<body>
+	<div class="container">
+		<header>
+			<h1>할 일 생성하기</h1>
+		</header>
+
+		<main>
+			<form id="todo-form">
+				<div class="form-group">
+					<label for="todo-title">할 일 제목</label> <input type="text"
+						id="todo-title" name="todo-title" required>
+				</div>
+				<div class="form-group">
+					<label for="pet-name">대상 강아지</label> <select id="pet-name"
+						name="pet-name">
+						<option value="choco">초코</option>
+						<option value="whitey">흰둥이</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="todo-date">날짜</label> <input type="date" id="todo-date"
+						name="todo-date" required>
+				</div>
+				<div class="form-group">
+					<label for="todo-time">시간 (선택)</label> <input type="time"
+						id="todo-time" name="todo-time">
+				</div>
+				<div class="form-group">
+					<label for="is-routine">루틴으로 등록</label> <input type="checkbox"
+						id="is-routine" name="is-routine">
+				</div>
+				<button type="submit">등록하기</button>
+			</form>
+		</main>
+	</div>
+</body>
+</html>

@@ -1,0 +1,276 @@
+/* 공통 스타일: 모바일 웹 환경(375px) 고정 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 100%;
+    max-width: 375px;
+    margin: 0 auto;
+    background-color: #fff;
+    min-height: 100vh;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* 헤더 스타일 */
+header {
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.menu-icon {
+    cursor: pointer;
+}
+
+h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+/* 강아지 상태 표시 영역 (가로 스크롤 버전) */
+.pet-profiles-wrapper {
+    overflow-x: scroll; /* 가로 스크롤 활성화 */
+    -webkit-overflow-scrolling: touch; /* iOS에서 부드러운 스크롤 */
+    white-space: nowrap; /* 자식 요소들이 한 줄에 오도록 설정 */
+    padding: 10px 0;
+}
+
+/* 스크롤바 숨기기 */
+.pet-profiles-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.pet-profiles {
+    display: flex;
+    gap: 15px; /* 프로필 아이템 사이의 간격 */
+    padding: 0 5px;
+}
+
+.pet-profile {
+    display: inline-block;
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    flex-shrink: 0; /* 아이템이 줄어들지 않도록 설정 */
+}
+
+.profile-pic {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%; /* 원형 프로필 사진 */
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pet-profile.active .profile-pic {
+    border-color: #ffb74d; /* 선택된 프로필 강조 */
+}
+
+.pet-profile span {
+    display: block;
+    margin-top: 5px;
+    white-space: nowrap;
+}
+
+/* 달력 헤더에 오늘 날짜 표시 제거 */
+.date-navigation {
+    display: none; /* 이 섹션은 이제 사용하지 않음 */
+}
+
+/* 투두리스트 목록 스타일 (현재 사용하지 않지만 유지) */
+.todo-list {
+    list-style: none;
+    padding: 0;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.todo-item.completed span {
+    text-decoration: line-through;
+    color: #999;
+}
+
+/* 할 일 추가 버튼 */
+.add-todo-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+    background-color: #ffb74d;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+/* 푸터 스타일 */
+footer {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 12px;
+    color: #aaa;
+}
+
+/* 캘린더 관련 스타일 */
+.calendar-wrapper {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #ddd;
+}
+
+.calendar-header button {
+    border: none;
+    background: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: #ddd;
+}
+
+.day-header {
+    background-color: #eee;
+    text-align: center;
+    padding: 10px 0;
+    font-weight: bold;
+}
+
+.day {
+    background-color: #fff;
+    padding: 10px 5px;
+    min-height: 80px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    position: relative;
+    font-size: 14px;
+}
+
+.day .date-num {
+    display: block;
+    font-weight: bold;
+    text-align: right;
+    margin-bottom: 5px;
+}
+
+.todo-block {
+    background-color: #ffe0b2;
+    color: #333;
+    font-size: 10px;
+    padding: 2px 4px;
+    margin-top: 2px;
+    border-radius: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.day.has-todos {
+    border: 2px solid #ffb74d;
+}
+
+/* 모달 관련 스타일 (수정됨) */
+.modal {
+    display: none; /* 초기에는 숨김 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 검은색 배경 */
+}
+
+/* JavaScript에서 .show 클래스를 추가할 때만 적용 (추가됨) */
+.modal.show {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* 모달이 아래에 위치하도록 정렬 */
+}
+
+.modal-content {
+    background-color: #fff;
+    width: 100%;
+    max-width: 375px; /* 모바일 가로 사이즈 적용 */
+    padding: 20px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    /* 모달이 아래에서 위로 올라오는 애니메이션 효과 */
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+}
+
+/* 모달이 보일 때 애니메이션 실행 (추가됨) */
+.modal.show .modal-content {
+    transform: translateY(0);
+}
+
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#modal-todo-list {
+    list-style: none;
+    padding: 0;
+}
+
+#modal-todo-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+#add-new-todo-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 20px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
