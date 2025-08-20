@@ -1,5 +1,6 @@
 package ganadinote.location.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,7 +13,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class ReverseGeocodingService {
 
-	private final String KAKAO_API_KEY= "b4edb2482f3db38c9e1f5f81005f7b4d";
+	@Value("${kakao.api.key}")
+	private String KAKAO_API_KEY; 
+	
+	
 	private final RestTemplate restTemplate = new RestTemplate();
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	
