@@ -1,0 +1,153 @@
+@charset "UTF-8";
+/*
+* ysr.css
+* 멍멍그램 SNS 헤더를 위한 커스텀 스타일
+* 이 파일은 화면이 작을 때 상단 고정 헤더로 변경하는 스타일을 담고 있습니다.
+*/
+
+/* SNS 헤더를 위한 스타일 */
+@media (max-width: 1199px) {
+    /* 화면이 작아졌을 때, 상단 헤더를 고정시킵니다. */
+    #snsHeader {
+    	position: fixed;
+    	top: 0;
+    	left: 0;
+    	width: 100%;
+    	height: 60px;
+    	z-index: 9;
+    	background-color: #ffffff; /* 배경색을 명확하게 설정 */
+    	border-bottom: 1px solid #dee2e6;
+    	display: flex; /* 내부 요소를 수평으로 정렬 */
+    	justify-content: space-between;
+    	align-items: center;
+    	padding: 0 1rem;
+    	box-sizing: border-box;
+    	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 그림자 효과 추가 */
+   	}
+
+	/* snsHeader 내부에 있는 로고의 스타일을 조정합니다. */
+	#snsHeader .logo {
+    	display: block; /* 화면이 작을 때 로고가 보이도록 설정 */
+	}
+
+	#snsFooter {
+    	position: fixed;
+   		bottom: 0;
+    	left: 0;
+    	width: 100%;
+    	height: 60px; /* 푸터의 높이 */
+		background-color: #ffffff; /* 배경색 */
+		border-top: 1px solid #dee2e6; /* 상단 경계선 */
+		box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+		z-index: 9;
+		display: flex; /* 내부 요소 정렬을 위한 Flexbox */
+		justify-content: space-around; /* 탭 간격 균등 분배 */
+		align-items: center; /* 세로 중앙 정렬 */
+		padding: 0 10px; /* 좌우 패딩 */
+	}
+
+	.footer-tabs {
+    	display: flex;
+    	width: 100%;
+    	justify-content: space-around;
+    	align-items: center;
+	}
+
+	.tab-item {
+    	display: flex;
+    	flex-direction: column;
+    	align-items: center;
+    	text-align: center;
+    	color: #6c757d; /* 탭 아이콘과 텍스트 색상 */
+    	text-decoration: none;
+    	font-size: 12px;
+	}
+
+	.tab-item.active {
+    	color: #435ebe; /* 활성화된 탭 색상 */
+    	font-weight: bold;
+	}
+
+	.tab-item svg {
+    	margin-bottom: 4px; /* 아이콘과 텍스트 사이 간격 */
+    }
+
+    .main-content {
+        padding-top: 60px;
+        padding-bottom: 60px;
+    }
+}
+
+/* 사이드바 전체 레이아웃 조정 */
+@media (min-width: 1200px) {
+    /* 화면이 커지면 (1200px 이상) 사이드바는 원래대로 보입니다. */
+	#sidebar {
+    	width: 250px;
+	}
+
+	/* 화면이 커지면 snsHeader를 숨깁니다. */
+    #snsHeader {
+        display: none;
+    }
+    
+    #snsFooter {
+        display: none;
+    }
+    
+    .main-content {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+.sr_profile-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.sr_profile-stats {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 1rem;
+}
+
+.sr_profile-stat-item {
+    flex: 1;
+    text-align: center;
+}
+
+.sr_profile-stat-item strong {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.sr_profile-stat-item span {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.sr_feed-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+}
+
+.sr_feed-item {
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background-color: #f0f2f5;
+}
+
+.sr_feed-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}

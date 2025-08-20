@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>멍멍그램 SNS</title>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/bootstrap.css">
+
+    <link rel="stylesheet" href="/assets/vendors/perfect-scrollbar/perfect-scrollbar.css">
+    <link rel="stylesheet" href="/assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="/assets/css/ysr.css">
+    <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="shortcut icon" href="/assets/images/favicon.svg" type="image/x-icon">
+</head>
+
+<body>
+	<div id="app">
+		<header th:replace="~{sns/snsHeaderFragment :: snsHeaderFragment}"></header>
+		<header th:replace="~{sns/snsSideFragment :: snsSideFragment}"></header>
+		
+		<div id="main">
+			<div th:replace="~{sns/snsHomeFragment :: snsHomeFragment}"></div>
+		</div>
+		<footer th:replace="~{sns/snsFooterFragment :: snsFooterFragment}"></footer>
+	</div>
+	
+
+    <!-- Template  JS -->
+    <script src="/assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+
+    <script src="/assets/js/main.js"></script>
+    
+    <script>
+	  (function(){
+	    const root = document.getElementById('main');
+	    document.addEventListener('click', async (e) => {
+	      const a = e.target.closest('#snsFooter .tab-item');
+	      if (!a) return;
+	      e.preventDefault();
+	      const route = a.getAttribute('data-route') || a.getAttribute('href');
+	      try {
+	        const res = await fetch(route, { headers: {'X-Requested-With':'fetch'} });
+	        const html = await res.text();
+	        root.innerHTML = html;
+	        history.pushState({route}, '', route);
+	        document.querySelectorAll('#snsFooter .tab-item')
+	          .forEach(x => x.classList.toggle('active', x === a));
+	      } catch(err){
+	        root.innerHTML = '<div class="p-3 text-danger">불러오기 실패</div>';
+	      }
+	    });
+	    window.addEventListener('popstate', (e)=>{
+	      const route = e.state?.route || '/sns/home';
+	      fetch(route).then(r=>r.text()).then(h=>root.innerHTML=h);
+	      document.querySelectorAll('#snsFooter .tab-item')
+	        .forEach(x => x.classList.toggle('active', (x.getAttribute('data-route')||x.getAttribute('href')) === route));
+	    });
+	  })();
+	</script>
+</body>
+</html>
