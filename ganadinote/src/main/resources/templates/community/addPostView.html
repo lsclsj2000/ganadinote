@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/addPostLayoutView}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 작성</title>
+
+	<th:block layout:fragment="pageStyles">
+    	<link rel="stylesheet" href="/assets/vendors/summernote/summernote-lite.min.css" />
+		<style>
+		    /* 카드 헤더 내부 폼을 '세로 방향'으로 강제 */
+		    .card-header .form-stack .mb-3 {
+		      display: flex !important;
+		      flex-direction: column !important;
+		      gap: .35rem;
+		      width: 100%;
+		    }
+
+		    /* 라벨은 무조건 줄바꿈 */
+		    .card-header .form-stack .form-label {
+		      display: block !important;
+		      margin-bottom: 0; /* 위의 gap으로 간격 관리 */
+		      font-size: .95rem;
+		      font-weight: 600;
+		    }
+
+		    /* 입력 컨트롤은 꽉 채우기 */
+		    .card-header .form-stack .form-select,
+		    .card-header .form-stack .form-control {
+		      width: 100%;
+		      font-size: .95rem;
+			  margin : 10px 0px;
+		    }
+		  </style>
+	</th:block>
+	
+</head>
+
+<body>
+	<th:block layout:fragment="contents">
+	    <div class="page-heading">
+	      <div class="page-title">
+	        <div class="row">
+	          <div class="col-12 col-md-6 order-md-1 order-last">
+	            <h3>게시글 작성</h3>
+	          </div>
+	        </div>
+	      </div>
+
+	      <section class="section">
+	        <div class="row">
+	          <div class="col-12">
+	            <div class="card">
+					<div class="card-header">
+					  <div class="form-stack">
+					    <!-- 카테고리 -->
+					    <div class="mb-3">
+					      <label for="filterCategory" class="form-label fw-semibold d-block">카테고리</label>
+					      <select id="filterCategory" class="form-select form-select-sm w-100">
+					        <option value="" selected>카테고리를 선택해주세요</option>
+					        <option value="WALK_COURSE">발자국 산책코스</option>
+					        <option value="SHOP_REVIEW">멍멍 쇼핑리뷰</option>
+					        <option value="FREE_TALK">멍멍 수다방</option>
+					        <option value="CREW_RECRUIT">산책크루 모집해요!</option>
+					        <option value="GO_SPOT">같이가요 스팟</option>
+					      </select>
+					    </div>
+
+					    <!-- 제목 -->
+					    <div class="mb-3">
+					      <label for="postTitle" class="form-label fw-semibold d-block">제목</label>
+					      <input type="text" class="form-control form-control-sm w-100"
+					             id="postTitle" name="postTitle" placeholder="제목을 입력하세요">
+					    </div>
+					  </div>
+					</div>
+	              <div class="card-body">
+	                <div id="summernote"></div>
+	              </div>
+	            </div>
+	          </div>
+	        </div>
+	      </section>
+	    </div>
+	</th:block>
+	<th:block layout:fragment="pageScripts">
+		<script src="/assets/vendors/jquery/jquery.min.js"></script>
+		 <!-- 2) Summernote JS -->
+		 <script src="/assets/vendors/summernote/summernote-lite.min.js"></script>
+	    <script>
+			$(function () {
+		        $('#summernote').summernote({
+		          tabsize: 2,
+		          height: 300
+		        });
+		      });
+	    </script>
+	</th:block>
+</body>
+
+</html>
