@@ -76,6 +76,25 @@
         padding-top: 60px;
         padding-bottom: 60px;
     }
+    
+    #sidebar.active {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        height: 100vh;
+        overflow-y: auto;
+    }
+
+    /* app.css의 position: absolute를 덮어쓰기 위해 더 구체적인 선택자 사용 */
+    #sidebar.active .sidebar-wrapper {
+        position: initial;
+    }
+
+    /* 사이드바 래퍼도 100% 높이를 갖도록 설정 */
+    .sidebar-wrapper.active {
+        height: 100%;
+    }
 }
 
 /* 사이드바 전체 레이아웃 조정 */
