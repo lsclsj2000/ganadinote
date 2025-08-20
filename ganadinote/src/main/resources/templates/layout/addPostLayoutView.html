@@ -16,37 +16,19 @@
     <link rel="stylesheet" href="/assets/css/ysr.css">
     <link rel="stylesheet" href="/assets/css/app.css">
     <link rel="shortcut icon" href="/assets/images/favicon.svg" type="image/x-icon">
-	<style>
-	  /* 페이지 공통: 헤더/푸터 높이 정의 (필요시 값 조절) */
-	  :root { --header-h: 56px; --footer-h: 56px; }
-
-	  /* 데스크톱에선 바텀탭이 없으면 0으로 */
-	  @media (min-width: 1200px) {
-	    :root { --footer-h: 0px; }
-	  }
-
-	  /* 본문이 고정 헤더/푸터 밑으로 깔리지 않게 공간 확보 */
-	  #main {
-	    padding-top: var(--header-h);
-	    padding-bottom: var(--footer-h);
-	  }
-
-	  /* 혹시 상위 컨테이너에 overflow가 걸려있으면 sticky가 깨집니다 */
-	  #main, body, html { overflow: visible; }
-	</style>
+	
+	<th:block layout:fragment="pageStyles"></th:block>
 </head>
 
 <body>
 	<div id="app">
 		<header th:replace="fragments/headerFragment :: headerFragment"></header>
-	    <aside  th:replace="fragments/asideFragment  :: asideFragment"></aside>
+		    <aside  th:replace="fragments/asideFragment  :: asideFragment"></aside>
 
-	    <!-- ★ 자식이 주입될 슬롯 -->
-		<div id="main">
+		    <!-- ★ 자식이 주입될 슬롯 -->
+			<div id="main">
 			<th:block layout:fragment="contents"></th:block>
-		</main>
-
-	    <footer th:replace="fragments/footerFragment :: footerFragment"></footer>
+			</main>
 	</div>
 	
 
@@ -55,6 +37,8 @@
     <script src="/assets/js/bootstrap.bundle.min.js"></script>
 
     <script src="/assets/js/main.js"></script>
+	
+	<th:block layout:fragment="pageScripts"></th:block>
     
 </body>
 </html>
