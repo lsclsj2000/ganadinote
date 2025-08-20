@@ -20,13 +20,13 @@
 
 <body>
 	<div id="app">
-		<header th:replace="~{sns/snsHeaderFragment :: snsHeaderFragment}"></header>
-		<header th:replace="~{sns/snsSideFragment :: snsSideFragment}"></header>
+		<header th:replace="~{fragments/headerFragment :: headerFragment}"></header>
+		<header th:replace="~{fragments/asideFragment :: asideFragment}"></header>
 		
 		<div id="main">
-			<div th:replace="~{sns/snsHomeFragment :: snsHomeFragment}"></div>
+			<div th:replace="~{fragments/snsHomeFragment :: snsHomeFragment}"></div>
 		</div>
-		<footer th:replace="~{sns/snsFooterFragment :: snsFooterFragment}"></footer>
+		<footer th:replace="~{fragments/snsFooterFragment :: snsFooterFragment}"></footer>
 	</div>
 	
 
