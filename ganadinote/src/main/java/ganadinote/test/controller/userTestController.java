@@ -11,5 +11,4 @@ public class userTestController {
         return "ex/application-chat";
     }
 	
-	
 }
