@@ -16,4 +16,10 @@ public class communityController {
 	public String addPost() {
 		return "community/addPostView";
 	}
+	
+	@GetMapping("/postDetail")
+	public String postDetail() {
+		return "community/postDetail";
+	}
+	
 }
