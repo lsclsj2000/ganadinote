@@ -6,7 +6,7 @@
 
     <!-- DB 컬럼(snake_case)과 DTO 필드(camelCase)를 매핑하는 규칙입니다. -->
     <!-- [주의] type 속성의 TodoDTO 경로도 실제 위치에 맞게 수정해야 합니다. -->
-    <resultMap id="todoResultMap" type="ganadinote.todolist.common.TodoDTO">
+		<resultMap id="todoResultMap" type="ganadinote.todolist.domain.TodoDTO">
         <id property="todoCd" column="todo_cd"/>
         <result property="mbrCd" column="mbr_cd"/>
         <result property="petCd" column="pet_cd"/>
