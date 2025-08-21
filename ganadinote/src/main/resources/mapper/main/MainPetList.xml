@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ganadinote.main.mapper.MainMapper">
+	<resultMap id="petResultMap" 				type="ganadinote.common.domain.Pet">
+        <id 	property="petCd" 				column="pet_cd" /> 				<!-- 반려동물 코드 (Primary Key) -->
+        <result property="mbrCd" 				column="mbr_cd" /> 				<!-- 회원 코드 (Foreign Key) -->
+        <result property="petName" 				column="pet_name" /> 			<!-- 반려동물 이름 -->
+        <result property="petBreed" 			column="pet_breed" /> 			<!-- 반려동물 품종 -->
+        <result property="petGender" 			column="pet_gender" /> 			<!-- 반려동물 성별 -->
+        <result property="petBirthDate" 		column="pet_birth_date" /> 		<!-- 반려동물 생년월일 -->
+        <result property="petWeight" 			column="pet_weight" />  		<!-- 반려동물 체중 -->
+        <result property="petProfileImgUrl" 	column="pet_profile_img_url" /> <!-- 반려동물 프로필 이미지 URL -->
+        <result property="petIntroduction" 		column="pet_introduction" /> 	<!-- 반려동물 소개 -->
+        <result property="petRegDate" 			column="pet_reg_date" /> 		<!-- 등록 날짜 -->
+        <result property="petMdfcnDate" 		column="pet_mdfcn_date" />		<!-- 수정 날짜 -->
+    </resultMap>
+    
+    <select id="getPetInfoByMbrCd" resultMap="petResultMap">
+    	SELECT 
+			pet_cd, 
+			mbr_cd, 
+			pet_name, 
+			pet_breed, 
+			pet_gender, 
+			pet_birth_date, 
+			pet_weight, 
+			pet_profile_img_url, 
+			pet_introduction, 
+			pet_reg_date, 
+			pet_mdfcn_date
+		FROM 
+			pet
+		where
+			mbr_cd = #{mbrCd};
+    </select>
+    
+	
+</mapper>

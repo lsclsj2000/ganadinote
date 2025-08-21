@@ -17,8 +17,12 @@ public class ReverseGeocodingService {
 	private String KAKAO_API_KEY; 
 	
 	
-	private final RestTemplate restTemplate = new RestTemplate();
+	private final RestTemplate restTemplate;
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	
+	public ReverseGeocodingService(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
 	
 	public String getLocationName(double longitude, double latitude) {
 		String url = "https://dapi.kakao.com/v2/local/geo/coord2address.json"

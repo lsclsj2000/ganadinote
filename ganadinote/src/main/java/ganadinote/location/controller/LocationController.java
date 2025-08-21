@@ -12,7 +12,7 @@ public class LocationController {
 		return "location/location2.html";
 	}
 
-	@GetMapping("/main")
+	@GetMapping("/locationmain")
 	public String main() {
 		
 		return "location/main.html";
