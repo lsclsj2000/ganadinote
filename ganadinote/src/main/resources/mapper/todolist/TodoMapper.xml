@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- [주의] namespace는 위에서 만든 TodoMapper.java 인터페이스의 전체 경로와 정확히 일치해야 합니다. -->
+<mapper namespace="ganadinote.todolist.mapper.TodoMapper">
+
+    <!-- DB 컬럼(snake_case)과 DTO 필드(camelCase)를 매핑하는 규칙입니다. -->
+    <!-- [주의] type 속성의 TodoDTO 경로도 실제 위치에 맞게 수정해야 합니다. -->
+    <resultMap id="todoResultMap" type="ganadinote.todolist.common.TodoDTO">
+        <id property="todoCd" column="todo_cd"/>
+        <result property="mbrCd" column="mbr_cd"/>
+        <result property="petCd" column="pet_cd"/>
+        <result property="routineCd" column="routine_cd"/>
+        <result property="todoTitle" column="todo_title"/>
+        <result property="todoScheduledDt" column="todo_scheduled_dt"/>
+        <result property="todoIsCompleted" column="todo_is_completed"/>
+        <result property="regYmdt" column="reg_ymdt"/>
+        <result property="mdfcnYmdt" column="mdfcn_ymdt"/>
+    </resultMap>
+
+    <!-- id는 TodoMapper.java에 선언된 메소드 이름(getTodosByMbrCd)과 일치해야 합니다. -->
+    <select id="getTodosByMbrCd" parameterType="int" resultMap="todoResultMap">
+        SELECT
+            todo_cd,
+            mbr_cd,
+            pet_cd,
+            routine_cd,
+            todo_title,
+            todo_scheduled_dt,
+            todo_is_completed,
+            reg_ymdt,
+            mdfcn_ymdt
+        FROM
+            todo
+        WHERE
+            mbr_cd = #{mbrCd}
+        ORDER BY
+            todo_scheduled_dt ASC
+    </select>
+
+</mapper>

@@ -1,45 +1,64 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>할 일 생성</title>
-<link rel="stylesheet" href="/assets/css/todo/addTodo.css">
-</head>
-<body>
-	<div class="container">
-		<header>
-			<h1>할 일 생성하기</h1>
-		</header>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mainLayoutView}">
 
-		<main>
-			<form id="todo-form">
-				<div class="form-group">
-					<label for="todo-title">할 일 제목</label> <input type="text"
-						id="todo-title" name="todo-title" required>
-				</div>
-				<div class="form-group">
-					<label for="pet-name">대상 강아지</label> <select id="pet-name"
-						name="pet-name">
-						<option value="choco">초코</option>
-						<option value="whitey">흰둥이</option>
-					</select>
-				</div>
-				<div class="form-group">
-					<label for="todo-date">날짜</label> <input type="date" id="todo-date"
-						name="todo-date" required>
-				</div>
-				<div class="form-group">
-					<label for="todo-time">시간 (선택)</label> <input type="time"
-						id="todo-time" name="todo-time">
-				</div>
-				<div class="form-group">
-					<label for="is-routine">루틴으로 등록</label> <input type="checkbox"
-						id="is-routine" name="is-routine">
-				</div>
-				<button type="submit">등록하기</button>
-			</form>
-		</main>
-	</div>
-</body>
+<!-- 이 페이지의 고유한 title과 CSS를 정의합니다. -->
+<head>
+    <title>할 일 생성</title>
+    <link rel="stylesheet" href="/assets/css/todo/addTodo.css">
+</head>
+
+<!-- layout:fragment="contents" div로 페이지의 실제 콘텐츠를 감쌉니다. -->
+<div layout:fragment="contents">
+
+    <!-- 기존 <body> 안에 있던 모든 내용을 여기에 그대로 넣습니다. -->
+    <div class="container">
+        <header>
+            <!-- 페이지의 고유 헤더입니다. mainLayoutView의 헤더와는 다릅니다. -->
+            <div class="page-heading">
+                <h3>할 일 생성하기</h3>
+            </div>
+        </header>
+
+        <main>
+            <form id="todo-form" th:action="@{/todo/add}" method="post">
+                <div class="form-group">
+                    <label for="todo-title">할 일 제목</label>
+                    <input type="text" id="todo-title" name="todoTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="pet-cd">대상 강아지</label>
+                    <!-- 나중에 DB에서 실제 pet 목록을 가져와 채울 예정입니다. -->
+                    <select id="pet-cd" name="petCd">
+                        <option value="1">루비</option>
+                        <option value="2">쫑이</option>
+                        <option value="3">복실</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="todo-date">날짜</label>
+                    <input type="date" id="todo-date" name="todoDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="todo-time">시간 (선택)</label>
+                    <input type="time" id="todo-time" name="todoTime">
+                </div>
+
+                <div class="form-group">
+                    <label for="is-routine">루틴으로 등록</label>
+                    <input type="checkbox" id="is-routine" name="isRoutine">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">등록하기</button>
+            </form>
+        </main>
+    </div>
+
+</div>
+
 </html>

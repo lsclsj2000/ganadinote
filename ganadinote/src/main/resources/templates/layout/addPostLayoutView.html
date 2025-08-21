@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GanadiNote</title>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/bootstrap.css">
+
+    <link rel="stylesheet" href="/assets/vendors/perfect-scrollbar/perfect-scrollbar.css">
+    <link rel="stylesheet" href="/assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="/assets/css/ysr.css">
+    <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="shortcut icon" href="/assets/images/favicon.svg" type="image/x-icon">
+	
+	<th:block layout:fragment="pageStyles"></th:block>
+</head>
+
+<body>
+	<div id="app">
+		<header th:replace="fragments/headerFragment :: headerFragment"></header>
+		    <aside  th:replace="fragments/asideFragment  :: asideFragment"></aside>
+
+		    <!-- ★ 자식이 주입될 슬롯 -->
+			<div id="main">
+			<th:block layout:fragment="contents"></th:block>
+			</main>
+	</div>
+	
+
+    <!-- Template  JS -->
+    <script src="/assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+
+    <script src="/assets/js/main.js"></script>
+	
+	<th:block layout:fragment="pageScripts"></th:block>
+    
+</body>
+</html>

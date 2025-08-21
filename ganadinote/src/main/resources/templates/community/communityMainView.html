@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mainLayoutView}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+  <title>커뮤니티</title>
+  <link href="/assets/bootstrap.min.css" rel="stylesheet"/>
+  <th:block layout:fragment="pageStyles">
+	<style>
+	    .mobile-wrap { max-width: 460px; margin: auto; }
+	    .sticky-topbar { position: sticky; top: 0; border-bottom: 1px solid #eee; z-index: 1; padding: .5rem; }
+	    .sticky-topbar .d-flex { margin-bottom: .5rem; }
+	    .chip-scroll { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: .3rem; margin-bottom: .6rem; }
+	    .chip { display:inline-block; padding:.45rem .9rem; margin-right:.4rem; border:1px solid #ddd; border-radius:999px; font-size:.95rem; background:#f8f9fa; }
+	    .chip.active { background:#e9ecef; font-weight:600; }
+	    .post-card { border-bottom:1px solid #f1f1f1; padding:20px 8px; }
+	    .fab { position: fixed; right: 16px; bottom: calc(var(--footer-h) + 16px); z-index: 1; }
+	  </style>
+    </th:block>
+</head>
+<body>
+	<th:block layout:fragment="contents">
+		<div class="mobile-wrap">
+		  <!-- 상단 검색 + 정렬 -->
+		  <div class="sticky-topbar p-2">
+		    <div class="d-flex gap-2">
+		      <select class="form-select form-select-sm" style="max-width:120px">
+		        <option>최신순</option>
+		        <option>인기순</option>
+		        <option>댓글많은순</option>
+		      </select>
+		      <input type="search" class="form-control form-control-sm" placeholder="검색(제목/작성자)">
+		    </div>
+		    <!-- 카테고리 칩 -->
+		    <div class="chip-scroll mt-2 pb-1">
+		      <button class="chip active">전체</button>
+		      <button class="chip">발자국 산책코스</button>
+		      <button class="chip">멍멍 쇼핑리뷰</button>
+		      <button class="chip">멍멍 수다방</button>
+		      <button class="chip">산책크루 모집해요!</button>
+		      <button class="chip">같이가요 스팟</button>
+		    </div>
+		  </div>
+		
+		  <!-- 게시글 리스트 -->
+		  <div id="list">
+		    <div class="post-card">[게시글 카드 1]</div>
+		    <div class="post-card">[게시글 카드 2]</div>
+		    <div class="post-card">[게시글 카드 3]</div>
+		    <div class="post-card">[게시글 카드 1]</div>
+		    <div class="post-card">[게시글 카드 2]</div>
+		    <div class="post-card">[게시글 카드 3]</div>
+		    <div class="post-card">[게시글 카드 1]</div>
+		    <div class="post-card">[게시글 카드 2]</div>
+		    <div class="post-card">[게시글 카드 3]</div>
+		  </div>
+		
+		  <!-- 더보기 버튼 -->
+		  <div class="p-3 text-center">
+		    <button class="btn btn-outline-secondary btn-sm w-100">더보기</button>
+		  </div>
+		</div>
+		
+		<!-- 새 글 쓰기 버튼 -->
+		<div class="fab">
+		  <a th:href="@{/community/addPost}" class="btn btn-primary rounded-pill px-3 py-2">글쓰기</a>
+		</div>
+	</th:block>
+</body>
+</html>
