@@ -2,7 +2,7 @@
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/mainLayoutView}">
+      layout:decorate="~{layout/communityLayoutView}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
@@ -47,15 +47,71 @@
 		
 		  <!-- 게시글 리스트 -->
 		  <div id="list">
-		    <div class="post-card">[게시글 카드 1]</div>
-		    <div class="post-card">[게시글 카드 2]</div>
-		    <div class="post-card">[게시글 카드 3]</div>
-		    <div class="post-card">[게시글 카드 1]</div>
-		    <div class="post-card">[게시글 카드 2]</div>
-		    <div class="post-card">[게시글 카드 3]</div>
-		    <div class="post-card">[게시글 카드 1]</div>
-		    <div class="post-card">[게시글 카드 2]</div>
-		    <div class="post-card">[게시글 카드 3]</div>
+			<div class="post-card card mb-3">
+			    <div class="card-body" >
+					<a class="stretched-link"
+					       th:href="@{/community/postDetail}"
+					       href="/community/postDetail"></a>
+			      <span class="badge bg-secondary mb-2">멍멍 수다방</span>
+			      <h5 class="card-title mb-2" >전주 가맥축제 진짜 사람 많네요</h5>
+			      <p class="card-text text-truncate">전주 가맥축제 진짜 사람 많네요 ㅋㅋ 저는 늦게 가서 기다리느라 힘들었어요.</p>
+			      <small class="text-muted">홍길동 · 2일 전 · 조회 938</small>
+			      <div class="d-flex justify-content-end gap-3 mt-2">
+			        <span>👍 4</span>
+			        <span>💬 7</span>
+			      </div>
+			    </div>
+			  </div>
+			<div class="post-card card mb-3">
+			    <div class="card-body">
+			      <span class="badge bg-secondary mb-2">발자국 산책코스</span>
+			      <h5 class="card-title mb-2">전주천 근처에 산책할만한 곳 있나요?</h5>
+			      <p class="card-text text-truncate">천변을 걷기엔 자전거들이 너무 쌩쌩 달려서 강아지가 흥분을 하더라고요. 산책 교육도 시킬 겸 괜찮은 산책로 추천해주세요!</p>
+			      <small class="text-muted">가루아빠 · 2일 전 · 조회 938</small>
+			      <div class="d-flex justify-content-end gap-3 mt-2">
+			        <span>👍 2</span>
+			        <span>💬 14</span>
+			      </div>
+			    </div>
+			  </div>
+			<div class="post-card card mb-3">
+			    <div class="card-body">
+			      <span class="badge bg-secondary mb-2">같이가요 스팟</span>
+			      <h5 class="card-title mb-2">OO동에 새로생긴 애견카페 같이 가실 분?</h5>
+			      <p class="card-text text-truncate">제곧내. 프로필 타고 들어와서 보시고 댓글주세요</p>
+			      <small class="text-muted">왕왕멍멍 · 1일 전 · 조회 554</small>
+			      <div class="d-flex justify-content-end gap-3 mt-2">
+			        <span>👍 1</span>
+			        <span>💬 1</span>
+			      </div>
+			    </div>
+			  </div>
+			<div class="post-card card mb-3">
+			    <div class="card-body">
+			      <span class="badge bg-secondary mb-2">발자국 산책코스</span>
+			      <h5 class="card-title mb-2">한옥마을 늦게 가니까 좋네요!</h5>
+			      <p class="card-text text-truncate">바람도 씽씽 불고 사람도 없어요! 사람 보이면 다들 강쥐랑 산책나오신 분들 뿐이더라고요 ㅎㅎ 산책크루분들 참고하셔요!</p>
+			      <small class="text-muted">강쥐네 · 1일 전 · 조회 886</small>
+			      <div class="d-flex justify-content-end gap-3 mt-2">
+			        <span>👍 2</span>
+			        <span>💬 11</span>
+			      </div>
+			    </div>
+			  </div>
+			<div class="post-card card mb-3">
+			    <div class="card-body">
+			      <span class="badge bg-secondary mb-2">멍멍 쇼핑리뷰</span>
+			      <h5 class="card-title mb-2">ㅁㅁ 샴푸 사용 한달후기</h5>
+			      <p class="card-text text-truncate">저희 강쥐는 물을 워낙 좋아해서... 비오는 날 산책도 좋아하다보니 목욕을 자주 시키는 편인데요, 그러다보니까 피부염도 생겨서 샴푸도 이것저것 바꿔 써봤는데 영 좋아지질 않더라고요ㅠ 그러다가 병원에서
+					추천해준 ㅁㅁ샴푸! 어찌고 저찌고
+				  </p>
+			      <small class="text-muted">또리엄마 · 5일 전 · 조회 5458</small>
+			      <div class="d-flex justify-content-end gap-3 mt-2">
+			        <span>👍 4</span>
+			        <span>💬 14</span>
+			      </div>
+			    </div>
+			  </div>
 		  </div>
 		
 		  <!-- 더보기 버튼 -->
