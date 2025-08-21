@@ -291,3 +291,122 @@
     font-size: 1rem;
     line-height: 1.5;
 }
+
+/* sns-walking */
+.sr_walking-card {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+}
+
+.sr_walking-card:hover {
+    transform: translateY(-5px);
+}
+
+.sr_walking-card-header {
+    display: flex;
+    padding: 0.2rem;
+    margin-bottom: 3px;
+}
+
+.sr_walking-profile-info {
+    display: flex;
+    margin-left: 0.5rem;
+    align-items: center;
+}
+
+.sr_walking-nickname {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #495057;
+    margin-right: 0.5rem;
+}
+
+.sr_walking-meta-info {
+    display: flex;
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+.sr_walking-meta-info span:not(:last-child)::after {
+    content: "•";
+    margin: 0 0.25rem;
+}
+
+.sr_walking-card-body {
+    display: flex;
+    padding: 0;
+}
+
+.sr_walking-info-title {
+    flex-grow: 1;
+    padding: 0.8rem;
+    padding-bottom: 0px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sr_walking-info {
+	width: 65%;
+    flex-grow: 1;
+    padding: 0.8rem;
+}
+
+.sr_walking-crew-image-container {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sr_walking-crew-image {
+    width: 80%;
+    height: 80%;
+    object-fit: cover;
+    display: block;
+    border-radius: 6px;
+}
+
+.sr_walking-crew-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.sr_walking-crew-description {
+    font-size: 0.7rem;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+    padding-left: 10px;
+}
+
+.sr_walking-crew-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.sr_walking-current-members {
+    font-weight: 700;
+    color: #435ebe;
+}
+
+.sr_walking-dday {
+    font-weight: 700;
+    color: #f3616d;
+}
+
+/* 기존 app.css와 ysr.css의 충돌 방지 및 재정의 */
+.card {
+    box-shadow: none;
+}
