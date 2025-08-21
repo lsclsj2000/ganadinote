@@ -1,0 +1,87 @@
+@charset "UTF-8";
+:root {
+    --primary-color: #B0E0E6; /* 부드러운 하늘색 */
+    --secondary-color: #FFD700; /* 연한 노란색 */
+    --text-color: #555;
+    --card-bg-color: #FFFFFF;
+    --shadow-light: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif; /* 구글 폰트 등 귀여운 폰트 사용 */
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.weather-container {
+    width: 100%;
+    max-width: 400px; /* 모바일 화면에 최적화 */
+    background-color: #F5F5DC; /* 베이지색 배경 */
+    border-radius: 20px;
+    box-shadow: var(--shadow-light);
+    padding: 25px;
+    text-align: center;
+}
+
+.current-weather {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.location {
+    font-size: 1.5rem;
+    color: #4CAF50; /* 포인트 색상 */
+}
+
+.weather-icon img {
+    width: 120px;
+    height: 120px;
+    margin: 10px auto;
+}
+
+.temperature {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #E74C3C; /* 날씨 온도 포인트 색상 */
+}
+
+.condition {
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.hourly-list, .daily-list {
+    display: flex;
+    overflow-x: auto; /* 가로 스크롤 가능 */
+    gap: 15px;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.hourly-item, .daily-item {
+    background-color: var(--card-bg-color);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.hourly-item img, .daily-item img {
+    width: 50px;
+    height: 50px;
+}
