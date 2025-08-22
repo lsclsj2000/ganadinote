@@ -4,9 +4,9 @@
 	<div class="sidebar-wrapper active">
 	    <div class="sidebar-header">
 	        <div class="d-flex justify-content-between">
-	            <div class="logo">
-	                <a href="index.html"><img src="/assets/images/logo/logo.png" alt="Logo" srcset=""></a>
-	            </div>
+	            <a th:href="@{/main}">
+	            	<img src="/assets/images/logo/ganadinote-logo.png" alt="Logo" srcset="" style="width: 65%; height: auto;">
+            	</a>
 	            <div class="toggler">
 	                <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
 	            </div>
@@ -76,13 +76,13 @@
 	                </a>
 	                <ul class="submenu">
 	                    <li class="submenu-item">
-	                        <a href="component-alert.html">Home</a>
+	                        <a th:href="@{/sns/home}">Home</a>
 	                    </li>
 	                    <li class="submenu-item">
-	                        <a href="component-badge.html">Walking</a>
+	                        <a th:href="@{/sns/walking}">Walking</a>
 	                    </li>
 	                    <li class="submenu-item">
-	                        <a href="component-badge.html">My Feed</a>
+	                        <a th:href="@{/sns/myfeed}">My Feed</a>
 	                    </li>
 	                </ul>
 	            </li>

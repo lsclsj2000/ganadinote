@@ -115,6 +115,7 @@
         padding-top: 0;
         padding-bottom: 0;
     }
+    
 }
 
 /* sns-myfeed 프로필 */
@@ -589,4 +590,9 @@
 /* 기존 app.css와 ysr.css의 충돌 방지 및 재정의 */
 .card {
     box-shadow: none;
+}
+
+
+#snsHeader .d-flex {
+    justify-content: space-around !important;
 }
