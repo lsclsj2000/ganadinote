@@ -1,20 +1,9 @@
 package ganadinote.notification.service.impl;
 
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PublicKey;
 import java.security.Security;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Base64;
 import java.util.List;
 
-import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECPoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,8 +15,7 @@ import ganadinote.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
-import nl.martijndwars.webpush.Subscription;
-import nl.martijndwars.webpush.Utils;
+import nl.martijndwars.webpush.Subscription; 
 
 
 @Service
@@ -65,11 +53,53 @@ public class NotificationServiceImpl implements NotificationService {
     public List<PushSubscription> getSubInfoByMbrCd(Integer mbrCd) {
         return pushMapper.getSubInfoByMbrCd(mbrCd);
     }
-
-@Override
+    
+    @Override
     public void sendNotification(Integer mbrCd, String message) throws Exception {
-    	// TODO Auto-generated method stub
-    	
+        // 1. VAPID 키를 사용하여 PushService 객체를 생성합니다. (이 방식이 가장 안정적입니다.)
+        PushService pushService = new PushService(vapidPublicKey, vapidPrivateKey, "mailto:admin@yourdomain.com");
+
+        // 2. DB에서 사용자의 구독 정보를 가져옵니다.
+        List<PushSubscription> subscriptions = getSubInfoByMbrCd(mbrCd);
+
+        if (subscriptions == null || subscriptions.isEmpty()) {
+            System.out.println("No subscriptions found for member code: " + mbrCd);
+            return;
+        }
+
+        for (PushSubscription sub : subscriptions) {
+            try {
+                if (sub.getEndpoint() == null || sub.getP256dh() == null || sub.getAuth() == null) {
+                    System.err.println("Skipping invalid subscription data: " + sub);
+                    continue;
+                }
+
+                // =================================================================
+                // 3. Subscription 객체를 생성하는 새로운 방식 (가장 중요)
+                // =================================================================
+                
+                // 3-1. DB에서 가져온 키 문자열로 'Keys' 객체를 먼저 만듭니다.
+                Subscription.Keys keys = new Subscription.Keys(sub.getP256dh(), sub.getAuth());
+
+                // 3-2. endpoint와 위에서 만든 'keys' 객체를 생성자에 전달합니다.
+                Subscription subscription = new Subscription(sub.getEndpoint(), keys);
+
+                // =================================================================
+
+
+                // 4. 전송할 페이로드(JSON 형식의 문자열)를 만듭니다.
+                String payload = "{\"notification\":{\"title\":\"새 알림이 도착했어요!\",\"body\":\"" + message + "\"}}";
+                
+                // 5. 알림 객체를 생성하고 전송합니다.
+                Notification notification = new Notification(subscription, payload);
+                pushService.send(notification);
+                
+                System.out.println("Notification sent successfully to endpoint: " + sub.getEndpoint());
+
+            } catch (Exception e) {
+                System.err.println("Failed to send notification to endpoint: " + sub.getEndpoint());
+                e.printStackTrace();
+            }
+        }
     }
-   
 }
