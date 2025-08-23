@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ganadinote.common.file.FileMapper">
+
+  <resultMap id="fileResultMap" type="ganadinote.common.domain.FileMetaData">
+    <result property="fileId"      column="file_id"/>
+    <result property="postId"      column="post_id"/>
+    <result property="fileOrgnlNm" column="file_orgnl_nm"/>
+    <result property="fileStoredNm" column="file_stored_nm"/>
+    <result property="filePath"    column="file_path"/>
+    <result property="fileSize"    column="file_size"/>
+  </resultMap>
+
+  <delete id="deleteFileByIdx" parameterType="int">
+    DELETE FROM `file`
+    WHERE file_id = #{fileId}
+  </delete>
+
+  <select id="getFileInfoByIdx" parameterType="int" resultMap="fileResultMap">
+    SELECT file_id, post_id, file_orgnl_nm, file_stored_nm, file_path, file_size
+    FROM `file`
+    WHERE file_id = #{fileId}
+  </select>
+
+  <select id="getFileList" resultMap="fileResultMap">
+    SELECT file_id, post_id, file_orgnl_nm, file_stored_nm, file_path, file_size
+    FROM `file`
+  </select>
+
+  <!-- 단일 insert: AUTO_INCREMENT file_id는 넣지 않는다 -->
+  <insert id="addfile" parameterType="ganadinote.common.domain.FileMetaData">
+    INSERT INTO `file` (post_id, file_orgnl_nm, file_stored_nm, file_path, file_size, file_reg_date)
+    VALUES (#{postId}, #{fileOrgnlNm}, #{fileStoredNm}, #{filePath}, #{fileSize}, NOW())
+  </insert>
+
+  <!-- 다중 insert -->
+  <insert id="addfiles" parameterType="java.util.List">
+    INSERT INTO `file` (post_id, file_orgnl_nm, file_stored_nm, file_path, file_size, file_reg_date)
+    VALUES
+    <foreach collection="list" item="f" separator=",">
+      (#{f.postId}, #{f.fileOrgnlNm}, #{f.fileStoredNm}, #{f.filePath}, #{f.fileSize}, NOW())
+    </foreach>
+  </insert>
+
+</mapper>
