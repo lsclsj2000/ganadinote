@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/community")
-public class communityController {
+public class CommunityController {
 	
 	@GetMapping("")
 	public String getCommunityMain() {
