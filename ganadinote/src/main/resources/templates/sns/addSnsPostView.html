@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/addPostLayoutView}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>댕댕그램 게시글 작성</title>
+
+	<th:block layout:fragment="pageStyles">
+    	<link rel="stylesheet" href="/assets/vendors/summernote/summernote-lite.min.css" />
+    	<link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+		<link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
+		<style>
+
+		</style>
+	</th:block>
+	
+</head>
+
+<body>
+	<th:block layout:fragment="contents">
+		<div class="mt-10 sr_post-container row no-gutter-x">
+			<!-- 1. 사진을 올리는 박스 -->
+			<h6 class="card-title">Photo</h6>
+            <div class="sr_photo-box-container mb-3">
+                <div class="sr_photo-box">
+                    <span class="sr_photo-box-plus">+</span>
+					<input type="file" name="images[]" class="sr-image-filepond" multiple>
+                </div>
+            </div>
+
+            <!-- 2. 태그를 작성하는 박스 -->
+            <h6 class="card-title">Tag</h6>
+            <textarea class="sr_tag-box" style="padding:8px 10px;"placeholder="쉼표로 구분"></textarea>
+		    <div class="sr_profile-buttons">
+				<a th:href="@{/sns/myfeed}" class="sr_btn-profile">취소</a>
+				<a th:href="@{/sns/addSnsPost}" class="sr_btn-profile">게시물 업로드</a>
+			</div>
+		</div>
+	</th:block>
+	
+	<th:block layout:fragment="pageScripts">
+		<script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+		<script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+		<script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
+		<script src="https://unpkg.com/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.js"></script>
+		<script src="https://unpkg.com/filepond-plugin-image-crop/dist/filepond-plugin-image-crop.js"></script>
+		<script src="https://unpkg.com/filepond-plugin-image-filter/dist/filepond-plugin-image-filter.js"></script>
+		<script src="https://unpkg.com/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.js"></script>
+		
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+			  FilePond.registerPlugin(
+			    FilePondPluginFileValidateType,
+			    FilePondPluginImagePreview,
+			    FilePondPluginImageExifOrientation,
+			    FilePondPluginImageCrop,
+			    FilePondPluginImageFilter,
+			    FilePondPluginImageResize,
+			  );
+			
+			  const input = document.querySelector('.sr-image-filepond');
+			  const pond  = FilePond.create(input, {
+			    allowMultiple: true,
+			    maxFiles: 10,
+			    acceptedFileTypes: ['image/*'],
+			    allowImagePreview: true,
+			    stylePanelAspectRatio: '1:1',
+			    imagePreviewHeight: 200,
+			
+			    allowImageExifOrientation: true,
+			    allowImageCrop: true,
+			    imageCropAspectRatio: '1:1',
+			
+			    allowImageFilter: true,
+			    allowImageResize: true,
+			    imageResizeMode: 'cover',
+			    imageResizeTargetWidth: 1080,
+			    imageResizeTargetHeight: 1080,
+			
+			    labelIdle: '',
+			    credits: false
+			  });
+			
+			  // "+" 버튼으로 파일 브라우저 열기
+			  const plus = document.querySelector('.sr_photo-box-plus');
+			  plus.addEventListener('click', (e) => { e.preventDefault(); pond.browse(); });
+			  plus.setAttribute('tabindex','0');
+			  plus.setAttribute('role','button');
+			  plus.addEventListener('keydown', (e) => {
+			    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pond.browse(); }
+			  });
+			
+			  // (선택) 파일 추가되면 + 숨기기
+			  pond.on('addfile', () => plus.style.display = 'none');
+			  pond.on('removefile', () => { if (!pond.getFiles().length) plus.style.display = ''; });
+			});
+		</script>
+	</th:block>
+</body>
+
+</html>

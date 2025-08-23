@@ -594,3 +594,147 @@
 #snsHeader .d-flex {
     justify-content: space-around !important;
 }
+
+/* sns-addpost */
+.sr_post-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sr_photo-box-container {
+    width: 100%;
+    height: 100%;
+    max-width: 375px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin: 0 auto;
+    padding: 0 !important;
+}
+
+.sr_photo-box-container::before {
+    content: '';
+    display: block;
+    padding-top: 100%;
+}
+
+.sr_photo-box {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #ccc;
+    cursor: pointer;
+    overflow: hidden !important;
+}
+
+.sr_photo-box .filepond--root { 
+	position: absolute;
+	inset: 0;
+	z-index: 1; 
+	width:100%;
+	height: 100%;
+	margin: 0;
+}
+
+.sr_photo-box .filepond--panel-root { 
+	height: 100% !important;
+	min-height: 0 !important;
+}
+
+.sr_photo-box-plus {
+    z-index: 10;
+    cursor: pointer;
+    user-select: none;
+    font-size: 3rem;
+    color: #ccc;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.sr_photo-box .filepond--item {
+	position: relative !important;
+	transform: none !important;
+	left: auto !important;
+	top: auto !important;
+	width: 100% !important;
+	height: 100% !important;
+	aspect-ratio: 1 / 1;
+	margin: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.filepond--item-panel {
+	box-shadow: none;
+}
+
+
+.sr_photo-box .filepond--drop-label,
+.sr_photo-box .filepond--credits,
+.sr_photo-box input[type="file"] {
+  display: none !important;
+}
+
+.sr_photo-box .filepond--image-preview-wrapper {
+    width: 100% !important; /* 98% -> 100% */
+    height: 100% !important; /* 98% -> 100% */
+    margin: auto;
+    overflow: hidden !important;
+}
+
+/* 이미지가 박스를 꽉 채우도록 object-fit: cover를 유지합니다. */
+.sr_photo-box .filepond--image-preview,
+.sr_photo-box .filepond--image-preview-canvas {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.sr_photo-box .filepond--list {
+  	display: flex !important;
+	flex-direction: row;
+	align-items: stretch;           /* center → stretch: 썸네일이 높이 꽉 채움 */
+	justify-content: flex-start;
+	gap: 8px;
+	height: 100%;
+}
+
+.sr_photo-box .filepond--list-scroller {
+  height: 100%;
+  overflow-x: auto !important;   /* hidden → auto */
+  overflow-y: hidden !important;
+  white-space: nowrap;
+  scrollbar-width: thin;
+}
+
+.sr_tag-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 1rem;
+    border: 1px solid #e5e5e5;
+    border-radius: 0.5rem;
+    resize: none; 
+    font-size: smaller;
+    color: #333;
+    font-family: inherit;
+}
+.sr_tag-box::placeholder {
+    color: #aaa;
+}
+.sr_tag-box:focus {
+    outline: none;
+    border-color: #435ebe;
+}
