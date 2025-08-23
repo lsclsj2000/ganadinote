@@ -24,7 +24,7 @@
 		<header th:replace="~{fragments/asideFragment :: asideFragment}"></header>
 		
 		<div id="main">
-			<div th:replace="~{fragments/snsHomeFragment :: snsHomeFragment}"></div>
+			<div th:replace="~{${initialTpl} :: ${initialFrag}}"></div>
 		</div>
 		<footer th:replace="~{fragments/snsFooterFragment :: snsFooterFragment}"></footer>
 	</div>
@@ -37,31 +37,147 @@
     <script src="/assets/js/main.js"></script>
     
     <script>
-	  (function(){
-	    const root = document.getElementById('main');
-	    document.addEventListener('click', async (e) => {
-	      const a = e.target.closest('#snsFooter .tab-item');
-	      if (!a) return;
-	      e.preventDefault();
-	      const route = a.getAttribute('data-route') || a.getAttribute('href');
-	      try {
-	        const res = await fetch(route, { headers: {'X-Requested-With':'fetch'} });
-	        const html = await res.text();
-	        root.innerHTML = html;
-	        history.pushState({route}, '', route);
-	        document.querySelectorAll('#snsFooter .tab-item')
-	          .forEach(x => x.classList.toggle('active', x === a));
-	      } catch(err){
-	        root.innerHTML = '<div class="p-3 text-danger">불러오기 실패</div>';
-	      }
-	    });
-	    window.addEventListener('popstate', (e)=>{
-	      const route = e.state?.route || '/sns/home';
-	      fetch(route).then(r=>r.text()).then(h=>root.innerHTML=h);
-	      document.querySelectorAll('#snsFooter .tab-item')
-	        .forEach(x => x.classList.toggle('active', (x.getAttribute('data-route')||x.getAttribute('href')) === route));
-	    });
-	  })();
+		(function(){
+			const norm = p => (p || '').replace(/\/+$/,''); // 끝 슬래시 제거
+			const cur = norm(location.pathname);
+		
+			document.querySelectorAll('#snsFooter .tab-item').forEach(el=>{
+				const raw = el.getAttribute('data-route') || el.getAttribute('href') || '';
+				// 상대경로도 절대경로로 해석
+				const full = raw.startsWith('/') ? raw : new URL(raw, location.origin).pathname;
+				const route = norm(full);
+				el.classList.toggle('active', route === cur);
+			});
+		})();
 	</script>
+    
+    <script>
+		(function(){
+			const root = document.getElementById('main');
+		
+			// [추가] 첫 로드 시 현재 경로를 히스토리 상태로 기록
+			if (!history.state || !history.state.route) {
+				history.replaceState({route: location.pathname}, '', location.pathname);
+			}
+		
+			document.addEventListener('click', async (e) => {
+				const a = e.target.closest('#snsFooter .tab-item');
+				if (!a) return;
+				e.preventDefault();
+				const route = a.getAttribute('data-route') || a.getAttribute('href');
+				try {
+					const res = await fetch(route, { headers: {'X-Requested-With':'fetch'} });
+					const html = await res.text();
+					root.innerHTML = html;
+					history.pushState({route}, '', route);
+					document.querySelectorAll('#snsFooter .tab-item')
+						.forEach(x => x.classList.toggle('active', x === a));
+				} catch(err){
+					root.innerHTML = '<div class="p-3 text-danger">불러오기 실패</div>';
+				}
+			});
+		
+			window.addEventListener('popstate', (e)=>{
+				const route = e.state?.route;
+				if (!route) return; // [변경] 초기 로드 등 state 없으면 아무것도 안 함
+				fetch(route, { headers: {'X-Requested-With':'fetch'} })
+					.then(r=>r.text())
+					.then(h=>{
+						root.innerHTML=h;
+						document.querySelectorAll('#snsFooter .tab-item')
+							.forEach(x => {
+								const r = x.getAttribute('data-route')||x.getAttribute('href');
+								x.classList.toggle('active', r === route);
+							});
+					});
+			});
+		})();
+	</script>
+
+	
+	<script>
+		// === 팔로워/팔로우 모달: 클릭한 항목에 따라 기본 탭 변경 ===
+		(function(){
+			const root = document.getElementById('main');
+		
+	  		// 1) 클릭한 버튼의 data-follow-tab 값을 기억
+			 let nextDefaultTab = 'followers'; // 기본값
+			 document.addEventListener('click', function(e){
+			const btn = e.target.closest('.sr_stat-link');
+			if (!btn) return;
+			const tab = btn.getAttribute('data-follow-tab');
+			if (tab === 'followers' || tab === 'following') {
+			  nextDefaultTab = tab;
+			}
+			 });
+		
+		  // 2) 모달이 보이기 직전에 원하는 탭을 활성화
+		  document.addEventListener('show.bs.modal', function(e){
+		    const modal = e.target;
+		    if (modal.id !== 'srFollowModal') return;
+		
+		    // 탭 버튼 DOM이 프래그먼트 안에 있으므로, 모달 DOM 기준으로 찾기
+		    const followersBtn = modal.querySelector('#srFollowersTabBtn');
+		    const followingBtn = modal.querySelector('#srFollowingTabBtn');
+		
+		    // 부트스트랩 탭 API로 강제 전환
+		    const targetBtn = (nextDefaultTab === 'following') ? followingBtn : followersBtn;
+		    if (targetBtn) {
+		      const tab = new bootstrap.Tab(targetBtn);
+		      tab.show();
+		    }
+		  });
+		})();
+	</script>
+	
+	<script>
+        (function(){
+            // srPostModal 요소는 페이지 로드 시점에 존재하지 않기 때문에 document에 이벤트를 위임합니다.
+            // 이렇게 하면 모달이 DOM에 추가된 후에도 이벤트가 감지됩니다.
+            document.addEventListener('show.bs.modal', function (event) {
+                // 이벤트가 'srPostModal'에서 발생했는지 확인합니다.
+                if (event.target.id === 'srPostModal') {
+                    // 모달을 트리거한 게시물 아이템을 찾습니다.
+                    const button = event.relatedTarget; 
+
+                    // data-* 속성에서 게시물 정보를 가져옵니다.
+                    const imageSrc = button.getAttribute('data-image-src');
+                    const profileSrc = button.getAttribute('data-profile-src');
+                    const userName = button.getAttribute('data-user-name');
+                    const postDate = button.getAttribute('data-post-date');
+                    const tags = button.getAttribute('data-tags');
+
+                    // 모달 내부의 요소들을 찾습니다.
+                    const srPostModal = document.getElementById('srPostModal');
+                    const modalPostImg = srPostModal.querySelector('#modalPostImg');
+                    const modalProfileImg = srPostModal.querySelector('#modalProfileImg');
+                    const modalUserName = srPostModal.querySelector('#modalUserName');
+                    const modalPostDate = srPostModal.querySelector('#modalPostDate');
+                    const modalTags = srPostModal.querySelector('#modalTags');
+
+                    // 찾은 정보로 모달 내용을 채웁니다.
+                    modalPostImg.src = imageSrc;
+                    modalPostImg.alt = "게시물 이미지"; 
+                    modalProfileImg.src = profileSrc;
+                    modalProfileImg.alt = `${userName} 프로필 사진`;
+                    modalUserName.textContent = userName;
+                    modalPostDate.textContent = postDate;
+                    
+                    // 태그를 동적으로 생성하여 추가
+                    modalTags.innerHTML = ''; // 기존 태그 초기화
+                    if (tags) {
+                        tags.split(' ').forEach(tag => {
+                            const span = document.createElement('span');
+                            span.className = 'badge bg-light-secondary';
+                            span.style.fontSize = '.65em';
+                            span.textContent = tag;
+                            modalTags.appendChild(span);
+                            modalTags.appendChild(document.createTextNode(' ')); // 태그 사이 공백 추가
+                        });
+                    }
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
