@@ -198,7 +198,6 @@
   align-items: center;
   gap: .75rem;
   padding: .5rem 0;
-  border-bottom: 1px solid #f0f0f0;
 }
 
 .sr_follow-item:last-child { border-bottom: 0; }
@@ -327,7 +326,6 @@
 .sr_follow-item {
     display: flex;
     align-items: center;
-    margin-bottom: 1rem;
     padding: 0.5rem 0;
     transition: background-color 0.2s ease-in-out;
 }
