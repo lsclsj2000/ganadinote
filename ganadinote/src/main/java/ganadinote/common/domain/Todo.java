@@ -1,9 +1,9 @@
-package ganadinote.todolist.domain;
+package ganadinote.common.domain;
 
 import java.time.LocalDateTime;
 
 // 데이터베이스의 'todo' 테이블과 1:1로 대응되는 데이터 전송 객체입니다.
-public class TodoDTO {
+public class Todo {
 
     private Long todoCd;
     private int mbrCd;

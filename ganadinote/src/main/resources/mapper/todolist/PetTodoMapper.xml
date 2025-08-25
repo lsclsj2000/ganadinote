@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- [이름 통일] namespace를 PetTodoMapper 인터페이스의 경로와 일치시킵니다. -->
+<mapper namespace="ganadinote.todolist.mapper.PetTodoMapper">
+
+    <resultMap id="petResultMap" type="ganadinote.common.domain.Pet">
+        <id property="petCd" column="pet_cd"/>
+        <result property="mbrCd" column="mbr_cd"/>
+        <result property="petName" column="pet_name"/>
+        <result property="petBreed" column="pet_breed"/>
+        <result property="petGender" column="pet_gender"/>
+        <result property="petBirthDate" column="pet_birth_date"/>
+        <result property="petWeight" column="pet_weight"/>
+        <result property="petProfileImgUrl" column="pet_profile_img_url"/>
+        <result property="petIntroduction" column="pet_introduction"/>
+        <result property="petRegDate" column="pet_reg_date"/>
+        <result property="petMdfcnDate" column="pet_mdfcn_date"/>
+    </resultMap>
+
+    <select id="getPetsByMbrCd" parameterType="int" resultMap="petResultMap">
+        SELECT
+            pet_cd, mbr_cd, pet_name, pet_breed, pet_gender, pet_birth_date,
+            pet_weight, pet_profile_img_url, pet_introduction, pet_reg_date, pet_mdfcn_date
+        FROM
+            pet
+        WHERE
+            mbr_cd = #{mbrCd}
+    </select>
+
+</mapper>
