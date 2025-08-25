@@ -47,5 +47,10 @@
             #{todoScheduledDt}
         )
     </insert>
+    
+    <delete id="deleteTodo" parameterType="long">
+        DELETE FROM todo
+        WHERE todo_cd = #{todoCd}
+    </delete>
 
 </mapper>

@@ -85,4 +85,14 @@ public class TodoController {
         // 처리가 끝나면 목록 페이지로 리다이렉트합니다.
         return "redirect:/todo/list";
     }
+    
+ // [추가!] /todo/delete 경로의 POST 요청을 처리하는 삭제 메소드
+    @PostMapping("/delete")
+    public String deleteTodo(@RequestParam("todoCd") Long todoCd) {
+        // Service를 호출하여 해당 ID의 할 일을 삭제합니다.
+        todoService.deleteTodo(todoCd);
+        
+        // 처리가 끝나면 목록 페이지로 다시 이동(redirect)시킵니다.
+        return "redirect:/todo/list";
+    }
 }

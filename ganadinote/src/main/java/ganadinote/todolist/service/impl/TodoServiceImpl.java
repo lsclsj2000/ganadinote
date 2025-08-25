@@ -29,4 +29,12 @@ public class TodoServiceImpl implements TodoService {
     public void addTodo(Todo todo) {
         todoMapper.addTodo(todo);
     }
+    
+ // [추가!] deleteTodo 메소드의 실제 구현
+    @Override
+    public void deleteTodo(Long todoCd) {
+        // 나중에 여기에 "삭제 권한이 있는 사용자인가?" 같은
+        // 비즈니스 로직을 추가할 수 있습니다.
+        todoMapper.deleteTodo(todoCd);
+    }
 }

@@ -10,4 +10,7 @@ public interface TodoService {
     
     // [추가!] 새로운 할 일을 추가하는 기능 명세
     void addTodo(Todo todo);
+    
+ // [추가!] 할 일을 삭제하는 기능 명세
+    void deleteTodo(Long todoCd);
 }
