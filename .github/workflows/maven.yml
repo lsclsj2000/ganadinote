@@ -52,7 +52,7 @@ jobs:
       with:
         host: ${{ secrets.OCI_HOST }}
         username: ${{ secrets.OCI_USER }}
-        key: ${{ secrets.OUTPOLICDEV }}
+        key: ${{ secrets.GANADINOTEDEV }}
         script: |
           cd ${{ secrets.OCI_RELEASE }}
           sudo sh release.sh
