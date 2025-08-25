@@ -1,168 +1,210 @@
 <!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/mainLayoutView}">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/mainLayoutView}">
 
 <head>
-    <title>댕댕이 투두리스트</title>
-    <link rel="stylesheet" href="/assets/css/todo/todoList.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<title>댕댕이 투두리스트</title>
+<link rel="stylesheet" href="/assets/css/todo/todoList.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+	rel="stylesheet">
 </head>
 
 <div layout:fragment="contents">
-    <!-- 
+	<!-- 
       [수정!] <header>, <main>, <footer> 태그를 제거하고,
       순수한 콘텐츠 '알맹이'만 남겨 레이아웃에 통합시킵니다.
       페이지 전체를 감싸는 고유 클래스 .todo-list-page는 유지합니다.
     -->
-    <div class="todo-list-page">
-        
-        <!-- 기존 header의 내용물 -->
-        <div class="header-top">
-            <span class="material-icons menu-icon">menu</span>
-            <h2>오늘 할 일</h2>
-        </div>
-        <div class="pet-profiles-wrapper">
-            <div class="pet-profiles">
-                <div class="pet-profile" data-pet-id="all">
-                    <img src="/images/imokaycat.jpg" alt="견주 프로필" class="profile-pic">
-                    <span>me</span>
-                </div>
-                <div class="pet-profile" data-pet-id="ruby">
-                    <img src="/images/루비.jpg" alt="루비 프로필" class="profile-pic">
-                    <span>루비</span>
-                </div>
-                <div class="pet-profile" data-pet-id="jjongi">
-                    <img src="/images/쫑이.jpg" alt="쫑이 프로필" class="profile-pic">
-                    <span>쫑이</span>
-                </div>
-                <div class="pet-profile" data-pet-id="boksil">
-                    <img src="/images/복실.jpg" alt="복실 프로필" class="profile-pic">
-                    <span>복실</span>
-                </div>
-            </div>
-        </div>
+	<div class="todo-list-page">
 
-        <!-- 기존 main의 내용물 -->
-        <div class="calendar-wrapper">
-            <div class="calendar-header">
-                <button id="prevMonthBtn">&lt;</button>
-                <span id="currentMonthYear">2025년 8월</span>
-                <button id="nextMonthBtn">&gt;</button>
-            </div>
-            <div class="calendar-grid">
-                <!-- JavaScript가 이 부분을 동적으로 채울 것입니다. -->
-            </div>
-        </div>
-        <button class="add-todo-btn" onclick="location.href='/todo/addView'">할 일 추가</button>
+		<!-- 기존 header의 내용물 -->
+		<div class="header-top">
+			<span class="material-icons menu-icon">menu</span>
+			<h2>오늘 할 일</h2>
+		</div>
+		<div class="pet-profiles-wrapper">
+			<div class="pet-profiles">
+				<div class="pet-profile" data-pet-id="all">
+					<img src="/images/imokaycat.jpg" alt="견주 프로필" class="profile-pic">
+					<span>me</span>
+				</div>
+				<div class="pet-profile" data-pet-id="ruby">
+					<img src="/images/루비.jpg" alt="루비 프로필" class="profile-pic"> <span>루비</span>
+				</div>
+				<div class="pet-profile" data-pet-id="jjongi">
+					<img src="/images/쫑이.jpg" alt="쫑이 프로필" class="profile-pic"> <span>쫑이</span>
+				</div>
+				<div class="pet-profile" data-pet-id="boksil">
+					<img src="/images/복실.jpg" alt="복실 프로필" class="profile-pic"> <span>복실</span>
+				</div>
+			</div>
+		</div>
 
-        <!-- 모달창은 구조 변경 없음 -->
-        <div class="modal" id="todoModal">
-            <div class="modal-content">
-                <span class="close-btn">&times;</span>
-                <h3 id="modal-date"></h3>
-                <ul id="modal-todo-list">
-                    <!-- JavaScript로 할 일 목록이 여기에 들어갈 예정 -->
-                </ul>
-                <button id="add-new-todo-btn">할 일 추가하기</button>
-            </div>
-        </div>
-        
-        <!-- JavaScript 로직 변경 없음 -->
-        <script th:inline="javascript">
-        /* <![CDATA[ */
-            // ... (기존 JavaScript 코드 전체, 변경 없음) ...
-            const todosFromServer = /*[[${todos}]]*/ [];
-            document.addEventListener('DOMContentLoaded', () => {
-                const calendarGrid = document.querySelector('.calendar-grid');
-                const currentMonthYearSpan = document.getElementById('currentMonthYear');
-                const prevMonthBtn = document.getElementById('prevMonthBtn');
-                const nextMonthBtn = document.getElementById('nextMonthBtn');
-                const modal = document.getElementById('todoModal');
-                const modalDate = document.getElementById('modal-date');
-                const closeBtn = document.querySelector('.close-btn');
-                let currentDate = new Date();
-                const todosByDate = {};
-                todosFromServer.forEach(todo => {
-                    const date = todo.todoScheduledDt.substring(0, 10);
-                    if (!todosByDate[date]) {
-                        todosByDate[date] = [];
-                    }
-                    todosByDate[date].push(todo);
-                });
-                function renderCalendar() {
-                    const year = currentDate.getFullYear();
-                    const month = currentDate.getMonth();
-                    currentMonthYearSpan.textContent = `${year}년 ${month + 1}월`;
-                    const firstDayOfMonth = new Date(year, month, 1).getDay();
-                    const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
-                    calendarGrid.innerHTML = `<div class="day-header">일</div> <div class="day-header">월</div><div class="day-header">화</div> <div class="day-header">수</div><div class="day-header">목</div> <div class="day-header">금</div><div class="day-header">토</div>`;
-                    for (let i = 0; i < firstDayOfMonth; i++) {
-                        calendarGrid.insertAdjacentHTML('beforeend', `<div class="day empty"></div>`);
-                    }
-                    for (let i = 1; i <= lastDateOfMonth; i++) {
-                        const day = document.createElement('div');
-                        day.classList.add('day');
-                        day.textContent = i;
-                        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                        day.setAttribute('data-date', dateStr);
-                        const todosForThisDay = todosByDate[dateStr] || [];
-                        if (todosForThisDay.length > 0) {
-                            day.classList.add('has-todos');
-                            todosForThisDay.slice(0, 2).forEach(todo => {
-                                const todoBlock = document.createElement('div');
-                                todoBlock.classList.add('todo-block');
-                                if (todo.todoIsCompleted) {
-                                    todoBlock.classList.add('completed');
-                                }
-                                todoBlock.textContent = todo.todoTitle;
-                                day.appendChild(todoBlock);
-                            });
-                        }
-                        day.addEventListener('click', () => {
-                            const date = day.getAttribute('data-date');
-                            modalDate.textContent = date;
-                            const modalTodoList = document.getElementById('modal-todo-list');
-                            modalTodoList.innerHTML = '';
-                            if (todosForThisDay.length > 0) {
-                                todosForThisDay.forEach(todo => {
-                                    const li = document.createElement('li');
-                                    li.textContent = `[${todo.petCd}번 댕댕이] ${todo.todoTitle}`;
-                                    if (todo.todoIsCompleted) {
-                                        li.classList.add('completed');
-                                    }
-                                    modalTodoList.appendChild(li);
-                                });
-                            } else {
-                                modalTodoList.innerHTML = '<li>등록된 할 일이 없습니다.</li>';
-                            }
-                            modal.classList.add('show');
-                        });
-                        calendarGrid.appendChild(day);
-                    }
-                }
-                renderCalendar();
-                prevMonthBtn.addEventListener('click', () => {
-                    currentDate.setMonth(currentDate.getMonth() - 1);
-                    renderCalendar();
-                });
-                nextMonthBtn.addEventListener('click', () => {
-                    currentDate.setMonth(currentDate.getMonth() + 1);
-                    renderCalendar();
-                });
-                closeBtn.addEventListener('click', () => modal.classList.remove('show'));
-                window.addEventListener('click', (event) => {
-                    if (event.target === modal) modal.classList.remove('show');
-                });
-            });
-        /* ]]> */
-        </script>
-        
-        <!-- 기존 footer의 내용물 -->
-        <div class="ad-section">
-            <p>광고 영역</p>
-        </div>
-    </div>
+		<!-- 기존 main의 내용물 -->
+		<div class="calendar-wrapper">
+			<div class="calendar-header">
+				<button id="prevMonthBtn">&lt;</button>
+				<span id="currentMonthYear">2025년 8월</span>
+				<button id="nextMonthBtn">&gt;</button>
+			</div>
+			<div class="calendar-grid">
+				<!-- JavaScript가 이 부분을 동적으로 채울 것입니다. -->
+			</div>
+		</div>
+		<button class="add-todo-btn" onclick="location.href='/todo/addView'">할
+			일 추가</button>
+
+		<!-- 모달창은 구조 변경 없음 -->
+		<div class="modal" id="todoModal">
+			<div class="modal-content">
+				<span class="close-btn">&times;</span>
+				<h3 id="modal-date"></h3>
+				<ul id="modal-todo-list">
+					<!-- JavaScript로 할 일 목록이 여기에 들어갈 예정 -->
+				</ul>
+				<button id="add-new-todo-btn">할 일 추가하기</button>
+			</div>
+		</div>
+
+		<script th:inline="javascript">
+		/* <![CDATA[ */
+		    const todosFromServer = /*[[${todos}]]*/ [];
+		
+		    document.addEventListener('DOMContentLoaded', () => {
+		        // [추가 1] 어떤 펫이 선택되었는지 상태를 저장할 변수를 만듭니다.
+		        // 'all'은 전체보기를 의미합니다.
+		        let currentSelectedPetId = 'all'; 
+		        
+		        // [추가 2] 모든 펫 프로필 element들을 가져옵니다.
+		        const petProfileElements = document.querySelectorAll('.pet-profile');
+		
+		        const calendarGrid = document.querySelector('.calendar-grid');
+		        const currentMonthYearSpan = document.getElementById('currentMonthYear');
+		        const prevMonthBtn = document.getElementById('prevMonthBtn');
+		        const nextMonthBtn = document.getElementById('nextMonthBtn');
+		        const modal = document.getElementById('todoModal');
+		        const modalDate = document.getElementById('modal-date');
+		        const closeBtn = document.querySelector('.close-btn');
+		
+		        let currentDate = new Date();
+		
+		        // 달력 생성 함수를 수정합니다.
+		        function renderCalendar() {
+		            // [수정 1] 필터링된 할 일 목록을 만듭니다.
+		            const filteredTodos = todosFromServer.filter(todo => {
+		                if (currentSelectedPetId === 'all') {
+		                    return true; // '전체'가 선택되면 모든 할 일을 포함
+		                }
+		                // 특정 펫이 선택되면, 그 펫의 할 일만 포함 (ID 비교)
+		                return todo.petCd == currentSelectedPetId; 
+		            });
+		
+		            // [수정 2] 필터링된 목록을 기반으로 날짜별 데이터를 재구성합니다.
+		            const todosByDate = {};
+		            filteredTodos.forEach(todo => {
+		                const date = todo.todoScheduledDt.substring(0, 10);
+		                if (!todosByDate[date]) {
+		                    todosByDate[date] = [];
+		                }
+		                todosByDate[date].push(todo);
+		            });
+		            
+		            // ... (아래 달력을 그리는 로직은 이전과 100% 동일합니다) ...
+		            const year = currentDate.getFullYear();
+		            const month = currentDate.getMonth();
+		            currentMonthYearSpan.textContent = `${year}년 ${month + 1}월`;
+		            const firstDayOfMonth = new Date(year, month, 1).getDay();
+		            const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
+		            calendarGrid.innerHTML = `<div class="day-header">일</div> <div class="day-header">월</div><div class="day-header">화</div> <div class="day-header">수</div><div class="day-header">목</div> <div class="day-header">금</div><div class="day-header">토</div>`;
+		            for (let i = 0; i < firstDayOfMonth; i++) {
+		                calendarGrid.insertAdjacentHTML('beforeend', `<div class="day empty"></div>`);
+		            }
+		            for (let i = 1; i <= lastDateOfMonth; i++) {
+		                const day = document.createElement('div');
+		                day.classList.add('day');
+		                day.textContent = i;
+		                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+		                day.setAttribute('data-date', dateStr);
+		                const todosForThisDay = todosByDate[dateStr] || [];
+		                if (todosForThisDay.length > 0) {
+		                    day.classList.add('has-todos');
+		                    todosForThisDay.slice(0, 2).forEach(todo => {
+		                        const todoBlock = document.createElement('div');
+		                        todoBlock.classList.add('todo-block');
+		                        if (todo.todoIsCompleted) {
+		                            todoBlock.classList.add('completed');
+		                        }
+		                        todoBlock.textContent = todo.todoTitle;
+		                        day.appendChild(todoBlock);
+		                    });
+		                }
+		                day.addEventListener('click', () => {
+		                    const date = day.getAttribute('data-date');
+		                    modalDate.textContent = date;
+		                    const modalTodoList = document.getElementById('modal-todo-list');
+		                    modalTodoList.innerHTML = '';
+		                    if (todosForThisDay.length > 0) {
+		                        todosForThisDay.forEach(todo => {
+		                            const li = document.createElement('li');
+		                            li.textContent = `[${todo.petCd}번 댕댕이] ${todo.todoTitle}`;
+		                            if (todo.todoIsCompleted) {
+		                                li.classList.add('completed');
+		                            }
+		                            modalTodoList.appendChild(li);
+		                        });
+		                    } else {
+		                        modalTodoList.innerHTML = '<li>등록된 할 일이 없습니다.</li>';
+		                    }
+		                    modal.classList.add('show');
+		                });
+		                calendarGrid.appendChild(day);
+		            }
+		        }
+		
+		        // [추가 3] 각 펫 프로필에 클릭 이벤트를 추가합니다.
+		        petProfileElements.forEach(profile => {
+		            profile.addEventListener('click', () => {
+		                // 클릭된 프로필의 pet-id를 가져옵니다.
+		                const petId = profile.getAttribute('data-pet-id');
+		                
+		                // 선택 상태를 업데이트합니다.
+		                currentSelectedPetId = petId;
+		
+		                // 시각적 효과를 위해 'active' 클래스를 관리합니다.
+		                petProfileElements.forEach(p => p.classList.remove('active'));
+		                profile.classList.add('active');
+		
+		                // 변경된 선택 상태로 달력을 다시 그립니다.
+		                renderCalendar();
+		            });
+		        });
+		
+		        // 초기 로딩 시 전체 달력을 한번 그려줍니다.
+		        renderCalendar(); 
+		        document.querySelector('.pet-profile[data-pet-id="all"]').classList.add('active'); // 'me'를 기본 선택으로
+		
+		        // ... (이전과 동일한 이전/다음 달, 모달 버튼 로직) ...
+		        prevMonthBtn.addEventListener('click', () => {
+		            currentDate.setMonth(currentDate.getMonth() - 1);
+		            renderCalendar();
+		        });
+		        nextMonthBtn.addEventListener('click', () => {
+		            currentDate.setMonth(currentDate.getMonth() + 1);
+		            renderCalendar();
+		        });
+		        closeBtn.addEventListener('click', () => modal.classList.remove('show'));
+		        window.addEventListener('click', (event) => {
+		            if (event.target === modal) modal.classList.remove('show');
+		        });
+		    });
+		/* ]]> */
+		</script>
+
+		<!-- 기존 footer의 내용물 -->
+		<div class="ad-section">
+			<p>광고 영역</p>
+		</div>
+	</div>
 </div>
 </html>
