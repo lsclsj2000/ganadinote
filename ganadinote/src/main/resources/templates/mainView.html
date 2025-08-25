@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mainLayoutView}">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>강아지 날씨 예보</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets//css/ljs.css">
+</head>
+<body>
+<th:block layout:fragment="contents">
+   <div class="page-heading mt-3">
+        <h3>내 강아지</h3>
+    </div>
+    <div class="page-content">
+        <section class="row">
+            <div class="col-6 col-lg-9">
+                <!-- 여기에 반려동물 카드들이 동적으로 추가될 것입니다. -->
+                <div class="row" id="pet-cards-container">
+                    <!-- 초기 로딩 메시지 -->
+                    <p id="loading-message">반려동물 정보를 불러오는 중...</p>
+                </div>
+            </div>
+            <!-- 여기부터는 기존에 있던 다른 UI 요소들입니다. -->
+           
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+							    <p id="dong-name">위치 정보를 불러오는 중...</p>
+							    <p id="status-message"style="display: none;"></p>
+                            </div>
+                            <div class="card-body">
+                            	<div id="weather-display"></div>
+							</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ... (나머지 UI 요소들) ... -->
+            </div>
+            <div class="col-12 col-lg-3">
+                <div class="card">
+                    <div class="card-body py-4 px-5">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-xl">
+                                <img src="assets/images/faces/1.jpg" alt="Face 1">
+                            </div>
+                            <div class="ms-3 name">
+                                <h5 class="font-bold">John Duck</h5>
+                                <h6 class="text-muted mb-0">@johnducky</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Recent Messages</h4>
+                    </div>
+                    <div class="card-content pb-4">
+                        <div class="recent-message d-flex px-4 py-3">
+                            <div class="avatar avatar-lg">
+                                <img src="assets/images/faces/4.jpg">
+                            </div>
+                            <div class="name ms-4">
+                                <h5 class="mb-1">Hank Schrader</h5>
+                                <h6 class="text-muted mb-0">@johnducky</h6>
+                            </div>
+                        </div>
+                        <div class="recent-message d-flex px-4 py-3">
+                            <div class="avatar avatar-lg">
+                                <img src="assets/images/faces/5.jpg">
+                            </div>
+                            <div class="name ms-4">
+                                <h5 class="mb-1">Dean Winchester</h5>
+                                <h6 class="text-muted mb-0">@imdean</h6>
+                            </div>
+                        </div>
+                        <div class="recent-message d-flex px-4 py-3">
+                            <div class="avatar avatar-lg">
+                                <img src="assets/images/faces/1.jpg">
+                            </div>
+                            <div class="name ms-4">
+                                <h5 class="mb-1">John Dodol</h5>
+                                <h6 class="text-muted mb-0">@dodoljohn</h6>
+                            </div>
+                        </div>
+                        <div class="px-4">
+                            <button class='btn btn-block btn-xl btn-light-primary font-bold mt-3'>Start
+                                Conversation</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Visitors Profile</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-visitors-profile"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="footer clearfix mb-0 text-muted">
+            <div class="float-start">
+                <p>2021 &copy; Mazer</p>
+            </div>
+            <div class="float-end">
+                <p>Crafted with <span class="text-danger"><i class="bi bi-heart"></i></span> by <a
+                        href="http://ahmadsaugi.com">A. Saugi</a></p>
+            </div>
+        </div>
+    </footer>
+    <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+
+    <script src="assets/vendors/apexcharts/apexcharts.js"></script>
+    <script src="assets/js/pages/dashboard.js"></script>
+
+    <script src="assets/js/main.js"></script>
+    
+</th:block>
+
+<th:block layout:fragment="jsScripts">
+    <script th:inline="javascript">
+        // Thymeleaf를 통해 서버에서 mbrCd 값을 받아옵니다.
+        const mbrCd = '1'; // 예시. 실제로는 동적으로 받아와야 함
+
+        /**
+         * 반려동물 정보를 서버에서 가져와서 화면에 표시합니다.
+         * @param {string} memberCode - 회원의 고유 코드 (mbrCd)
+         */
+        async function fetchAndRenderPets(memberCode) {
+            const container = document.getElementById('pet-cards-container');
+            const loadingMessage = document.getElementById('loading-message');
+            
+            loadingMessage.style.display = 'block';
+            container.innerHTML = ''; 
+
+            try {
+                // 새로운 REST API 엔드포인트 호출
+                const response = await fetch(`/mainapi/pets/${memberCode}`);
+
+                if (!response.ok) {
+                    throw new Error('서버에서 반려동물 정보를 가져오는 데 실패했습니다.');
+                }
+                
+                const pets = await response.json(); // JSON 배열로 변환
+
+                loadingMessage.style.display = 'none';
+
+                if (pets.length === 0) {
+                    container.innerHTML = `<p class="text-muted text-center">등록된 반려동물이 없습니다.</p>`;
+                } else {
+                    pets.forEach(pet => {
+                        const cardHtml = createPetCard(pet.petName, pet.petProfileImgUrl);
+                        container.insertAdjacentHTML('beforeend', cardHtml);
+                    });
+                }
+
+            } catch (error) {
+                console.error("Error fetching pet data:", error);
+                loadingMessage.style.display = 'none';
+                container.innerHTML = `<p class="text-danger text-center">오류가 발생했습니다: ${error.message}</p>`;
+            }
+        }
+
+        /**
+         * 반려동물 정보로 HTML 카드 요소를 생성합니다.
+         * @param {string} petName - 반려동물 이름
+         * @param {string} profileImgUrl - 반려동물 프로필 이미지 URL
+         * @returns {string} - 생성된 HTML 문자열
+         */
+         function createPetCard(petName, petProfileImgUrl) {
+        	    return `
+        	        <div class="col-6 col-lg-3 col-md-6 mb-4">
+        	            <div class="card h-100 d-flex flex-column pet-card">
+        	                <div class="pet-img-container">
+        	                    <img src="${petProfileImgUrl}" class="pet-profile-img" alt="${petName} 프로필">
+        	                </div>
+        	                <div class="pet-name-body">
+        	                    <h6 class="font-extrabold mb-0 text-center">${petName}</h6>
+        	                </div>
+        	            </div>
+        	        </div>
+        	    `;
+        	}
+         
+         // 날씨 정보를 가져오는 기능
+         async function fetchWeather(latitude, longitude){
+        	 const statusMessage = document.getElementById('status-message');
+        	 const weatherDisplay = document.getElementById('weather-display');
+        	 
+        	 try{
+        		 statusMessage.textContent = '날씨 정보를 불러오는 중...';
+        		 
+        		 const response = await fetch(`/api/weather?lat=${latitude}&lon=${longitude}`);
+        		 
+        		  if(!response.ok){
+        			  throw new Error('날씨 정보를 가져오지 못했습니다')
+        		  }
+        		  
+        		  const weatherData = await response.json();
+        		  
+        		  // 날씨 데이터 추출
+        		  const weatherDescription = weatherData.weather[0].description;
+        		  const temperature = weatherData.main.temp; 
+        		  const feelsLike = weatherData.main.feels_like;
+        		  const humidity = weatherData.main.humidity;
+        		  const windSpeed = weatherData.wind.speed;
+        		  
+        		  // 날씨 정보 표시
+        		  weatherDisplay.innerHTML = `
+        		  <div class= " weather-info">
+        		  	<p><strong>날씨 :</strong>${weatherDescription}</p>
+        		  	<p><strong>현재기온 :</strong>${temperature}°C</p>
+        		  	<p><strong>체감 온도 :</strong>${feelsLike}°C</p>
+        		  	<p><strong>습도 :</strong>${humidity}%</p>
+        		  	<p><strong>바람 :</strong>${windSpeed}</p>
+        		  </div>
+        		  `;
+        		 statusMessage.textContent = '날씨 정보 확인 완료';
+        	 }catch(error){
+        		 console.error("Error fetching weather data:",error);
+        		 statusMessage.textContent = `날씨 정보 로딩 중 오류 발생: ${error.message}`;
+        		 weatherDisplay.innerHTML = `<p class = "text-danger"> 날씨정보를 가져올 수 없습니다.</p>`;
+        	 }
+         }
+        
+        // 위치 정보를 가져오는 기능
+         async function getLocationName() {
+            const statusMessage = document.getElementById('status-message');
+            const LocationNameElement = document.getElementById('dong-name');
+
+            statusMessage.textContent = '위치 정보 가져오는 중...';
+            LocationNameElement.textContent = '';
+
+            // 브라우저가 Geolocation API를 지원하지 않는 경우 IP 기반 fallback
+            if (!navigator.geolocation) {
+                await fetchIpLocation();
+                return;
+            }
+
+            try {
+                // GPS 좌표 가져오기 시도
+                let position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+                }).catch(async () => {
+                    // GPS 불가 시 IP 기반 위치 fallback
+                    return await fetchIpLocation(true);
+                });
+
+                // position이 좌표를 가지고 있는지 확인
+                if (position && position.coords && position.coords.latitude) {
+                    const { latitude, longitude } = position.coords;
+                    await fetchServerLocation(latitude, longitude);
+                    await fetchWeather(latitude, longitude);
+                } else if (position && position.locationName) {
+                    // IP fallback 결과
+                    LocationNameElement.textContent = `현재 위치(대략)는 '${position.locationName}' 입니다.`;
+                    statusMessage.textContent = '위치 확인 완료!';
+                } else {
+                    // 아무 정보도 없는 경우
+                    LocationNameElement.textContent = '위치 정보를 가져올 수 없습니다.';
+                    statusMessage.textContent = '위치 확인 실패';
+                }
+
+            } catch (error) {
+                statusMessage.textContent = `오류 발생: ${error.message}`;
+            }
+
+            // IP 기반 위치 가져오기
+            async function fetchIpLocation(fromCatch=false) {
+                try {
+                    statusMessage.textContent = fromCatch 
+                        ? 'GPS를 사용할 수 없습니다. IP 기반 위치 추정 중...' 
+                        : 'Geolocation API를 지원하지 않습니다. IP 기반 위치 추정 중...';
+
+                    const response = await fetch('/locationapi/ipLocation');
+                    const data = await response.json();
+
+                    if (data.locationName) {
+                        LocationNameElement.textContent = `현재 위치(대략)는 '${data.locationName}' 입니다.`;
+                        statusMessage.textContent = '위치 확인 완료!';
+                    } else {
+                        LocationNameElement.textContent = '위치 정보를 찾을 수 없습니다.';
+                        statusMessage.textContent = '위치 확인 실패';
+                    }
+
+                    return data; // position 대체용
+                } catch (error) {
+                    statusMessage.textContent = `오류 발생: ${error.message}`;
+                    return {};
+                }
+            }
+
+            // 서버에 GPS 좌표 전송 후 동 이름 받아오기
+            async function fetchServerLocation(latitude, longitude) {
+                try {
+                    const response = await fetch('/locationapi/location', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ latitude, longitude })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('서버 통신 오류');
+                    }
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        statusMessage.textContent = '위치 정보를 찾을 수 없습니다.';
+                        LocationNameElement.textContent = '';
+                    } else {
+                        LocationNameElement.textContent = `현재 위치는 '${data.locationName}' 입니다.`;
+                        statusMessage.textContent = '위치 확인 완료!';
+                    }
+                } catch (error) {
+                    statusMessage.textContent = `오류 발생: ${error.message}`;
+                }
+            }
+        }
+         // 페이지 로드 시 반려동물 정보 가져오기 시작
+         document.addEventListener('DOMContentLoaded', () => {
+             fetchAndRenderPets(mbrCd);
+             
+             getLocationName();
+         });
+        
+    </script>
+</th:block>
+</body>
+</html>

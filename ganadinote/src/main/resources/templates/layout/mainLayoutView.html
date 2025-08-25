@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GanadiNote</title>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/ysr.css">
+    <link rel="stylesheet" href="/assets/css/bootstrap.css">
+
+    <link rel="stylesheet" href="/assets/vendors/perfect-scrollbar/perfect-scrollbar.css">
+    <link rel="stylesheet" href="/assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="shortcut icon" href="/assets/images/favicon.svg" type="image/x-icon">
+	<style>
+	  /* 페이지 공통: 헤더/푸터 높이 정의 (필요시 값 조절) */
+	  :root { --header-h: 56px; --footer-h: 56px; }
+
+	  /* 데스크톱에선 바텀탭이 없으면 0으로 */
+	  @media (min-width: 1200px) {
+	    :root { --footer-h: 0px; }
+	  }
+
+	  /* 본문이 고정 헤더/푸터 밑으로 깔리지 않게 공간 확보 */
+	  #main {
+	    padding-top: var(--header-h);
+	    padding-bottom: var(--footer-h);
+	  }
+
+	  /* 혹시 상위 컨테이너에 overflow가 걸려있으면 sticky가 깨집니다 */
+	  #main, body, html { overflow: visible; }
+	</style>
+</head>
+
+<body>
+	<div id="app">
+		<header th:replace="fragments/headerFragment :: headerFragment"></header>
+	    <aside  th:replace="fragments/asideFragment  :: asideFragment"></aside>
+
+	    <!-- ★ 자식이 주입될 슬롯 -->
+		<div id="main">
+			<th:block layout:fragment="contents"></th:block>
+		</div>
+
+	    <footer th:replace="fragments/footerFragment :: footerFragment"></footer>
+	</div>
+	
+
+    <!-- Template  JS -->
+    <script src="/assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.min.js"></script>
+
+    <script src="/assets/js/main.js"></script>
+    
+    <!--/* 개발시 추가할 스크립트 영역 정의 */-->
+	<th:block layout:fragment="jsScripts"></th:block>
+    
+</body>
+</html>

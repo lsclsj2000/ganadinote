@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/communityLayoutView}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>게시글 상세</title>
+  <!-- 프로젝트에서 이미 Bootstrap을 로드하고 있다면 아래 링크는 제거하세요. -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    /* 페이지 전용 간단 스타일 (필요 시 조정) */
+    .post-header { border-bottom: 1px solid #eee; }
+    .post-actions .btn { min-width: 40px; }
+    .author-card { border: 1px solid #eee; border-radius: 12px; }
+    .author-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+    .post-title { word-break: keep-all; }
+    .post-content { white-space: pre-line; line-height: 1.7; }
+    .post-toolbar { border-top: 1px solid #f1f1f1; border-bottom: 1px solid #f1f1f1; }
+    .comment-item { border-bottom: 1px solid #f5f5f5; }
+    .comment-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+    .sticky-side { position: sticky; top: 24px; }
+  </style>
+</head>
+<th:block layout:fragment="contents">
+<main class="container py-4">
+
+
+<!-- 상단 -->
+<div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom">
+<div class="d-flex align-items-center gap-2">
+<a class="btn btn-outline-secondary btn-sm" aria-label="뒤로가기" href="/community/list">
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+</a>
+<h5 class="mb-0">멍멍 산책코스</h5>
+</div>
+<div class="d-flex align-items-center gap-1">
+<button type="button" class="btn btn-outline-secondary btn-sm">공유</button>
+</div>
+</div>
+
+
+<div class="row g-4">
+<!-- 메인 영역 -->
+<section class="col-12 col-lg-8">
+<!-- 작성자 프로필 -->
+<article class="p-3 mb-3 bg-white border rounded-3">
+<div class="d-flex align-items-center gap-3">
+<img class="rounded-circle object-fit-cover" style="width:48px;height:48px"
+src="https://placehold.co/96x96" alt="작성자 프로필" />
+<div class="d-flex flex-column">
+<strong>복실이를복복복</strong>
+<small class="text-muted">20시간 전 · 조회 116</small>
+</div>
+</div>
+</article>
+
+
+<!-- 제목 & 본문 -->
+	<article class="bg-white border rounded-3 p-3 p-md-4">
+		<h3 class="mb-3">전주천 근처에</h3>
+		<div style="white-space:pre-line;line-height:1.7">
+			벌레 많나요? 저녁쯤 산책가려고 하는데 벌레때문에 고민이네요... 요즘 날도 너무 덥고 산책하기 힘들어요ㅠ
+		</div>
+		
+		
+		<!-- 툴바 -->
+		<div class="d-flex align-items-center justify-content-between mt-4 pt-3 pb-3 border-top border-bottom">
+			<div class="d-flex align-items-center gap-2">
+				<button type="button" class="btn btn-outline-primary btn-sm">
+				👍 <span class="badge text-bg-light ms-1">23</span>
+				</button>
+				<button type="button" class="btn btn-outline-secondary btn-sm">스크랩</button>
+			</div>
+			<a class="btn btn-dark btn-sm" th:href="@{/community}">목록으로 돌아가기</a>
+		</div>
+	</article>
+
+
+<!-- 댓글 입력 -->
+	<section class="bg-white border rounded-3 p-3 p-md-4 mt-3">
+	<h6 class="mb-3">댓글</h6>
+	<form class="d-flex gap-2">
+	<input type="text" class="form-control" placeholder="댓글을 입력하세요" required />
+	<button type="submit" class="btn btn-primary">등록</button>
+	</form>
+	</section>
+
+
+<!-- 댓글 리스트 (더미데이터) -->
+<section class="bg-white border rounded-3 mt-3">
+<ul class="list-unstyled m-0">
+<li class="p-3 border-bottom">
+<div class="d-flex align-items-start gap-2">
+<img class="rounded-circle object-fit-cover" style="width:36px;height:36px"
+src="https://placehold.co/72x72" alt="댓글 작성자" />
+<div class="flex-grow-1">
+<div class="d-flex align-items-center justify-content-between">
+<div>
+<strong>가루아빠</strong>
+<small class="text-muted ms-2">19시간 전</small>
+</div>
+</div>
+<p class="mb-1">벌레가 좀 많아서 벌레기피제 준비하시는게 좋을 것 같아요!</p>
+<div class="d-flex gap-2">
+<button class="btn btn-sm btn-outline-primary" type="button">좋아요</button>
+</html>

@@ -11,5 +11,9 @@ public class userTestController {
         return "ex/application-chat";
     }
 	
+	@GetMapping("/main")
+    public String mainList() {
+        return "layout/mainLayoutView";
+    }
 	
 }

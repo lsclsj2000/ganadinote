@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header id="sidebar" class="active" th:fragment="asideFragment">
+	<div class="sidebar-wrapper active">
+	    <div class="sidebar-header">
+	        <div class="d-flex justify-content-between">
+	            <a th:href="@{/main}">
+	            	<img src="/assets/images/logo/ganadinote-logo.png" alt="Logo" srcset="" style="width: 65%; height: auto;">
+            	</a>
+	            <div class="toggler">
+	                <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+	            </div>
+	        </div>
+	    </div>
+	    <div class="sidebar-menu">
+	        <ul class="menu">
+	            <li class="sidebar-item">
+	                <a href="index.html" class='sidebar-link'>
+	                    <i class="bi bi-grid-fill"></i>
+	                    <span>Dashboard</span>
+	                </a>
+	            </li>
+	            
+	            <li class="sidebar-item active has-sub">
+	                <a href="#" class='sidebar-link'>
+	                    <i class="bi bi-stack"></i>
+	                    <span>My Page</span>
+	                </a>
+	                <ul class="submenu">
+	                    <li class="submenu-item">
+	                        <a href="component-alert.html">me</a>
+	                    </li>
+	                    <li class="submenu-item">
+	                        <a href="component-badge.html">pet</a>
+	                    </li>
+	                </ul>
+	            </li>
+	            
+	            <li class="sidebar-item has-sub">
+	                <a href="#" class='sidebar-link'>
+	                    <i class="bi bi-stack"></i>
+	                    <span>Calendar</span>
+	                </a>
+	                <ul class="submenu">
+	                    <li class="submenu-item">
+	                        <a href="component-alert.html">To-do List</a>
+	                    </li>
+	                    <li class="submenu-item">
+	                        <a href="component-badge.html">+</a>
+	                    </li>
+	                </ul>
+	            </li>
+	
+	            <li class="sidebar-item has-sub">
+	                <a href="#" class='sidebar-link'>
+	                    <i class="bi bi-stack"></i>
+	                    <span>community</span>
+	                </a>
+	                <ul class="submenu">
+	                    <li class="submenu-item">
+	                        <a th:href="@{/community}">발자국 산책코스</a>
+	                    </li>
+	                    <li class="submenu-item">
+	                        <a th:href="@{/community}">멍멍 쇼핑리뷰</a>
+	                    </li>
+	                    <li class="submenu-item">
+	                        <a th:href="@{/community}">멍멍 수다방</a>
+	                    </li>
+	                </ul>
+	            </li>
+	            
+	            <li class="sidebar-item has-sub">
+	                <a href="#" class='sidebar-link'>
+	                    <i class="bi bi-stack"></i>
+	                    <span>SNS</span>
+	                </a>
+	                <ul class="submenu">
+	                    <li class="submenu-item">
+	                        <a th:href="@{/sns/home}">Home</a>
+	                    </li>
+	                    <li class="submenu-item">
+	                        <a th:href="@{/sns/walking}">Walking</a>
+	                    </li>
+	                    <li class="submenu-item">
+	                        <a th:href="@{/sns/myfeed}">My Feed</a>
+	                    </li>
+	                </ul>
+	            </li>
+	        </ul>
+	    </div>
+	    <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+	</div>
+</header>
+</html>
