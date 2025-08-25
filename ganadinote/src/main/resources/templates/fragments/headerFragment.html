@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header id="snsHeader" th:fragment="headerFragment">
+	<!-- 햄버거바와 로고를 포함하는 상단 고정 헤더 -->
+    <div style="width: 100%; display: flex; justify-content: space-between; margin-top: 3px;">
+        <a href="#" class="burger-btn d-flex d-xl-none">
+	        <i class="bi-justify bi-sub fs-3" style="display: flex; align-items: center;"></i>
+	    </a>
+	    <a href="/main">
+	    	<img src="/assets/images/logo/ganadinote-logo.png" alt="Logo" srcset="" style="width:100px;">
+	    </a>
+		<a href="#" class="burger-btn d-block d-xl-none" style="padding-top: 3px;">
+			<i class="bi bi-bell bi-sub fs-4"></i>
+		</a>
+    </div>
+</header>
+</html>

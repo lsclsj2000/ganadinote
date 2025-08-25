@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="snsMyfeedFragment">
+	<div class="mt-10">
+        <section class="section">
+            <div class="row no-gutter-x justify-content-center">
+                <div class="col-12 col-md-8">
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <!-- 1. 원형 프로필사진 -->
+                            <div class="sr_profile-container">
+                                <div class="avatar avatar-xl mb-3">
+                                    <!-- app.css에 정의된 .avatar, .avatar-xl 클래스 활용 -->
+                                    <img src="https://mblogthumb-phinf.pstatic.net/MjAyMjAyMjFfMjQ5/MDAxNjQ1NDIyMTcxNDg5.eAPGmnpjXy5DvjvkOj2DGKRvc5rNhi83QPfR8bFKjoMg.45PnNECyLIXS5jro4jLz7G7M9EdEdLuH67rpZEX7uSAg.PNG.withwithpet/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2022-02-21_%EC%98%A4%ED%9B%84_2.35.53.png?type=w800" alt="프로필 사진">
+                                </div>
+                                <h5 class="">댕댕</h5>
+                                <div class="sr_profile-stats">
+									<div class="sr_profile-stat-item">
+										<strong>5</strong>
+										<span>게시물</span>
+									</div>
+									
+									<!-- 팔로워: 클릭 시 모달 + 팔로워 탭 기본 -->
+									<button type="button"
+									        class="sr_profile-stat-item sr_stat-link"
+									        data-bs-toggle="modal"
+									        data-bs-target="#srFollowModal"
+									        data-follow-tab="followers">
+										<strong style="color: #607080;">12</strong>
+										<span>팔로워</span>
+									</button>
+									
+									<!-- 팔로우: 클릭 시 모달 + 팔로우 탭 기본 -->
+									<button type="button"
+									        class="sr_profile-stat-item sr_stat-link"
+									        data-bs-toggle="modal"
+									        data-bs-target="#srFollowModal"
+									        data-follow-tab="following">
+										<strong style="color: #607080;">34</strong>
+										<span>팔로우</span>
+									</button>
+								</div>
+                                <div class="sr_profile-buttons">
+                                	<a href="#" class="sr_btn-profile">프로필 수정</a>
+                                	<a th:href="@{/sns/addSnsPost}" class="sr_btn-profile">게시물 업로드</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 올린 게시물(박스형태 1행 3열) -->
+            <div class="row no-gutter-x justify-content-center mb-3">
+                <div class="col-12 col-md-8 mb-4">
+                    <div class="sr_feed-post-grid">
+                        <!-- 각 게시물 아이템에 모달 트리거와 데이터 추가 -->
+                        <div class="sr_feed-post-item" data-bs-toggle="modal" data-bs-target="#srPostModal"
+                             data-image-src="https://contents.kyobobook.co.kr/sih/fit-in/400x0/gift/pdt/1026/hot1705642935222.jpg"
+                             data-profile-src="https://mblogthumb-phinf.pstatic.net/MjAyMjAyMjFfMjQ5/MDAxNjQ1NDIyMTcxNDg5.eAPGmnpjXy5DvjvkOj2DGKRvc5rNhi83QPfR8bFKjoMg.45PnNECyLIXS5jro4jLz7G7M9EdEdLuH67rpZEX7uSAg.PNG.withwithpet/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2022-02-21_%EC%98%A4%ED%9B%84_2.35.53.png?type=w800"
+                             data-user-name="댕댕"
+                             data-post-date="8월 8일"
+                             data-tags="#산책 #모델 #바나나"
+                             data-feed-id="1">
+                            <img src="https://contents.kyobobook.co.kr/sih/fit-in/400x0/gift/pdt/1026/hot1705642935222.jpg" alt="게시물1">
+                        </div>
+                        <div class="sr_feed-post-item" data-bs-toggle="modal" data-bs-target="#srPostModal"
+                             data-image-src="https://images.mypetlife.co.kr/content/uploads/2022/12/16162807/IMG_1666-edited-scaled.jpg"
+                             data-profile-src="https://mblogthumb-phinf.pstatic.net/MjAyMjAyMjFfMjQ5/MDAxNjQ1NDIyMTcxNDg5.eAPGmnpjXy5DvjvkOj2DGKRvc5rNhi83QPfR8bFKjoMg.45PnNECyLIXS5jro4jLz7G7M9EdEdLuH67rpZEX7uSAg.PNG.withwithpet/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2022-02-21_%EC%98%A4%ED%9B%84_2.35.53.png?type=w800"
+                             data-user-name="댕댕"
+                             data-post-date="8월 12일"
+                             data-tags="#강아지 #귀여워"
+                             data-feed-id="2">
+                            <img src="https://images.mypetlife.co.kr/content/uploads/2022/12/16162807/IMG_1666-edited-scaled.jpg" alt="게시물2">
+                        </div>
+                        <div class="sr_feed-post-item" data-bs-toggle="modal" data-bs-target="#srPostModal"
+                             data-image-src="https://product.cdn.cevaws.com/var/storage/images/media/adaptil-2017/images/www-ww/shutterstock_395310793-3-2/3547034-1-www-WW/shutterstock_395310793-3-2.jpg"
+                             data-profile-src="https://mblogthumb-phinf.pstatic.net/MjAyMjAyMjFfMjQ5/MDAxNjQ1NDIyMTcxNDg5.eAPGmnpjXy5DvjvkOj2DGKRvc5rNhi83QPfR8bFKjoMg.45PnNECyLIXS5jro4jLz7G7M9EdEdLuH67rpZEX7uSAg.PNG.withwithpet/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2022-02-21_%EC%98%A4%ED%9B%84_2.35.53.png?type=w800"
+                             data-user-name="댕댕"
+                             data-post-date="8월 15일"
+                             data-tags="#포메라니안 #새로운친구"
+                             data-feed-id="3">
+                            <img src="https://product.cdn.cevaws.com/var/storage/images/media/adaptil-2017/images/www-ww/shutterstock_395310793-3-2/3547034-1-www-WW/shutterstock_395310793-3-2.jpg" alt="게시물3">
+                        </div>
+                        <div class="sr_feed-post-item" data-bs-toggle="modal" data-bs-target="#srPostModal"
+                             data-image-src="https://mblogthumb-phinf.pstatic.net/MjAyMTEyMjJfNDcg/MDAxNjQwMTUwOTUzODg2.ywMUl6KPyDdljDTufa1npucGWF5Wyl41Q9NhFyM0Xdog.ntOsJiNdGgz7Hd8VQxk1w7onoPz6ztcDPvsie3hsrzog.JPEG.41minit/1640142789090.jpg?type=w800"
+                             data-profile-src="https://mblogthumb-phinf.pstatic.net/MjAyMjAyMjFfMjQ5/MDAxNjQ1NDIyMTcxNDg5.eAPGmnpjXy5DvjvkOj2DGKRvc5rNhi83QPfR8bFKjoMg.45PnNECyLIXS5jro4jLz7G7M9EdEdLuH67rpZEX7uSAg.PNG.withwithpet/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2022-02-21_%EC%98%A4%ED%9B%84_2.35.53.png?type=w800"
+                             data-user-name="댕댕"
+                             data-post-date="8월 18일"
+                             data-tags="#치와와 #미용 #새옷"
+                             data-feed-id="4">
+                            <img src=https://mblogthumb-phinf.pstatic.net/MjAyMTEyMjJfNDcg/MDAxNjQwMTUwOTUzODg2.ywMUl6KPyDdljDTufa1npucGWF5Wyl41Q9NhFyM0Xdog.ntOsJiNdGgz7Hd8VQxk1w7onoPz6ztcDPvsie3hsrzog.JPEG.41minit/1640142789090.jpg?type=w800 alt="게시물4">
+                        </div>
+                        <div class="sr_feed-post-item" data-bs-toggle="modal" data-bs-target="#srPostModal"
+                             data-image-src="https://mblogthumb-phinf.pstatic.net/MjAxOTEwMjZfNzkg/MDAxNTcyMDkyNjM2NjIw.6KtvWoIJKLEMfAOobzJk8HPi02Os3AXNEjWaUCYjZV0g.hWHuBs02RASsTflewS8lCuctm1Xh4qrnKOmBuW-F_e4g.JPEG.charmed__/1572092635544.jpg?type=w800"
+                             data-profile-src="https://mblogthumb-phinf.pstatic.net/MjAyMjAyMjFfMjQ5/MDAxNjQ1NDIyMTcxNDg5.eAPGmnpjXy5DvjvkOj2DGKRvc5rNhi83QPfR8bFKjoMg.45PnNECyLIXS5jro4jLz7G7M9EdEdLuH67rpZEX7uSAg.PNG.withwithpet/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2022-02-21_%EC%98%A4%ED%9B%84_2.35.53.png?type=w800"
+                             data-user-name="댕댕"
+                             data-post-date="8월 20일"
+                             data-tags="#골든리트리버 #산책중"
+                             data-feed-id="5">
+                            <img src="https://mblogthumb-phinf.pstatic.net/MjAxOTEwMjZfNzkg/MDAxNTcyMDkyNjM2NjIw.6KtvWoIJKLEMfAOobzJk8HPi02Os3AXNEjWaUCYjZV0g.hWHuBs02RASsTflewS8lCuctm1Xh4qrnKOmBuW-F_e4g.JPEG.charmed__/1572092635544.jpg?type=w800" alt="게시물5">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- 팔로워/팔로우 공용 모달 -->
+	<div class="modal fade" id="srFollowModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered sr_custom-modal-dialog">
+			<div class="modal-content sr_custom-modal-content">
+				<div class="modal-header sr_custom-modal-header">
+					<h5 class="modal-title">친구 목록</h5>
+					<button type="button" class="btn-close sr_custom-btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+				</div>
+	
+				<div class="modal-body sr_custom-modal-body">
+				<!-- 탭 -->
+					<ul class="nav nav-tabs sr_custom-nav-tabs" id="srFollowTabs" role="tablist">
+						<li class="nav-item" role="presentation">
+							<button class="nav-link active"
+							        id="srFollowersTabBtn"
+							        data-bs-toggle="tab"
+							        data-bs-target="#srFollowersTab"
+							        type="button" role="tab" aria-controls="srFollowersTab" aria-selected="true">
+							  팔로워
+							</button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="nav-link"
+							        id="srFollowingTabBtn"
+							        data-bs-toggle="tab"
+							        data-bs-target="#srFollowingTab"
+							        type="button" role="tab" aria-controls="srFollowingTab" aria-selected="false">
+							  팔로우
+							</button>
+						</li>
+					</ul>
+	
+					<!-- 탭 콘텐츠 -->
+					<div class="tab-content mt-3">
+						<!-- 팔로워 목록 -->
+						<div class="tab-pane fade show active" id="srFollowersTab" role="tabpanel" aria-labelledby="srFollowersTabBtn">
+							<ul class="sr_follow-list">
+								<!-- 예시 항목 -->
+								<li class="sr_follow-item">
+									<div class="avatar avatar-md">
+										<img src="https://images.mypetlife.co.kr/content/uploads/2022/12/16162807/IMG_1666-edited-scaled.jpg" alt="">
+									</div>
+									<div class="sr_follow-meta">
+										<div class="sr_follow-name">두리</div>
+										<div class="sr_follow-sub">@poodle</div>
+									</div>
+									<div class="sr_feed-actions d-flex align-items-center mb-2">
+		                                <i class="bi bi-heart text-danger"></i>
+		                            </div>
+								</li>
+								<li class="sr_follow-item">
+									<div class="avatar avatar-md">
+										<img src="https://newsimg-hams.hankookilbo.com/2024/06/25/9b490f29-4415-43bb-bdf8-b77c3ca67413.jpg" alt="">
+									</div>
+									<div class="sr_follow-meta">
+										<div class="sr_follow-name">멈무</div>
+										<div class="sr_follow-sub">@malchi</div>
+									</div>
+									<div class="sr_feed-actions d-flex align-items-center mb-2">
+		                                <i class="bi bi-heart text-danger"></i>
+		                            </div>
+								</li>
+								<!-- ... Ajax로 채워넣기 -->
+							</ul>
+						</div>
+	
+						<!-- 팔로우 목록 -->
+						<div class="tab-pane fade" id="srFollowingTab" role="tabpanel" aria-labelledby="srFollowingTabBtn">
+							<ul class="sr_follow-list">
+								<li class="sr_follow-item">
+									<div class="avatar avatar-md">
+										<img src="https://newsimg-hams.hankookilbo.com/2024/06/25/9b490f29-4415-43bb-bdf8-b77c3ca67413.jpg" alt="">
+									</div>
+									<div class="sr_follow-meta">
+										<div class="sr_follow-name">멈무</div>
+										<div class="sr_follow-sub">@malchi</div>
+									</div>
+									<div class="sr_feed-actions d-flex align-items-center mb-2">
+		                                <i class="bi bi-heart text-danger"></i>
+		                            </div>
+								</li>
+								<li class="sr_follow-item">
+									<div class="avatar avatar-md">
+										<img src="https://images.mypetlife.co.kr/content/uploads/2022/12/16162807/IMG_1666-edited-scaled.jpg" alt="">
+									</div>
+									<div class="sr_follow-meta">
+										<div class="sr_follow-name">두리</div>
+										<div class="sr_follow-sub">@poodle</div>
+									</div>
+									<div class="sr_feed-actions d-flex align-items-center mb-2">
+		                                <i class="bi bi-heart text-danger"></i>
+		                            </div>
+								</li>
+	    						<!-- ... Ajax로 채워넣기 -->
+	            			</ul>
+	          			</div>
+	        		</div>
+	      		</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 게시물 상세 모달 (새로 추가) -->
+    <div class="modal fade" id="srPostModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered sr_custom-modal-dialog sr_post-modal-dialog">
+            <div class="modal-content sr_custom-modal-content" style="height: auto;">
+                <div class="modal-body p-0">
+                    <!-- snsHomeFragment의 게시물 구조를 복사하여 모달 내부에 배치 -->
+                    <div class="card sr_feed-item mb-0">
+                        <div class="card-body p-0">
+                            <!-- 헤더 -->
+                            <div class="sr_feed-header d-flex align-items-center mb-1 mt-1" style="justify-content:space-between;">
+                                <div style="display:flex; align-items:center;">
+                                    <div class="avatar avatar-md me-3">
+                                        <img id="modalProfileImg" src="" alt="게시자 프로필">
+                                    </div>
+                                    <div class="sr_feed-user-name">
+                                        <p id="modalUserName" class="mb-0" style="font-size: small;font-weight: bolder;"></p>
+                                        <p id="modalPostDate" class="mb-0" style="font-size: xx-small;"></p>
+                                    </div>
+                                </div>
+                                <a href="" class="tab-item active">
+                                    <svg class="bi" width="24" height="24" fill="currentColor">
+                                        <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#three-dots-vertical"></use>
+                                    </svg>
+                                </a>
+                            </div>
+                            <!-- 이미지 -->
+                            <div class="sr_feed-img mb-3">
+                                <img id="modalPostImg" src="" class="d-block w-100" alt="게시물 이미지">
+                            </div>
+                            <!-- 좋아요 버튼 -->
+                            <div class="sr_feed-actions d-flex align-items-center mb-2">
+                                <i class="bi bi-heart text-danger"></i>
+                            </div>
+                            <!-- 태그 -->
+                            <div id="modalTags" class="sr_feed-content">
+                                <!-- JS로 태그들이 여기에 동적으로 들어감 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>
