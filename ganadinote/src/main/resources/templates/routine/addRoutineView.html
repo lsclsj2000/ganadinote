@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/mainLayoutView}">
+<head>
+    <title>새 루틴 추가</title>
+    <!-- [추가!] routine.css 파일을 링크합니다. -->
+    <link rel="stylesheet" href="/assets/css/routine/routine.css">
+</head>
+<div layout:fragment="contents">
+    <!-- [추가!] 고유 클래스를 추가합니다. -->
+    <div class="routine-add-page">
+        <div class="page-heading"><h3>새로운 루틴 추가</h3></div>
+        
+        <form th:action="@{/routine/add}" method="post">
+            <div class="form-group">
+                <label>대상 강아지</label>
+                <select name="petCd" class="form-control">
+                    <option th:each="pet : ${pets}" th:value="${pet.petCd}" th:text="${pet.petName}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>루틴 제목</label>
+                <input type="text" name="routineTitle" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>반복 타입</label>
+                <select name="routineRepeatType" class="form-control">
+                    <option value="DAILY">매일</option>
+                    <option value="WEEKLY">매주</option>
+                    <option value="MONTHLY">매월</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>수행 시간 (선택)</label>
+                <input type="time" name="routineTimeOfDay" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>루틴 시작일</label>
+                <input type="date" name="routineStartDate" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">저장하기</button>
+        </form>
+    </div>
+</div>
+</html>

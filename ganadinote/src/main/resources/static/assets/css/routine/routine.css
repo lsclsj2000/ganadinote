@@ -1,0 +1,39 @@
+/* =================================================================== */
+/*                     routine-page 전용 스타일                      */
+/* =================================================================== */
+
+/* 페이지 전체에 일관된 여백 제공 */
+.routine-list-page,
+.routine-add-page {
+    padding: 10px;
+}
+
+/* 테이블이 화면을 넘어가지 않도록 설정 */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* 테이블 셀 내용이 너무 길 경우 줄바꿈 처리 */
+.table th, .table td {
+    white-space: nowrap; /* 기본적으로 줄바꿈 안함 */
+}
+
+/* 모바일 화면에서는 테이블 레이아웃이 깨질 수 있으므로,
+   필요하다면 더 작은 폰트나 다른 레이아웃을 고려할 수 있습니다.
+   지금은 기본 bootstrap 스타일을 최대한 활용합니다. */
+
+
+/* 폼 그룹 사이의 간격 */
+.routine-add-page .form-group {
+    margin-bottom: 1rem; /* 16px */
+}
+
+/* 버튼 스타일 */
+.btn-primary {
+    /* Bootstrap 기본 스타일을 사용하지만, 원한다면 여기서 색상 등을 바꿀 수 있습니다. */
+    /* background-color: #ffb74d; */
+    /* border-color: #ffb74d; */
+    width: 100%; /* 버튼 너비를 100%로 설정하여 모바일에서 누르기 쉽게 함 */
+    padding: 10px;
+    font-size: 16px;
+}

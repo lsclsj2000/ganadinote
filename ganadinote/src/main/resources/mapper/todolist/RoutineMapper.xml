@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ganadinote.todolist.mapper.RoutineMapper">
+
+    <resultMap id="routineResultMap" type="ganadinote.common.domain.Routine">
+        <id property="routineCd" column="routine_cd"/>
+        <result property="petCd" column="pet_cd"/>
+        <result property="routineTitle" column="routine_title"/>
+        <result property="routineRepeatType" column="routine_repeat_type"/>
+        <result property="routineTimeOfDay" column="routine_time_of_day"/>
+        <result property="routineStartDate" column="routine_start_date"/>
+        <result property="routineEndDate" column="routine_end_date"/>
+        <result property="regYmdt" column="reg_ymdt"/>
+        <result property="mdfcnYmdt" column="mdfcn_ymdt"/>
+    </resultMap>
+
+    <!-- [수정!] petCd가 아닌 mbrCd로 루틴을 조회하도록 변경합니다. -->
+    <select id="getRoutinesByMbrCd" parameterType="int" resultMap="routineResultMap">
+        SELECT * 
+        FROM routine
+        WHERE pet_cd IN (SELECT pet_cd FROM pet WHERE mbr_cd = #{mbrCd})
+    </select>
+    
+    <insert id="addRoutine" parameterType="ganadinote.common.domain.Routine">
+        INSERT INTO routine (
+            pet_cd, routine_title, routine_repeat_type, 
+            routine_time_of_day, routine_start_date, routine_end_date
+        ) VALUES (
+            #{petCd}, #{routineTitle}, #{routineRepeatType}, 
+            #{routineTimeOfDay}, #{routineStartDate}, #{routineEndDate}
+        )
+    </insert>
+
+</mapper>
