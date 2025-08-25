@@ -24,5 +24,4 @@ public class MainAPIController {
 		return ResponseEntity.ok(petList);
 	}
 	
-
 }

@@ -26,7 +26,7 @@
 									        data-bs-toggle="modal"
 									        data-bs-target="#srFollowModal"
 									        data-follow-tab="followers">
-										<strong>12</strong>
+										<strong style="color: #607080;">12</strong>
 										<span>팔로워</span>
 									</button>
 									
@@ -36,13 +36,13 @@
 									        data-bs-toggle="modal"
 									        data-bs-target="#srFollowModal"
 									        data-follow-tab="following">
-										<strong>34</strong>
+										<strong style="color: #607080;">34</strong>
 										<span>팔로우</span>
 									</button>
 								</div>
                                 <div class="sr_profile-buttons">
                                 	<a href="#" class="sr_btn-profile">프로필 수정</a>
-                                	<a href="#" class="sr_btn-profile">게시물 업로드</a>
+                                	<a th:href="@{/sns/addSnsPost}" class="sr_btn-profile">게시물 업로드</a>
                                 </div>
                             </div>
                         </div>
@@ -156,6 +156,18 @@
 		                                <i class="bi bi-heart text-danger"></i>
 		                            </div>
 								</li>
+								<li class="sr_follow-item">
+									<div class="avatar avatar-md">
+										<img src="https://newsimg-hams.hankookilbo.com/2024/06/25/9b490f29-4415-43bb-bdf8-b77c3ca67413.jpg" alt="">
+									</div>
+									<div class="sr_follow-meta">
+										<div class="sr_follow-name">멈무</div>
+										<div class="sr_follow-sub">@malchi</div>
+									</div>
+									<div class="sr_feed-actions d-flex align-items-center mb-2">
+		                                <i class="bi bi-heart text-danger"></i>
+		                            </div>
+								</li>
 								<!-- ... Ajax로 채워넣기 -->
 							</ul>
 						</div>
@@ -170,6 +182,18 @@
 									<div class="sr_follow-meta">
 										<div class="sr_follow-name">멈무</div>
 										<div class="sr_follow-sub">@malchi</div>
+									</div>
+									<div class="sr_feed-actions d-flex align-items-center mb-2">
+		                                <i class="bi bi-heart text-danger"></i>
+		                            </div>
+								</li>
+								<li class="sr_follow-item">
+									<div class="avatar avatar-md">
+										<img src="https://images.mypetlife.co.kr/content/uploads/2022/12/16162807/IMG_1666-edited-scaled.jpg" alt="">
+									</div>
+									<div class="sr_follow-meta">
+										<div class="sr_follow-name">두리</div>
+										<div class="sr_follow-sub">@poodle</div>
 									</div>
 									<div class="sr_feed-actions d-flex align-items-center mb-2">
 		                                <i class="bi bi-heart text-danger"></i>

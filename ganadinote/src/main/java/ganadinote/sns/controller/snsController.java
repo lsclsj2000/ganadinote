@@ -1,13 +1,28 @@
 package ganadinote.sns.controller;
 
-import jakarta.servlet.http.HttpServletRequest; // jakarta 패키지 사용 시
+import java.util.Map;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import ganadinote.sns.service.SnsService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/sns")
+@RequiredArgsConstructor
 public class snsController {
+	
+	private final SnsService snsService;
 
     @GetMapping
     public String getSnsMainView(Model model) {
@@ -24,7 +39,7 @@ public class snsController {
 
     // Home
     @GetMapping("/home")
-    public String home(HttpServletRequest req, Model model,
+    public String getSnshomeView(HttpServletRequest req, Model model,
                        @RequestParam(defaultValue = "1") int page) {
         if (isFetch(req)) {
             return "fragments/snsHomeFragment :: snsHomeFragment";
@@ -36,7 +51,7 @@ public class snsController {
 
     // Walking
     @GetMapping("/walking")
-    public String walking(HttpServletRequest req, Model model,
+    public String getSnswalkingView(HttpServletRequest req, Model model,
                           @RequestParam(required = false) String region,
                           @RequestParam(defaultValue = "1") int page) {
         if (isFetch(req)) {
@@ -49,7 +64,7 @@ public class snsController {
 
     // MyFeed
     @GetMapping("/myfeed")
-    public String myfeed(HttpServletRequest req, Model model,
+    public String getSnsmyfeedView(HttpServletRequest req, Model model,
                          @RequestParam(defaultValue = "1") int page) {
         if (isFetch(req)) {
             return "fragments/snsMyfeedFragment :: snsMyfeedFragment";
@@ -57,5 +72,28 @@ public class snsController {
         model.addAttribute("initialTpl", "fragments/snsMyfeedFragment");
     	model.addAttribute("initialFrag", "snsMyfeedFragment");
         return "layout/snsLayoutMainView";
+    }
+    
+    // add sns post
+    @GetMapping("/addSnsPost")
+    public String addSnsPost() {
+        return "sns/addSnsPostView";
+    }
+    
+    
+    @PostMapping(value = "/api/posts", consumes = {"multipart/form-data"})
+    @ResponseBody
+    public Map<String, Object> createPost(
+            @RequestParam("content") String content,
+            @RequestParam(value="tags", required=false) String tags,
+            @RequestPart(value="images", required=false) MultipartFile[] images,
+            HttpSession session
+    ) {
+        String scd = (String) session.getAttribute("SCD"); // 로그인 세션키 확인
+        if (scd == null) throw new RuntimeException("로그인이 필요합니다.");
+        Integer mbrCd = Integer.valueOf(scd);
+
+        Integer spCd = snsService.createPost(content, mbrCd, images);
+        return Map.of("ok", true, "sp_cd", spCd);
     }
 }
