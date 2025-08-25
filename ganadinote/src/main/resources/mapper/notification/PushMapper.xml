@@ -16,7 +16,7 @@
         )
     </insert>
 
-    <select id="getSubInfoByMbrCd " resultType="com.ganadinote.domain.PushSubscription">
+    <select id="getSubInfoByMbrCd " resultType="ganadinote.common.domain.PushSubscription">
         SELECT 
             id,
             mbr_cd,
