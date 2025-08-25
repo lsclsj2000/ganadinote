@@ -6,7 +6,7 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
       <version>3.5.4</version>
-      <relativePath/> <!-- lookup parent from repository -->
+      <relativePath/>
    </parent>
    <groupId>com.example</groupId>
    <artifactId>ganadinote</artifactId>
@@ -29,6 +29,7 @@
    <properties>
       <java.version>17</java.version>
    </properties>
+   
    <dependencies>
       <dependency>
          <groupId>org.springframework.boot</groupId>
@@ -43,7 +44,6 @@
          <artifactId>mybatis-spring-boot-starter</artifactId>
          <version>3.0.5</version>
       </dependency>
-
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-devtools</artifactId>
@@ -85,6 +85,16 @@
         <artifactId>thymeleaf-layout-dialect</artifactId>
         <version>3.3.0</version>
       </dependency>
+      <dependency>
+          <groupId>nl.martijndwars</groupId>
+          <artifactId>web-push</artifactId>
+          <version>5.1.0</version>
+      </dependency>
+      <dependency>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+          <version>1.70</version>
+      </dependency>
    </dependencies>
 
    <build>
@@ -97,6 +107,7 @@
                   <path>
                      <groupId>org.projectlombok</groupId>
                      <artifactId>lombok</artifactId>
+                     <version>${lombok.version}</version>
                   </path>
                </annotationProcessorPaths>
             </configuration>
