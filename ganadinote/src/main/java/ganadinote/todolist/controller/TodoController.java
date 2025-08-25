@@ -95,4 +95,40 @@ public class TodoController {
         // 처리가 끝나면 목록 페이지로 다시 이동(redirect)시킵니다.
         return "redirect:/todo/list";
     }
+    
+    // [추가!] /todo/update 경로의 POST 요청을 처리하는 수정 메소드
+    @PostMapping("/update")
+    public String updateTodo(
+            @RequestParam("todoCd") Long todoCd,
+            @RequestParam("todoTitle") String todoTitle,
+            @RequestParam("petCd") int petCd,
+            @RequestParam("todoDate") String todoDate,
+            @RequestParam(value = "todoTime", required = false) String todoTime,
+            @RequestParam(value = "isCompleted", required = false) boolean isCompleted
+    ) {
+        // 1. 기존 할 일 정보를 불러옵니다.
+        Todo todo = todoService.getTodoByCd(todoCd);
+        
+        // 2. 폼에서 받은 데이터로 값을 업데이트합니다.
+        todo.setTodoTitle(todoTitle);
+        todo.setPetCd(petCd);
+        todo.setTodoIsCompleted(isCompleted);
+
+        // 날짜와 시간을 합쳐서 업데이트합니다.
+        LocalDate date = LocalDate.parse(todoDate);
+        LocalDateTime scheduledDt;
+        if (todoTime != null && !todoTime.isEmpty()) {
+            LocalTime time = LocalTime.parse(todoTime);
+            scheduledDt = LocalDateTime.of(date, time);
+        } else {
+            scheduledDt = date.atStartOfDay();
+        }
+        todo.setTodoScheduledDt(scheduledDt);
+        
+        // 3. Service를 호출하여 DB에 업데이트합니다.
+        todoService.updateTodo(todo);
+
+        // 4. 처리가 끝나면 목록 페이지로 다시 이동합니다.
+        return "redirect:/todo/list";
+    }
 }

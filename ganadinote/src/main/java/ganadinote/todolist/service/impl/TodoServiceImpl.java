@@ -37,4 +37,18 @@ public class TodoServiceImpl implements TodoService {
         // 비즈니스 로직을 추가할 수 있습니다.
         todoMapper.deleteTodo(todoCd);
     }
+    
+ // [추가 1!] getTodoByCd 메소드의 실제 구현
+    @Override
+    public Todo getTodoByCd(Long todoCd) {
+        return todoMapper.getTodoByCd(todoCd);
+    }
+    
+    // [추가 2!] updateTodo 메소드의 실제 구현
+    @Override
+    public void updateTodo(Todo todo) {
+        // 나중에 여기에 "수정 권한이 있는 사용자인가?" 같은
+        // 비즈니스 로직을 추가할 수 있습니다.
+        todoMapper.updateTodo(todo);
+    }
 }

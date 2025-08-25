@@ -52,5 +52,28 @@
         DELETE FROM todo
         WHERE todo_cd = #{todoCd}
     </delete>
+    
+    <!-- [추가 1!] 할 일 ID로 1건을 조회하는 SELECT 쿼리 -->
+    <select id="getTodoByCd" parameterType="long" resultMap="todoResultMap">
+        SELECT
+            todo_cd, mbr_cd, pet_cd, routine_cd, todo_title,
+            todo_scheduled_dt, todo_is_completed, reg_ymdt, mdfcn_ymdt
+        FROM
+            todo
+        WHERE
+            todo_cd = #{todoCd}
+    </select>
+    
+    <!-- [추가 2!] 할 일 정보를 업데이트하는 UPDATE 쿼리 -->
+    <update id="updateTodo" parameterType="ganadinote.common.domain.Todo">
+        UPDATE todo
+        SET
+            pet_cd = #{petCd},
+            todo_title = #{todoTitle},
+            todo_scheduled_dt = #{todoScheduledDt},
+            todo_is_completed = #{todoIsCompleted}
+        WHERE
+            todo_cd = #{todoCd}
+    </update>
 
 </mapper>
