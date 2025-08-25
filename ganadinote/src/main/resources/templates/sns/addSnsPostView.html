@@ -99,7 +99,7 @@
 			  
 			// 업로드 버튼 클릭 -> 서버로 전송
 			  document.getElementById('btn-upload').addEventListener('click', async () => {
-			    const content = document.getElementById('sr_content').value.trim();
+			    const content = document.getElementById('sr_content').value.trim(); 
 			    const tags = document.getElementById('sr_tags').value.trim();
 
 			    // 서버에서 @RequestParam("content")가 필수이므로 최소 한 글자 체크
