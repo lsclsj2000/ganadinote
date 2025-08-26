@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="ganadinote.push.mapper.PushMapper">
+<mapper namespace="ganadinote.notification.mapper.PushMapper">
 
 <insert id="addSubscription">
         INSERT INTO push_subscription (
@@ -16,8 +16,8 @@
         )
     </insert>
 
-    <select id="getSubInfoByMbrCd " resultType="ganadinote.common.domain.PushSubscription">
-        SELECT 
+    <select id="getSubInfoByMbrCd" resultType="ganadinote.common.domain.PushSubscription">
+        SELECT
             id,
             mbr_cd,
             endpoint,

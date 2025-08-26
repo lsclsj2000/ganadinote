@@ -25,20 +25,51 @@ public class WeatherServiceImpl implements WeatherService{
 		
 		@Override
 		public String getWeather(double lat, double lon) {
-			String url = String.format("https://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&appid=%s&units=metric&lang=kr",
-		            lat, lon, apiKey);
+			String url = String.format(
+		            "https://api.openweathermap.org/data/3.0/onecall?lat=%f&lon=%f&exclude=minutely,alerts&appid=%s&units=metric&lang=kr",
+		            lat, lon, apiKey
+		        );
 			
-			try {
-				return restTemplate.getForObject(url, String.class);
-			}catch(HttpClientErrorException e) {
-				log.error("날씨 API 호출 중 클라이언트 오류 발생: HTTP 상태 코드 = {}", e.getStatusCode(), e);
-				return null;
-			}catch(ResourceAccessException e) {
-				log.error("날씨 API서버에 연결할 수 없습니다.", e);
-				return null;
-			}catch(Exception e) {
-				log.error("날씨 API 호출 중 예상치 못한 오류 발생",e);
-				return null;
-			}						
+			 try {
+					log.info("OpenWeatherMap API 호출 URL: {}", url); // ⚠️ 추가된 디버깅 라인
+					String response = restTemplate.getForObject(url, String.class);
+					log.info("OpenWeatherMap API 응답: {}", response); // ⚠️ 추가된 디버깅 라인
+					return response;
+				}catch(HttpClientErrorException e) {
+					log.error("날씨 API 호출 중 클라이언트 오류 발생: HTTP 상태 코드 = {}", e.getStatusCode(), e);
+					log.error("오류 응답 본문: {}", e.getResponseBodyAsString()); // ⚠️ 추가된 디버깅 라인
+					return null;
+				}catch(ResourceAccessException e) {
+					log.error("날씨 API서버에 연결할 수 없습니다.", e);
+					return null;
+				}catch(Exception e) {
+					log.error("날씨 API 호출 중 예상치 못한 오류 발생",e);
+					return null;
+				}				
 	}
+		
+		@Override
+		public String getAirPollution(double lat, double lon) {
+			 String url = String.format(
+			            "http://api.openweathermap.org/data/2.5/air_pollution?lat=%f&lon=%f&appid=%s",
+			            lat, lon, apiKey
+			        );
+			 
+			 try {
+				 log.info("Air Pollution API 호출 URL: {}", url);
+				 String response = restTemplate.getForObject(url,  String.class);
+				 log.info("Sir Pollution API 응답: {}",response);
+				 return response;
+			 }catch (HttpClientErrorException e) {
+				 log.error("대기질 API 호출 중 클라이언트 오류 발생: HTTP 상태 코드 = {}", e.getStatusCode(), e);
+		         log.error("오류 응답 본문: {}", e.getResponseBodyAsString());
+		         return null;
+			 }catch(ResourceAccessException  e) {
+				 log.error("대기질 API 서벌에 연결할 수 없습니다.", e);
+				 return null;
+			 }catch(Exception e) {
+				 log.error("대기질 API 호출 중 예상치 못한 오류 발생", e);
+				 return null;
+			 }
+		}
 }
