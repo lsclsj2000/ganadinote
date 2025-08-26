@@ -22,7 +22,7 @@ public class RegisterController {
      * GET 요청이 "/auth/register" 경로로 들어올 때 호출됩니다.
      * @return 보여줄 HTML 파일의 이름 (templates/auth-register.html)
      */
-    @GetMapping("/auth-register.html")
+    @GetMapping("/register")
     public String showRegisterForm() {
         return "ex/auth-register";
     }
@@ -34,9 +34,9 @@ public class RegisterController {
      * @return 회원가입 성공 후 이동할 페이지 경로 (로그인 페이지로 리다이렉트)
      */
     @PostMapping("/register")
-    public String processRegister(RegisterDTO regosterDTO) {
+    public String processRegister(RegisterDTO registerDTO) {
         // 서비스 클래스에 회원가입 처리를 위임합니다.
-        //registerService.register(regosterDTO);
+        //registerService.register(registerDTO);
 
         // 회원가입이 성공하면 로그인 페이지로 이동시킵니다.
         return "redirect:/auth/login";
