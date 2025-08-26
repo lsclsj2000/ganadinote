@@ -47,5 +47,9 @@
             #{routineEndDate}
         )
     </insert>
+    
+    <delete id="deleteRoutine" parameterType="long">
+        DELETE FROM routine WHERE routine_cd = #{routineCd}
+    </delete>
 
 </mapper>

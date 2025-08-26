@@ -1,16 +1,19 @@
 package ganadinote.todolist.controller;
 
-import ganadinote.common.domain.Pet;
-import ganadinote.common.domain.Routine;
-import ganadinote.todolist.service.PetTodoService;
-import ganadinote.todolist.service.RoutineService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import ganadinote.common.domain.Pet;
+import ganadinote.common.domain.Routine;
+import ganadinote.todolist.service.PetTodoService;
+import ganadinote.todolist.service.RoutineService;
 
 @Controller
 @RequestMapping("/routine")
@@ -54,6 +57,16 @@ public class RoutineController {
         // RoutineService에서 할 일 일괄 생성을 처리합니다.
         routineService.addRoutineAndTodos(routine); 
         
+        return "redirect:/routine/list";
+    }
+    
+    // [추가!] /routine/delete 경로의 POST 요청을 처리하는 삭제 메소드
+    @PostMapping("/delete")
+    public String deleteRoutine(@RequestParam("routineCd") Long routineCd) {
+        // Service를 호출하여 해당 루틴과 관련된 모든 할 일을 함께 삭제합니다.
+        routineService.deleteRoutine(routineCd);
+        
+        // 처리가 끝나면 루틴 목록 페이지로 다시 이동(redirect)시킵니다.
         return "redirect:/routine/list";
     }
 

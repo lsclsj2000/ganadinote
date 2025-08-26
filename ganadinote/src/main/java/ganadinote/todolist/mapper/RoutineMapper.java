@@ -13,5 +13,6 @@ public interface RoutineMapper {
     // 새로운 루틴 추가
     void addRoutine(Routine routine);
 
-    // (수정/삭제는 다음 단계에서 추가)
+    // [추가!] 루틴 ID를 기반으로 데이터를 삭제하는 메소드
+    void deleteRoutine(Long routineCd);
 }

@@ -10,8 +10,7 @@
 		<div class="page-heading">
 			<h3>나의 루틴 관리</h3>
 		</div>
-		<a th:href="@{/routine/addView}" class="btn btn-primary mb-3">새 루틴
-			추가하기</a>
+		<a th:href="@{/routine/addView}" class="btn btn-primary mb-3">새 루틴 추가하기</a>
 
 		<div th:if="${routines.isEmpty()}">
 			<p>등록된 루틴이 없습니다.</p>
@@ -26,21 +25,34 @@
 						<th>반복</th>
 						<th>시간</th>
 						<th>시작일</th>
+						<!-- [추가 1] 종료일 컬럼 헤더 추가 -->
+						<th>종료일</th>
+						<!-- [추가 2] 작업 컬럼 헤더 추가 -->
+						<th>작업</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr th:each="routine : ${routines}">
 						<td>
-							<!-- [수정!] routine.petCd 앞에 #root를 붙여서 외부 변수임을 명시합니다. --> <span
-							th:text="${pets.?[petCd == #root.routine.petCd][0].petName}">펫
-								이름</span>
+							<span th:text="${pets.?[petCd == #root.routine.petCd][0].petName}">펫 이름</span>
 						</td>
 						<td th:text="${routine.routineTitle}"></td>
 						<td th:text="${routine.routineRepeatType}"></td>
-						<td
-							th:text="${routine.routineTimeOfDay != null ? #temporals.format(routine.routineTimeOfDay, 'a hh:mm') : '-'}"></td>
-						<td
-							th:text="${#temporals.format(routine.routineStartDate, 'yyyy-MM-dd')}"></td>
+						<td th:text="${routine.routineTimeOfDay != null ? #temporals.format(routine.routineTimeOfDay, 'a hh:mm') : '-'}"></td>
+						<td th:text="${#temporals.format(routine.routineStartDate, 'yyyy-MM-dd')}"></td>
+						
+						<!-- [추가 3] 종료일 데이터 표시 -->
+						<td th:text="${#temporals.format(routine.routineEndDate, 'yyyy-MM-dd')}"></td>
+						
+						<!-- [추가 4] 삭제 버튼을 포함하는 '작업' 셀 -->
+						<td>
+							<form th:action="@{/routine/delete}" method="post" onsubmit="return confirm('이 루틴과 관련된 모든 미래의 할 일이 함께 삭제됩니다. 정말 삭제하시겠습니까?');">
+								<!-- Controller로 보낼 숨겨진 루틴 ID -->
+								<input type="hidden" name="routineCd" th:value="${routine.routineCd}" />
+								<!-- Bootstrap 스타일이 적용된 삭제 버튼 -->
+								<button type="submit" class="btn btn-danger btn-sm">삭제</button>
+							</form>
+						</td>
 					</tr>
 				</tbody>
 			</table>

@@ -90,4 +90,15 @@ public class RoutineServiceImpl implements RoutineService {
                 return false;
         }
     }
+    
+    // [추가!] deleteRoutine 메소드의 실제 구현
+    @Override
+    @Transactional // 두 개의 삭제 작업이 모두 성공하거나 모두 실패하도록 보장
+    public void deleteRoutine(Long routineCd) {
+        // 1. 먼저 자식 테이블인 todo에서 관련 할 일들을 모두 삭제합니다.
+        todoMapper.deleteTodosByRoutineCd(routineCd);
+        
+        // 2. 그 다음, 부모인 routine 테이블에서 해당 루틴을 삭제합니다.
+        routineMapper.deleteRoutine(routineCd);
+    }
 }

@@ -17,4 +17,7 @@ public interface RoutineService {
      * @param routine 추가할 루틴 정보
      */
     void addRoutineAndTodos(Routine routine);
+    
+ // [추가!] 루틴을 삭제하는 기능 명세
+    void deleteRoutine(Long routineCd);
 }

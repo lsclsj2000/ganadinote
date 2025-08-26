@@ -31,4 +31,7 @@ public interface TodoMapper {
     
  // [추가!] 여러 개의 할 일을 한 번에 삽입하는 메소드
     void addTodos(List<Todo> todos);
+    
+ // [추가!] 특정 루틴 ID에 해당하는 모든 할 일을 삭제하는 메소드
+    void deleteTodosByRoutineCd(Long routineCd);
 }
