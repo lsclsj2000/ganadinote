@@ -11,6 +11,7 @@ public class Comment {
 	private int postId; 
 	private int commentParentId; 
 	private int mbrCd; 
+	private String authorNickname; 
 	private String commentCtnt; 
 	private LocalDateTime commentRegDate; 
 	private LocalDateTime commentMdfcnDate; 
