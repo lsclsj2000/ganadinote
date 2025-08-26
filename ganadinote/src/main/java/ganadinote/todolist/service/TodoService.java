@@ -19,4 +19,5 @@ public interface TodoService {
 
     // [추가 2!] 수정된 할 일 정보를 업데이트하는 기능 명세
     void updateTodo(Todo todo);
+    
 }

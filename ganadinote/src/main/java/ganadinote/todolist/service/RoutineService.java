@@ -16,5 +16,5 @@ public interface RoutineService {
      * 새로운 루틴을 추가합니다.
      * @param routine 추가할 루틴 정보
      */
-    void addRoutine(Routine routine);
+    void addRoutineAndTodos(Routine routine);
 }

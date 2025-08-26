@@ -17,4 +17,6 @@ public class Routine {
     private LocalDate routineEndDate;
     private LocalDateTime regYmdt;
     private LocalDateTime mdfcnYmdt;
+    private Integer routineDayOfWeek; // [추가!] Integer 타입으로 선언 (NULL 가능)
+    private Integer routineDayOfMonth; // [추가!] Integer 타입으로 선언 (NULL 가능)
 }

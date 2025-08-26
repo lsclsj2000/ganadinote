@@ -13,6 +13,8 @@
         <result property="routineEndDate" column="routine_end_date"/>
         <result property="regYmdt" column="reg_ymdt"/>
         <result property="mdfcnYmdt" column="mdfcn_ymdt"/>
+        <result property="routineDayOfWeek" column="routine_day_of_week"/> <!-- [추가!] -->
+        <result property="routineDayOfMonth" column="routine_day_of_month"/> <!-- [추가!] -->
     </resultMap>
 
     <!-- [수정!] petCd가 아닌 mbrCd로 루틴을 조회하도록 변경합니다. -->
@@ -22,13 +24,27 @@
         WHERE pet_cd IN (SELECT pet_cd FROM pet WHERE mbr_cd = #{mbrCd})
     </select>
     
-    <insert id="addRoutine" parameterType="ganadinote.common.domain.Routine">
+        <!-- [수정 완료!] useGeneratedKeys 옵션은 그대로 유지하고, INSERT할 컬럼 목록과 VALUES 목록에 새로운 필드를 추가합니다. -->
+    <insert id="addRoutine" parameterType="ganadinote.common.domain.Routine"
+            useGeneratedKeys="true" keyProperty="routineCd">
         INSERT INTO routine (
-            pet_cd, routine_title, routine_repeat_type, 
-            routine_time_of_day, routine_start_date, routine_end_date
+            pet_cd, 
+            routine_title, 
+            routine_repeat_type, 
+            routine_day_of_week,
+            routine_day_of_month,
+            routine_time_of_day, 
+            routine_start_date, 
+            routine_end_date
         ) VALUES (
-            #{petCd}, #{routineTitle}, #{routineRepeatType}, 
-            #{routineTimeOfDay}, #{routineStartDate}, #{routineEndDate}
+            #{petCd}, 
+            #{routineTitle}, 
+            #{routineRepeatType}, 
+            #{routineDayOfWeek},
+            #{routineDayOfMonth},
+            #{routineTimeOfDay}, 
+            #{routineStartDate}, 
+            #{routineEndDate}
         )
     </insert>
 

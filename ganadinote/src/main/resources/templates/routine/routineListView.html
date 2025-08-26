@@ -1,41 +1,50 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/mainLayoutView}">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+	layout:decorate="~{layout/mainLayoutView}">
 <head>
-    <title>루틴 관리</title>
-    <!-- [추가!] routine.css 파일을 링크합니다. -->
-    <link rel="stylesheet" href="/assets/css/routine/routine.css">
+<title>루틴 관리</title>
+<link rel="stylesheet" href="/assets/css/routine/routine.css">
 </head>
 <div layout:fragment="contents">
-    <!-- [추가!] 고유 클래스를 추가합니다. -->
-    <div class="routine-list-page">
-        <div class="page-heading"><h3>나의 루틴 관리</h3></div>
-        <a th:href="@{/routine/addView}" class="btn btn-primary mb-3">새 루틴 추가하기</a>
-        
-        <div th:if="${routines.isEmpty()}"><p>등록된 루틴이 없습니다.</p></div>
-        
-        <!-- [추가!] 테이블을 div로 감싸 반응형으로 만듭니다. -->
-        <div class="table-responsive" th:unless="${routines.isEmpty()}">
-            <table class="table table-hover"> <!-- table-hover 클래스로 마우스 오버 효과 추가 -->
-                <thead>
-                    <tr>
-                        <th>대상</th>
-                        <th>루틴 제목</th>
-                        <th>반복</th>
-                        <th>시간</th>
-                        <th>시작일</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="routine : ${routines}">
-                        <td th:text="${routine.petCd} + '번 댕댕이'"></td>
-                        <td th:text="${routine.routineTitle}"></td>
-                        <td th:text="${routine.routineRepeatType}"></td>
-                        <td th:text="${routine.routineTimeOfDay != null ? #temporals.format(routine.routineTimeOfDay, 'HH:mm') : '-'}"></td>
-                        <td th:text="${#temporals.format(routine.routineStartDate, 'yyyy-MM-dd')}"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+	<div class="routine-list-page">
+		<div class="page-heading">
+			<h3>나의 루틴 관리</h3>
+		</div>
+		<a th:href="@{/routine/addView}" class="btn btn-primary mb-3">새 루틴
+			추가하기</a>
+
+		<div th:if="${routines.isEmpty()}">
+			<p>등록된 루틴이 없습니다.</p>
+		</div>
+
+		<div class="table-responsive" th:unless="${routines.isEmpty()}">
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th>대상</th>
+						<th>루틴 제목</th>
+						<th>반복</th>
+						<th>시간</th>
+						<th>시작일</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="routine : ${routines}">
+						<td>
+							<!-- [수정!] routine.petCd 앞에 #root를 붙여서 외부 변수임을 명시합니다. --> <span
+							th:text="${pets.?[petCd == #root.routine.petCd][0].petName}">펫
+								이름</span>
+						</td>
+						<td th:text="${routine.routineTitle}"></td>
+						<td th:text="${routine.routineRepeatType}"></td>
+						<td
+							th:text="${routine.routineTimeOfDay != null ? #temporals.format(routine.routineTimeOfDay, 'a hh:mm') : '-'}"></td>
+						<td
+							th:text="${#temporals.format(routine.routineStartDate, 'yyyy-MM-dd')}"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
 </div>
 </html>

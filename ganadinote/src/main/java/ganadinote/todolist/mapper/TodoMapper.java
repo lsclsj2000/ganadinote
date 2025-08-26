@@ -1,8 +1,12 @@
 package ganadinote.todolist.mapper;
 
-import org.apache.ibatis.annotations.Mapper;
-import ganadinote.common.domain.Todo;
+import java.time.LocalDate;
 import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import ganadinote.common.domain.Todo;
 
 @Mapper
 public interface TodoMapper {
@@ -21,4 +25,10 @@ public interface TodoMapper {
     
     // [추가 2!] 수정된 할 일 정보를 DB에 업데이트하는 메소드
     void updateTodo(Todo todo);
+    
+    // [추가!] 특정 루틴으로 오늘 생성된 할 일이 있는지 확인 (개수 반환)
+    int countTodoByRoutineCdAndDate(@Param("routineCd") Long routineCd, @Param("today") LocalDate today);
+    
+ // [추가!] 여러 개의 할 일을 한 번에 삽입하는 메소드
+    void addTodos(List<Todo> todos);
 }
