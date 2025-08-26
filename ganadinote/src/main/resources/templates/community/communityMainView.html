@@ -1,131 +1,221 @@
 <!DOCTYPE html>
-<html lang="ko"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/communityLayoutView}">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/communityLayoutView}">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
-  <title>커뮤니티</title>
-  <link href="/assets/bootstrap.min.css" rel="stylesheet"/>
-  <th:block layout:fragment="pageStyles">
-	<style>
-	    .mobile-wrap { max-width: 460px; margin: auto; }
-	    .sticky-topbar { position: sticky; top: 0; border-bottom: 1px solid #eee; z-index: 1; padding: .5rem; }
-	    .sticky-topbar .d-flex { margin-bottom: .5rem; }
-	    .chip-scroll { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: .3rem; margin-bottom: .6rem; }
-	    .chip { display:inline-block; padding:.45rem .9rem; margin-right:.4rem; border:1px solid #ddd; border-radius:999px; font-size:.95rem; background:#f8f9fa; }
-	    .chip.active { background:#e9ecef; font-weight:600; }
-	    .post-card { border-bottom:1px solid #f1f1f1; padding:20px 8px; }
-	    .fab { position: fixed; right: 16px; bottom: calc(var(--footer-h) + 16px); z-index: 1; }
-		.card-text{font-size: 0.7rem; color: #6c757d;}
-		.small {font-size: 0.7rem;}
-	  </style>
-    </th:block>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<title>커뮤니티</title>
+	<link th:href="@{/assets/css/bootstrap.css}" href="/assets/css/bootstrap.css" rel="stylesheet"/>
+	<th:block layout:fragment="pageStyles">
+		<style>
+			.mobile-wrap {
+				max-width: 460px;
+				margin: auto;
+			}
+
+			.sticky-topbar {
+				position: sticky;
+				top: 0;
+				border-bottom: 1px solid #eee;
+				z-index: 1;
+				padding: .5rem;
+			}
+
+			.sticky-topbar .d-flex {
+				margin-bottom: .5rem;
+			}
+
+			.chip-scroll {
+				overflow-x: auto;
+				white-space: nowrap;
+				-webkit-overflow-scrolling: touch;
+				padding-bottom: .3rem;
+				margin-bottom: .6rem;
+			}
+
+			.chip {
+				display: inline-block;
+				padding: .45rem .9rem;
+				margin-right: .4rem;
+				border: 1px solid #ddd;
+				border-radius: 999px;
+				font-size: .95rem;
+				background: #f8f9fa;
+			}
+
+			.chip.active {
+				background: #e9ecef;
+				font-weight: 600;
+			}
+
+			.post-card {
+				border-bottom: 1px solid #f1f1f1;
+				padding: 20px 8px;
+			}
+
+			.fab {
+				position: fixed;
+				right: 16px;
+				bottom: calc(var(--footer-h) + 16px);
+				z-index: 1;
+			}
+
+			.card-text {
+				font-size: 0.7rem;
+				color: #6c757d;
+			}
+
+			.small {
+				font-size: 0.7rem;
+			}
+		</style>
+	</th:block>
 </head>
+
 <body>
 	<th:block layout:fragment="contents">
 		<div class="mobile-wrap">
-		  <!-- 상단 검색 + 정렬 -->
-		  <div class="sticky-topbar p-2">
-		    <div class="d-flex gap-2">
-		      <select class="form-select form-select-sm" style="max-width:120px">
-		        <option>최신순</option>
-		        <option>인기순</option>
-		        <option>댓글많은순</option>
-		      </select>
-		      <input type="search" class="form-control form-control-sm" placeholder="검색(제목/작성자)">
-		    </div>
-		    <!-- 카테고리 칩 -->
-		    <div class="chip-scroll mt-2 pb-1">
-		      <button class="chip active">전체</button>
-		      <button class="chip">발자국 산책코스</button>
-		      <button class="chip">멍멍 쇼핑리뷰</button>
-		      <button class="chip">멍멍 수다방</button>
-		      <button class="chip">산책크루 모집해요!</button>
-		      <button class="chip">같이가요 스팟</button>
-		    </div>
-		  </div>
-		
-		  <!-- 게시글 리스트 -->
-		  <div id="list">
-			<div class="post-card card mb-3">
-			    <div class="card-body" >
-					<a class="stretched-link"
-					       th:href="@{/community/postDetail}"
-					       href="/community/postDetail"></a>
-			      <span class="badge bg-secondary mb-3">멍멍 수다방</span>
-			      <h6>전주 가맥축제 진짜 사람 많네요</h6>
-			      <p class="card-text text-truncate">전주 가맥축제 진짜 사람 많네요 ㅋㅋ 저는 늦게 가서 기다리느라 힘들었어요.</p>
-			      <small class="text-muted">홍길동 · 2일 전 · 조회 938</small>
-			      <div class="d-flex justify-content-end gap-3 mt-2">
-			        <span>👍 4</span>
-			        <span>💬 7</span>
-			      </div>
-			    </div>
-			  </div>
-			<div class="post-card card mb-3">
-			    <div class="card-body">
-			      <span class="badge bg-secondary mb-3">발자국 산책코스</span>
-			      <h6>전주천 근처에 산책할만한 곳 있나요?</h6>
-			      <p class="card-text text-truncate">천변을 걷기엔 자전거들이 너무 쌩쌩 달려서 강아지가 흥분을 하더라고요. 산책 교육도 시킬 겸 괜찮은 산책로 추천해주세요!</p>
-			      <small class="text-muted">가루아빠 · 2일 전 · 조회 938</small>
-			      <div class="d-flex justify-content-end gap-3 mt-2">
-			        <span>👍 2</span>
-			        <span>💬 14</span>
-			      </div>
-			    </div>
-			  </div>
-			<div class="post-card card mb-3">
-			    <div class="card-body">
-			      <span class="badge bg-secondary mb-3">같이가요 스팟</span>
-			      <h6 class="card-title mb-2">OO동에 새로생긴 애견카페 같이 가실 분?</h6>
-			      <p class="card-text text-truncate">제곧내. 프로필 타고 들어와서 보시고 댓글주세요</p>
-			      <small class="text-muted">왕왕멍멍 · 1일 전 · 조회 554</small>
-			      <div class="d-flex justify-content-end gap-3 mt-2">
-			        <span>👍 1</span>
-			        <span>💬 1</span>
-			      </div>
-			    </div>
-			  </div>
-			<div class="post-card card mb-3">
-			    <div class="card-body">
-			      <span class="badge bg-secondary mb-3">발자국 산책코스</span>
-			      <h6>한옥마을 늦게 가니까 좋네요!</h6>
-			      <p class="card-text text-truncate">바람도 씽씽 불고 사람도 없어요! 사람 보이면 다들 강쥐랑 산책나오신 분들 뿐이더라고요 ㅎㅎ 산책크루분들 참고하셔요!</p>
-			      <small class="text-muted">강쥐네 · 1일 전 · 조회 886</small>
-			      <div class="d-flex justify-content-end gap-3 mt-2">
-			        <span>👍 2</span>
-			        <span>💬 11</span>
-			      </div>
-			    </div>
-			  </div>
-			<div class="post-card card mb-3">
-			    <div class="card-body">
-			      <span class="badge bg-secondary mb-3">멍멍 쇼핑리뷰</span>
-			      <h6>ㅁㅁ 샴푸 사용 한달후기</h6>
-			      <p class="card-text text-truncate">저희 강쥐는 물을 워낙 좋아해서... 비오는 날 산책도 좋아하다보니 목욕을 자주 시키는 편인데요, 그러다보니까 피부염도 생겨서 샴푸도 이것저것 바꿔 써봤는데 영 좋아지질 않더라고요ㅠ 그러다가 병원에서
-					추천해준 ㅁㅁ샴푸! 어찌고 저찌고
-				  </p>
-			      <small class="text-muted">또리엄마 · 5일 전 · 조회 5458</small>
-			      <div class="d-flex justify-content-end gap-3 mt-2">
-			        <span>👍 4</span>
-			        <span>💬 14</span>
-			      </div>
-			    </div>
-			  </div>
-		  </div>
-		
-		  <!-- 더보기 버튼 -->
-		  <div class="p-3 text-center">
-		    <button class="btn btn-outline-secondary btn-sm w-100">더보기</button>
-		  </div>
+			<!-- 상단 검색 + 정렬 -->
+			<div class="sticky-topbar p-2">
+				<div class="d-flex gap-2">
+				  <select class="form-select form-select-sm" style="max-width:120px" name="sort">
+				    <option th:value="latest"   th:selected="${param.sort ?: 'latest'} == 'latest'">최신순</option>
+				    <option th:value="popular"  th:selected="${param.sort} == 'popular'">인기순</option>
+				    <option th:value="comments" th:selected="${param.sort} == 'comments'">댓글많은순</option>
+				  </select>
+				  <input type="search"
+				         class="form-control form-control-sm"
+				         name="q"
+				         placeholder="검색(제목/작성자)"
+				         th:value="${param.q}">
+				</div>
+				<!-- 카테고리 칩 -->
+				<div class="chip-scroll mt-2 pb-1" id="catChips">
+				  <button class="chip"
+				          data-cat=""
+				          th:classappend="${#strings.isEmpty(param.categoryId)} ? ' active'">전체</button>
+
+				  <button class="chip" data-cat="1"
+				          th:classappend="${param.categoryId} == '1' ? ' active'">발자국 산책코스</button>
+
+				  <button class="chip" data-cat="2"
+				          th:classappend="${param.categoryId} == '2' ? ' active'">멍멍 쇼핑리뷰</button>
+
+				  <button class="chip" data-cat="3"
+				          th:classappend="${param.categoryId} == '3' ? ' active'">멍멍 수다방</button>
+
+				  <button class="chip" data-cat="4"
+				          th:classappend="${param.categoryId} == '4' ? ' active'">산책크루 모집해요!</button>
+
+				  <button class="chip" data-cat="5"
+				          th:classappend="${param.categoryId} == '5' ? ' active'">같이가요 스팟</button>
+				</div>
+			</div>
+
+			<!-- 게시글 리스트 -->
+			<div id="list">
+				<div th:if="${#lists.isEmpty(post)}"
+				       class="text-center text-muted py-4">게시글이 없습니다.</div>
+
+				  <!-- 목록 렌더링 -->
+				  <div th:each="p : ${post}" class="post-card card mb-3">
+				    <div class="card-body">
+				      <a class="stretched-link"
+				         th:href="@{/community/postDetail(postId=${p.postId})}"></a>
+
+				      <span class="badge bg-secondary mb-3"
+				            th:text="${p.categoryNm}">카테고리</span>
+
+				      <h6 th:text="${p.postTtl}">제목</h6>
+
+					  <p class="card-text text-truncate"
+					     th:text="${p.postCtnt} ?: ''">미리보기</p>
+
+					 <div class="post-meta small text-muted">
+					   <div th:text="${p.mbrNknm}">작성자</div>
+					   <div th:text="${#temporals.format(p.postRegDate, 'yyyy.MM.dd HH:mm')}">2025.08.26 18:45</div>
+					   <div th:text="'조회 ' + ${p.postViewCount}">조회 10</div>
+					 </div>
+
+				      <div class="d-flex justify-content-end gap-3 mt-2">
+				        <span>👍 <span th:text="${p.postLikeCount}">0</span></span>
+				        <span>💬 <span th:text="${p.cmtCount}">0</span></span>
+				      </div>
+				    </div>
+				  </div>
+				</div>
+
+			<!-- 더보기 버튼 -->
+			<div class="p-3 text-center">
+				<button class="btn btn-outline-secondary btn-sm w-100">더보기</button>
+			</div>
 		</div>
-		
+
 		<!-- 새 글 쓰기 버튼 -->
 		<div class="fab">
-		  <a th:href="@{/community/addPost}" class="btn btn-primary rounded-pill px-3 py-2">글쓰기</a>
+			<a th:href="@{/community/addPost}" class="btn btn-primary rounded-pill px-3 py-2">글쓰기</a>
 		</div>
 	</th:block>
+	<th:block layout:fragment="pageScripts">
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<script>
+			function fmt(iso){
+			  if(!iso) return '';
+			  const d = new Date(iso);
+			  const z = n => String(n).padStart(2,'0');
+			  return `${d.getFullYear()}.${z(d.getMonth()+1)}.${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
+			}
+
+			function renderPosts(posts){
+			  if(!posts || posts.length===0){
+			    return '<div class="text-center text-muted py-4">게시글이 없습니다.</div>';
+			  }
+			  return posts.map(function(p){
+			    return `
+			      <div class="post-card card mb-3">
+			        <div class="card-body">
+			          <a class="stretched-link" href="/community/postDetail?postId=${p.postId}"></a>
+			          <span class="badge bg-secondary mb-3">${p.categoryNm ?? ''}</span>
+			          <h6>${p.postTtl ?? ''}</h6>
+			          <p class="card-text text-truncate">${p.postCtnt ?? ''}</p>
+			          <div class="post-meta small text-muted">
+			            <div>${p.mbrNknm ?? ''}</div>
+			            <div>${fmt(p.postRegDate)}</div>
+			            <div>조회 ${p.postViewCount ?? 0}</div>
+			          </div>
+			          <div class="d-flex justify-content-end gap-3 mt-2">
+			            <span>👍 ${p.postLikeCount ?? 0}</span>
+			            <span>💬 ${p.cmtCount ?? 0}</span>
+			          </div>
+			        </div>
+			      </div>`;
+			  }).join('');
+			}
+	
+		  // 칩 래퍼에 id 달아두기: <div class="chip-scroll ..." id="catChips">
+		  $(function(){
+		    $('#catChips').on('click', '.chip', function(){
+		      var $btn = $(this);
+		      var categoryId = $btn.data('cat'); // '' 또는 '1'~'5'
+	
+		      $('.chip').removeClass('active');
+		      $btn.addClass('active');
+	
+		      $('#list').html('<div class="text-center text-muted py-4">불러오는 중...</div>');
+	
+		      // 정렬/검색 파라미터 유지하고 categoryId만 갱신해서 호출하고 싶으면:
+		      var params = new URLSearchParams(window.location.search);
+		      if(categoryId !== undefined && categoryId !== '') params.set('categoryId', categoryId);
+		      else params.delete('categoryId');
+	
+		      $.getJSON('/community/api/list', Object.fromEntries(params.entries()))
+		        .done(function(posts){ $('#list').html(renderPosts(posts)); })
+		        .fail(function(){ $('#list').html('<div class="text-center text-danger py-4">목록을 불러오지 못했습니다.</div>'); });
+		    });
+		  });
+		</script>
+	</th:block>
 </body>
+
 </html>
