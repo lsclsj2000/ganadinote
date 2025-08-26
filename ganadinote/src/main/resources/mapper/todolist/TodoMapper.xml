@@ -108,5 +108,14 @@
     <delete id="deleteTodosByRoutineCd" parameterType="long">
         DELETE FROM todo WHERE routine_cd = #{routineCd}
     </delete>
+    
+    <!-- [추가!] 특정 할 일의 완료 상태(is_completed)만 반전시키는 쿼리 -->
+    <update id="toggleTodoCompleted" parameterType="long">
+        UPDATE todo
+        SET
+            todo_is_completed = NOT todo_is_completed 
+        WHERE
+            todo_cd = #{todoCd}
+    </update>
 
 </mapper>

@@ -43,5 +43,11 @@ public class TodoServiceImpl implements TodoService {
     public void updateTodo(Todo todo) {
         todoMapper.updateTodo(todo);
     }
+    
+    // [추가!]
+    @Override
+    public void toggleTodoCompleted(Long todoCd) {
+        todoMapper.toggleTodoCompleted(todoCd);
+    }
 
 }

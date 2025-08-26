@@ -34,4 +34,7 @@ public interface TodoMapper {
     
  // [추가!] 특정 루틴 ID에 해당하는 모든 할 일을 삭제하는 메소드
     void deleteTodosByRoutineCd(Long routineCd);
+    
+ // [추가!]
+    void toggleTodoCompleted(Long todoCd);
 }

@@ -51,5 +51,26 @@
     <delete id="deleteRoutine" parameterType="long">
         DELETE FROM routine WHERE routine_cd = #{routineCd}
     </delete>
+    
+    <!-- [추가 1!] 루틴 ID로 1건을 조회하는 SELECT 쿼리 -->
+    <select id="getRoutineByCd" parameterType="long" resultMap="routineResultMap">
+        SELECT * FROM routine WHERE routine_cd = #{routineCd}
+    </select>
+    
+    <!-- [추가 2!] 루틴 정보를 업데이트하는 UPDATE 쿼리 -->
+    <update id="updateRoutine" parameterType="ganadinote.common.domain.Routine">
+        UPDATE routine
+        SET
+            pet_cd = #{petCd},
+            routine_title = #{routineTitle},
+            routine_repeat_type = #{routineRepeatType},
+            routine_day_of_week = #{routineDayOfWeek},
+            routine_day_of_month = #{routineDayOfMonth},
+            routine_time_of_day = #{routineTimeOfDay},
+            routine_start_date = #{routineStartDate},
+            routine_end_date = #{routineEndDate}
+        WHERE
+            routine_cd = #{routineCd}
+    </update>
 
 </mapper>

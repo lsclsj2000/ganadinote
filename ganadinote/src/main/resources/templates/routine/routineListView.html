@@ -1,62 +1,116 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
-	layout:decorate="~{layout/mainLayoutView}">
+      layout:decorate="~{layout/mainLayoutView}">
 <head>
-<title>루틴 관리</title>
-<link rel="stylesheet" href="/assets/css/routine/routine.css">
+    <title>루틴 관리</title>
+    <link rel="stylesheet" href="/assets/css/routine/routine.css">
 </head>
 <div layout:fragment="contents">
-	<div class="routine-list-page">
-		<div class="page-heading">
-			<h3>나의 루틴 관리</h3>
-		</div>
-		<a th:href="@{/routine/addView}" class="btn btn-primary mb-3">새 루틴 추가하기</a>
+    <div class="routine-list-page">
+        <div class="page-heading">
+            <h3>나의 루틴 관리</h3>
+        </div>
+        <a th:href="@{/routine/addView}" class="btn btn-primary mb-3">새 루틴 추가하기</a>
 
-		<div th:if="${routines.isEmpty()}">
-			<p>등록된 루틴이 없습니다.</p>
-		</div>
+        <div th:if="${routines.isEmpty()}">
+            <p>등록된 루틴이 없습니다.</p>
+        </div>
 
-		<div class="table-responsive" th:unless="${routines.isEmpty()}">
-			<table class="table table-hover">
-				<thead>
-					<tr>
-						<th>대상</th>
-						<th>루틴 제목</th>
-						<th>반복</th>
-						<th>시간</th>
-						<th>시작일</th>
-						<!-- [추가 1] 종료일 컬럼 헤더 추가 -->
-						<th>종료일</th>
-						<!-- [추가 2] 작업 컬럼 헤더 추가 -->
-						<th>작업</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr th:each="routine : ${routines}">
-						<td>
-							<span th:text="${pets.?[petCd == #root.routine.petCd][0].petName}">펫 이름</span>
-						</td>
-						<td th:text="${routine.routineTitle}"></td>
-						<td th:text="${routine.routineRepeatType}"></td>
-						<td th:text="${routine.routineTimeOfDay != null ? #temporals.format(routine.routineTimeOfDay, 'a hh:mm') : '-'}"></td>
-						<td th:text="${#temporals.format(routine.routineStartDate, 'yyyy-MM-dd')}"></td>
-						
-						<!-- [추가 3] 종료일 데이터 표시 -->
-						<td th:text="${#temporals.format(routine.routineEndDate, 'yyyy-MM-dd')}"></td>
-						
-						<!-- [추가 4] 삭제 버튼을 포함하는 '작업' 셀 -->
-						<td>
-							<form th:action="@{/routine/delete}" method="post" onsubmit="return confirm('이 루틴과 관련된 모든 미래의 할 일이 함께 삭제됩니다. 정말 삭제하시겠습니까?');">
-								<!-- Controller로 보낼 숨겨진 루틴 ID -->
-								<input type="hidden" name="routineCd" th:value="${routine.routineCd}" />
-								<!-- Bootstrap 스타일이 적용된 삭제 버튼 -->
-								<button type="submit" class="btn btn-danger btn-sm">삭제</button>
-							</form>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-	</div>
+        <div class="table-responsive" th:unless="${routines.isEmpty()}">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>대상</th>
+                        <th>루틴 제목</th>
+                        <th>반복</th>
+                        <th>시간</th>
+                        <th>시작일</th>
+                        <th>종료일</th>
+                        <th>작업</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- [수정 1] 각 tr에 id를 부여하고, onclick 이벤트를 추가합니다. -->
+                    <tr th:each="routine, iterStat : ${routines}" th:id="'routineRow-' + ${routine.routineCd}"
+                        th:onclick="|showEditForm(${routine.routineCd}, ${iterStat.index})|">
+                        
+                        <td><span th:text="${pets.?[petCd == #root.routine.petCd][0].petName}">펫 이름</span></td>
+                        <td th:text="${routine.routineTitle}"></td>
+                        <td th:text="${routine.routineRepeatType}"></td>
+                        <td th:text="${routine.routineTimeOfDay != null ? #temporals.format(routine.routineTimeOfDay, 'a hh:mm') : '-'}"></td>
+                        <td th:text="${#temporals.format(routine.routineStartDate, 'yyyy-MM-dd')}"></td>
+                        <td th:text="${#temporals.format(routine.routineEndDate, 'yyyy-MM-dd')}"></td>
+                        <td>
+                            <form th:action="@{/routine/delete}" method="post" onsubmit="event.stopPropagation(); return confirm('이 루틴과 관련된 모든 미래의 할 일이 함께 삭제됩니다. 정말 삭제하시겠습니까?');">
+                                <input type="hidden" name="routineCd" th:value="${routine.routineCd}" />
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="event.stopPropagation();">삭제</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ====================================================================== -->
+    <!-- ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 이 부분이 핵심 수정사항입니다 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ -->
+    <!-- ====================================================================== -->
+    <script th:inline="javascript">
+    /* <![CDATA[ */
+        // 컨트롤러에서 받은 데이터를 JavaScript 변수로 저장합니다.
+        const routinesFromServer = /*[[${routines}]]*/ [];
+        const petsFromServer = /*[[${pets}]]*/ [];
+
+        /**
+         * 테이블 행을 클릭했을 때, 해당 행을 수정 폼으로 변경하는 함수
+         * @param routineCd - 클릭된 루틴의 고유 ID
+         * @param index - routinesFromServer 배열에서의 인덱스
+         */
+        function showEditForm(routineCd, index) {
+            const routine = routinesFromServer[index];
+            const row = document.getElementById('routineRow-' + routineCd);
+
+            // 이미 수정 모드이면, 다시 실행되지 않도록 방지
+            if (row.classList.contains('edit-mode')) {
+                return;
+            }
+            row.classList.add('edit-mode');
+            row.onclick = null; // 수정 모드에서는 행 클릭 이벤트를 제거
+
+            // 펫 목록 <option> HTML 생성
+            let petOptionsHtml = petsFromServer.map(pet => {
+                const isSelected = pet.petCd === routine.petCd ? 'selected' : '';
+                return `<option value="${pet.petCd}" ${isSelected}>${pet.petName}</option>`;
+            }).join('');
+            
+            // 반복 타입 <option> HTML 생성
+            const repeatTypes = ['DAILY', 'WEEKLY', 'MONTHLY'];
+            let repeatOptionsHtml = repeatTypes.map(type => {
+                const isSelected = type === routine.routineRepeatType ? 'selected' : '';
+                return `<option value="${type}" ${isSelected}>${type}</option>`;
+            }).join('');
+
+            // 행의 내부 HTML을 Form으로 완전히 교체
+            row.innerHTML = `
+                <td colspan="7">
+                    <form action="/routine/update" method="post" class="edit-form-inline">
+                        <input type="hidden" name="routineCd" value="${routine.routineCd}">
+                        <input type="hidden" name="mbrCd" value="1"> <!-- 임시 회원 ID -->
+                        
+                        <select name="petCd">${petOptionsHtml}</select>
+                        <input type="text" name="routineTitle" value="${routine.routineTitle}" required>
+                        <select name="routineRepeatType">${repeatOptionsHtml}</select>
+                        <input type="time" name="routineTimeOfDay" value="${routine.routineTimeOfDay || ''}">
+                        <input type="date" name="routineStartDate" value="${routine.routineStartDate}" required>
+                        <input type="date" name="routineEndDate" value="${routine.routineEndDate}" required>
+                        
+                        <button type="submit" class="btn btn-success btn-sm">저장</button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="location.reload()">취소</button>
+                    </form>
+                </td>
+            `;
+        }
+    /* ]]> */
+    </script>
 </div>
 </html>

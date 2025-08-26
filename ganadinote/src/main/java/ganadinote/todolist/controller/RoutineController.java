@@ -69,5 +69,18 @@ public class RoutineController {
         // 처리가 끝나면 루틴 목록 페이지로 다시 이동(redirect)시킵니다.
         return "redirect:/routine/list";
     }
+    
+ // [추가!] /routine/update 경로의 POST 요청을 처리하는 수정 메소드
+    @PostMapping("/update")
+    public String updateRoutine(Routine routine) { // 폼 데이터를 Routine 객체에 자동 매핑
+        // 로그인 기능 구현 전까지는 mbrCd를 직접 설정해줍니다.
+        routine.setMbrCd(1); 
+        
+        // 루틴을 수정하고, 관련된 미래 할 일을 모두 재생성하는 서비스를 호출합니다.
+        routineService.updateRoutineAndTodos(routine);
+        
+        // 처리가 끝나면 루틴 목록 페이지로 다시 이동합니다.
+        return "redirect:/routine/list";
+    }
 
-} // [수정!] 빠졌던 클래스 닫는 괄호를 추가했습니다.
+} 

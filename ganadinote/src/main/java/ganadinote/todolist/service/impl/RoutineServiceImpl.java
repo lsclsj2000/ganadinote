@@ -101,4 +101,52 @@ public class RoutineServiceImpl implements RoutineService {
         // 2. 그 다음, 부모인 routine 테이블에서 해당 루틴을 삭제합니다.
         routineMapper.deleteRoutine(routineCd);
     }
+    
+ // [추가 1!] getRoutineByCd 메소드 구현
+    @Override
+    public Routine getRoutineByCd(Long routineCd) {
+        return routineMapper.getRoutineByCd(routineCd);
+    }
+    
+    // [추가 2!] updateRoutineAndTodos 메소드의 실제 구현 (핵심!)
+    @Override
+    @Transactional // 모든 DB 작업이 하나의 단위로 묶입니다.
+    public void updateRoutineAndTodos(Routine routine) {
+        // 1. 먼저, 이 루틴으로 인해 생성되었던 기존의 모든 할 일들을 삭제합니다.
+        todoMapper.deleteTodosByRoutineCd(routine.getRoutineCd());
+        
+        // 2. 루틴 테이블의 정보를 새로운 내용으로 업데이트합니다.
+        routineMapper.updateRoutine(routine);
+
+        // 3. 'addRoutineAndTodos'에서 사용했던 할 일 일괄 생성 로직을 그대로 재활용합니다.
+        List<Todo> todosToCreate = new ArrayList<>();
+        LocalDate currentDate = routine.getRoutineStartDate();
+        
+        while (!currentDate.isAfter(routine.getRoutineEndDate())) {
+            if (isRoutineApplicableOn(routine, currentDate)) {
+                Todo newTodo = new Todo();
+                newTodo.setMbrCd(routine.getMbrCd());
+                newTodo.setPetCd(routine.getPetCd());
+                newTodo.setRoutineCd(routine.getRoutineCd());
+                newTodo.setTodoTitle(routine.getRoutineTitle());
+                
+                LocalDateTime scheduledDt;
+                if (routine.getRoutineTimeOfDay() != null) {
+                    scheduledDt = currentDate.atTime(routine.getRoutineTimeOfDay());
+                } else {
+                    scheduledDt = currentDate.atStartOfDay();
+                }
+                newTodo.setTodoScheduledDt(scheduledDt);
+                newTodo.setTodoIsCompleted(false);
+                
+                todosToCreate.add(newTodo);
+            }
+            currentDate = currentDate.plusDays(1);
+        }
+
+        // 4. 새로 생성할 할 일이 있다면, 한꺼번에 DB에 삽입합니다.
+        if (!todosToCreate.isEmpty()) {
+            todoMapper.addTodos(todosToCreate);
+        }
+    }
 }
