@@ -21,19 +21,19 @@
 
         /* 날씨 대시보드 스타일 */
         .weather-dashboard { font-family: 'Noto Sans KR', sans-serif; }
-        .current-weather-summary { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-        .current-weather-summary .icon { width: 80px; height: 80px; }
+        .current-weather-summary { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; justify-content: space-around;}
+        .current-weather-summary .icon { width: 10rem; height: 10rem; }
         .current-weather-summary .temp-main { font-size: 3rem; font-weight: 700; letter-spacing: -2px; }
         .current-weather-summary .temp-main sup { font-size: 1.5rem; top: -1rem; }
-        .current-weather-summary .temp-details p { margin: 0; color: #555; font-size: 0.9rem; }
+        .current-weather-summary .temp-details p { margin: 0; color: #555; font-size: 1.5rem; }
         .current-weather-summary .weather-desc { font-size: 1.1rem; font-weight: 500; margin-bottom: 5px; }
 
         /* ▼▼▼ [수정] 미세먼지 카드 그리드: 모바일에서 2열, 특정 너비 이상에서 4열로 변경 ▼▼▼ */
         .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); /* 모바일 기본 2열 */ gap: 10px; margin-bottom: 20px; }
         
         .info-box { background-color: #f8f9fa; border-radius: 12px; padding: 15px; text-align: center; }
-        .info-box .title { font-size: 0.8rem; color: #6c757d; margin-bottom: 5px; }
-        .info-box .value { font-size: 1rem; font-weight: 700; }
+        .info-box .title { font-size: 1.1rem; color: #6c757d; margin-bottom: 5px; }
+        .info-box .value { font-size: 1.2rem; font-weight: 700; }
         .info-box .value.good { color: #0d6efd; }
         .info-box .value.normal { color: #198754; }
         .info-box .value.bad { color: #ffc107; }
@@ -80,7 +80,7 @@
                 grid-template-columns: 1fr 1fr; /* 태블릿 이상: 2열 */
                 gap: 15px;
             }
-            .current-weather-summary .icon { width: 100px; height: 100px; }
+            .current-weather-summary .icon { width: 10rem; height: 10rem; }
             .current-weather-summary .temp-main { font-size: 3.5rem; }
         }
     </style>
