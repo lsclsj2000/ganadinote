@@ -140,3 +140,15 @@
     gap: 10px;
     margin-top: 20px;
 }
+
+/* 체크박스 스타일 */
+.todo-checkbox {
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+/* 완료된 항목(li)에 대한 스타일 */
+.completed .todo-item-wrapper span {
+    text-decoration: line-through;
+    color: #999;
+}
