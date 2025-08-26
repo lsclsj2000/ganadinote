@@ -18,12 +18,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화 (개발 편의상)
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/register").permitAll()
-                .requestMatchers("/api/**").permitAll()
-                .requestMatchers("/assets/**").permitAll()
-                .anyRequest().authenticated()
+                // .requestMatchers(
+                //     "/",
+                //     "/auth/**",
+                //     "/assets/**",
+                //     "/api/**",
+                //     "/about",
+                //     "/contact"
+                // ).permitAll()
+                .anyRequest().permitAll() // 모든 요청에 대해 인증 없이 접근 허용
             );
+        
         return http.build();
     }
 }
