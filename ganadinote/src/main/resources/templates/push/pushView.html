@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>웹 푸시 알림</title>
+</head>
+<body>
+    <h1>웹 푸시 알림 테스트</h1>
+    <p>알림을 받으려면 아래 '알림 구독하기' 버튼을 누르고 알림 권한을 허용해 주세요.</p>
+    <button id="subscribeButton">알림 구독하기</button>
+    <p id="message"></p>
+    <script>
+        const applicationServerPublicKey = "BBrZN67vKHpAVNXNuffxoBMcBVA10WqO9mGqcEFBwahOFKCEbMoly9XS0n2aWC9NOO9m8AZDH2SntF9oA6zp8k8";
+        const subscribeButton = document.getElementById('subscribeButton');
+        const messageElement = document.getElementById('message');
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/\-/g, '+')
+                .replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+        subscribeButton.addEventListener('click', async () => {
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                try {
+                    messageElement.textContent = "구독 중...";
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    const subscribeOptions = {
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(applicationServerPublicKey)
+                    };
+                    const subscription = await registration.pushManager.subscribe(subscribeOptions);
+                    const subscriptionJson = subscription.toJSON();
+                    const response = await fetch('/api/push/subscribe', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            endpoint: subscriptionJson.endpoint,
+                            p256dh: subscriptionJson.keys.p256dh,
+                            auth: subscriptionJson.keys.auth
+                        })
+                    });
+                    if (response.ok) {
+                        messageElement.textContent = "알림 구독에 성공했습니다!";
+                        console.log('Subscription data sent to server:', subscriptionJson);
+                    } else {
+                        messageElement.textContent = "서버로 구독 정보 전송에 실패했습니다.";
+                    }
+                } catch (error) {
+                    messageElement.textContent = "알림 구독에 실패했습니다. (콘솔 로그 확인)";
+                    console.error('Push subscription failed:', error);
+                }
+            } else {
+                messageElement.textContent = "이 브라우저에서는 푸시 알림을 지원하지 않습니다.";
+            }
+        });
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/serviceWorker.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

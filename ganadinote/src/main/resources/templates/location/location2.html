@@ -7,15 +7,13 @@
     <meta charset="UTF-8">
     <title>내 위치 '동' 이름</title>
     <style>
-        /* 로딩바 기본 스타일 */
         #loading-bar-container {
             width: 100%;
             background-color: #f3f3f3;
             border-radius: 5px;
             margin: 10px 0;
-            display: none; /* 기본은 숨김 */
+            display: none;
         }
-
         #loading-bar {
             width: 0%;
             height: 20px;
@@ -26,131 +24,214 @@
             line-height: 20px;
             font-weight: bold;
         }
+        #hourly-forecast-list div,
+        #daily-forecast-list div {
+            margin: 5px;
+            text-align: center;
+        }
     </style>
 </head>
+<th:block layout:fragment="contents">
 <body>
-    <h1>내 위치 '동' 이름 확인하기</h1>
-    <button onclick="getLocationName()">위치 확인</button>
-    <p id="status-message"></p>
-    <div id="loading-bar-container">
-        <div id="loading-bar">0%</div>
+<h1>내 위치 '동' 이름 확인하기</h1>
+<button onclick="getLocationName()">위치 확인</button>
+<p id="status-message"></p>
+<div id="loading-bar-container">
+    <div id="loading-bar">0%</div>
+</div>
+<p id="dong-name"></p>
+
+<div id="weather-cards-container" style="display:none;">
+    <div id="current-weather-card">
+        <h2>오늘의 날씨</h2>
+        <p><strong>현재 기온:</strong> <span id="current-temp"></span>℃</p>
+        <p><strong>체감 온도:</strong> <span id="feels-like"></span>℃</p>
+        <p><strong>날씨 상태:</strong> <span id="weather-desc"></span></p>
+        <p><strong>습도:</strong> <span id="humidity"></span>%</p>
+        <p><strong>바람:</strong> <span id="wind-speed"></span>m/s</p>
     </div>
-    <p id="dong-name"></p>
 
-    <script>
-        async function getLocationName() {
-            const statusMessage = document.getElementById('status-message');
-            const LocationNameElement = document.getElementById('dong-name');
-            const loadingContainer = document.getElementById('loading-bar-container');
-            const loadingBar = document.getElementById('loading-bar');
+    <hr/>
 
-            statusMessage.textContent = '위치 정보 가져오는 중...';
-            LocationNameElement.textContent = '';
-            loadingContainer.style.display = 'block';
-            loadingBar.style.width = '0%';
-            loadingBar.textContent = '0%';
+    <div id="hourly-weather-card">
+        <h2>시간별 날씨</h2>
+        <div id="hourly-forecast-list" style="display: flex; overflow-x: auto;"></div>
+    </div>
 
-            function updateLoading(percent) {
-                loadingBar.style.width = percent + '%';
-                loadingBar.textContent = percent + '%';
-            }
+    <hr/>
 
-            // 브라우저가 Geolocation API를 지원하지 않는 경우 IP 기반 fallback
-            if (!navigator.geolocation) {
-                await fetchIpLocation();
-                return;
-            }
-
-            try {
-                // GPS 좌표 가져오기 시도
-                let position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
-                }).catch(async () => {
-                    // GPS 불가 시 IP 기반 위치 fallback
-                    return await fetchIpLocation(true);
-                });
-
-                // position이 좌표를 가지고 있는지 확인
-                if (position && position.coords && position.coords.latitude) {
-                    updateLoading(50);
-                    const { latitude, longitude } = position.coords;
-                    await fetchServerLocation(latitude, longitude);
-                    updateLoading(100);
-                } else if (position && position.locationName) {
-                    // IP fallback 결과
-                    LocationNameElement.textContent = `현재 위치(대략)는 '${position.locationName}' 입니다.`;
-                    statusMessage.textContent = '위치 확인 완료!';
-                    updateLoading(100);
-                } else {
-                    // 아무 정보도 없는 경우
-                    LocationNameElement.textContent = '위치 정보를 가져올 수 없습니다.';
-                    statusMessage.textContent = '위치 확인 실패';
-                    updateLoading(0);
-                }
-
-            } catch (error) {
-                statusMessage.textContent = `오류 발생: ${error.message}`;
-                updateLoading(0);
-            }
-
-            // IP 기반 위치 가져오기
-            async function fetchIpLocation(fromCatch=false) {
-                try {
-                    statusMessage.textContent = fromCatch 
-                        ? 'GPS를 사용할 수 없습니다. IP 기반 위치 추정 중...' 
-                        : 'Geolocation API를 지원하지 않습니다. IP 기반 위치 추정 중...';
-
-                    updateLoading(50);
-                    const response = await fetch('/locationapi/ipLocation');
-                    const data = await response.json();
-                    updateLoading(100);
-
-                    if (data.locationName) {
-                        LocationNameElement.textContent = `현재 위치(대략)는 '${data.locationName}' 입니다.`;
-                        statusMessage.textContent = '위치 확인 완료!';
-                    } else {
-                        LocationNameElement.textContent = '위치 정보를 찾을 수 없습니다.';
-                        statusMessage.textContent = '위치 확인 실패';
-                    }
-
-                    return data; // position 대체용
-                } catch (error) {
-                    statusMessage.textContent = `오류 발생: ${error.message}`;
-                    updateLoading(0);
-                    return {};
-                }
-            }
-
-            // 서버에 GPS 좌표 전송 후 동 이름 받아오기
-            async function fetchServerLocation(latitude, longitude) {
-                try {
-                    updateLoading(75);
-                    const response = await fetch('/locationapi/location', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ latitude, longitude })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('서버 통신 오류');
-                    }
-
-                    const data = await response.json();
-                    updateLoading(100);
-
-                    if (data.error) {
-                        statusMessage.textContent = '위치 정보를 찾을 수 없습니다.';
-                        LocationNameElement.textContent = '';
-                    } else {
-                        LocationNameElement.textContent = `현재 위치는 '${data.locationName}' 입니다.`;
-                        statusMessage.textContent = '위치 확인 완료!';
-                    }
-                } catch (error) {
-                    statusMessage.textContent = `오류 발생: ${error.message}`;
-                    updateLoading(0);
-                }
-            }
-        }
-    </script>
+    <div id="daily-weather-card">
+        <h2>주간 날씨 (7일)</h2>
+        <div id="daily-forecast-list"></div>
+    </div>
+</div>
 </body>
+</th:block>
+<th:block layout:fragment="jsScripts">
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    getLocationName();
+});
+
+async function getLocationName() {
+    const statusMessage = document.getElementById('status-message');
+    const LocationNameElement = document.getElementById('dong-name');
+    const loadingBar = document.getElementById('loading-bar');
+
+    function updateLoading(percent) {
+        loadingBar.style.width = percent + '%';
+        loadingBar.textContent = percent + '%';
+    }
+
+    statusMessage.textContent = '위치 정보 가져오는 중...';
+    LocationNameElement.textContent = '';
+    document.getElementById('loading-bar-container').style.display = 'block';
+    updateLoading(0);
+
+    async function fetchIpLocation() {
+        try {
+            statusMessage.textContent = 'GPS 사용 불가. IP 기반 위치 추정 중...';
+            updateLoading(50);
+            const response = await fetch('/locationapi/ipLocation');
+            const data = await response.json();
+            updateLoading(100);
+
+            if (data.locationName) {
+                LocationNameElement.textContent = `현재 위치(대략)는 '${data.locationName}' 입니다.`;
+                statusMessage.textContent = '위치 확인 완료!';
+            } else {
+                LocationNameElement.textContent = '위치 정보를 찾을 수 없습니다.';
+                statusMessage.textContent = '위치 확인 실패';
+            }
+
+            // IP fallback 좌표가 있다면 날씨도 가져오기
+            if (data.lat && data.lon) {
+                await fetchWeatherData(data.lat, data.lon);
+            }
+
+        } catch (error) {
+            statusMessage.textContent = `오류 발생: ${error.message}`;
+            updateLoading(0);
+        }
+    }
+
+    try {
+        if (!navigator.geolocation) {
+            await fetchIpLocation();
+            return;
+        }
+
+        let position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+        }).catch(async () => {
+            await fetchIpLocation();
+            return null;
+        });
+
+        if (position && position.coords) {
+            const { latitude, longitude } = position.coords;
+            updateLoading(50);
+            await fetchWeatherData(latitude, longitude);
+            updateLoading(100);
+        }
+
+    } catch (error) {
+        statusMessage.textContent = `오류 발생: ${error.message}`;
+        updateLoading(0);
+    }
+}
+
+async function fetchWeatherData(lat, lon) {
+    const statusMessage = document.getElementById('status-message');
+    const loadingBar = document.getElementById('loading-bar');
+    const weatherCardsContainer = document.getElementById('weather-cards-container');
+
+    function updateLoading(percent) {
+        loadingBar.style.width = percent + '%';
+        loadingBar.textContent = percent + '%';
+    }
+
+    try {
+        updateLoading(50);
+        const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+        if (!response.ok) throw new Error('날씨 정보 서버 통신 오류');
+
+        const data = await response.json();
+        console.log("Weather Data:", data); // ✅ 여기서 확인 가능
+
+        if (!data.list) {
+            statusMessage.textContent = '날씨 데이터가 올바르지 않습니다. (list 속성 없음)';
+            updateLoading(0);
+            return;
+        }
+
+        updateLoading(100);
+        displayWeatherData(data);
+        weatherCardsContainer.style.display = 'block';
+        statusMessage.textContent = '날씨 정보 로딩 완료!';
+    } catch (error) {
+        statusMessage.textContent = `오류 발생: ${error.message}`;
+        updateLoading(0);
+    }
+}
+
+function displayWeatherData(data) {
+	const current = (data.list && data.list.length > 0) ? data.list[0] : data.current;
+	
+	 if (!current) {
+	        console.error("표시할 현재 날씨 데이터가 없습니다.", data);
+	        document.getElementById('status-message').textContent = '현재 날씨 정보를 찾을 수 없습니다.';
+	        return; // 함수 실행 중단
+	    }
+	
+    document.getElementById('current-temp').textContent = Math.round(current.main.temp);
+    document.getElementById('feels-like').textContent = Math.round(current.main.feels_like);
+    document.getElementById('weather-desc').textContent = current.weather[0].description;
+    document.getElementById('humidity').textContent = current.main.humidity;
+    document.getElementById('wind-speed').textContent = current.wind.speed;
+
+    const hourlyList = document.getElementById('hourly-forecast-list');
+    hourlyList.innerHTML = '';
+    data.list.slice(0, 8).forEach(hour => {
+        const hourDiv = document.createElement('div');
+        const time = new Date(hour.dt * 1000).getHours();
+        const temp = Math.round(hour.main.temp);
+        const iconUrl = `https://openweathermap.org/img/wn/${hour.weather[0].icon}.png`;
+        hourDiv.innerHTML = `<p>${time}시</p><img src="${iconUrl}" alt="${hour.weather[0].description}" /><p>${temp}°</p>`;
+        hourlyList.appendChild(hourDiv);
+    });
+
+    const dailyList = document.getElementById('daily-forecast-list');
+    dailyList.innerHTML = '';
+    const dailyForecasts = {};
+
+    data.list.forEach(item => {
+        const date = new Date(item.dt * 1000).toISOString().split("T")[0];
+        if (!dailyForecasts[date]) {
+            dailyForecasts[date] = {
+                min: item.main.temp_min,
+                max: item.main.temp_max,
+                icon: item.weather[0].icon,
+                description: item.weather[0].description,
+                dateObj: new Date(item.dt * 1000)
+            };
+        } else {
+            dailyForecasts[date].min = Math.min(dailyForecasts[date].min, item.main.temp_min);
+            dailyForecasts[date].max = Math.max(dailyForecasts[date].max, item.main.temp_max);
+        }
+    });
+
+    Object.values(dailyForecasts).forEach(day => {
+        const dayDiv = document.createElement('div');
+        const dayOfWeek = ['일', '월', '화', '수', '목', '금', '토'][day.dateObj.getDay()];
+        const minTemp = Math.round(day.min);
+        const maxTemp = Math.round(day.max);
+        const iconUrl = `https://openweathermap.org/img/wn/${day.icon}.png`;
+        dayDiv.innerHTML = `<p><strong>${dayOfWeek}</strong></p><img src="${iconUrl}" alt="${day.description}" style="vertical-align: middle;"/><span>${minTemp}°C / ${maxTemp}°C</span>`;
+        dailyList.appendChild(dayDiv);
+    });
+}
+</script>
+</th:block>
+
 </html>
