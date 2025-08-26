@@ -7,14 +7,87 @@
 <link
 	href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap"
 	rel="stylesheet">
-<link rel="stylesheet" href="assets/css/bootstrap.css">
+<link rel="stylesheet" th:href="@{/assets/css/bootstrap.css}">
 <link rel="stylesheet"
-	href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
-<link rel="stylesheet" href="assets/css/app.css">
-<link rel="stylesheet" href="assets/css/pages/auth.css">
+	th:href="@{/assets/vendors/bootstrap-icons/bootstrap-icons.css}">
+<link rel="stylesheet" th:href="@{/assets/css/app.css}">
+<link rel="stylesheet" th:href="@{/assets/css/pages/auth.css}">
 </head>
 
 <body>
+	<script>
+        // 기존 비밀번호 확인 함수는 유지합니다.
+        function validateForm() {
+            var password = document.getElementById("password").value;
+            var confirmPassword = document.getElementById("confirmPassword").value;
+            var errorDiv = document.getElementById("password-error");
+
+            if (password !== confirmPassword) {
+                errorDiv.style.display = "block";
+                return false;
+            } else {
+                errorDiv.style.display = "none";
+                return true;
+            }
+        }
+        
+        // 이메일 및 닉네임 중복 체크를 위한 새로운 코드
+        document.addEventListener('DOMContentLoaded', function() {
+		    const emailInput = document.querySelector('input[name="mbrEmail"]');
+		    const nicknameInput = document.querySelector('input[name="mbrNknm"]');
+		    
+		    // 이메일 및 닉네임 에러 메시지를 표시할 div 추가
+		    const emailErrorDiv = document.createElement('div');
+		    emailInput.parentNode.appendChild(emailErrorDiv);
+		    
+		    const nicknameErrorDiv = document.createElement('div');
+		    nicknameInput.parentNode.appendChild(nicknameErrorDiv);
+		
+		    // 이메일 중복 체크 함수
+		    const checkEmail = async () => {
+		        const email = emailInput.value;
+		        if (email === "") {
+		            emailErrorDiv.textContent = "";
+		            return;
+		        }
+		        const response = await fetch(`/api/register/check-email?mbrEmail=${email}`);
+		        const isDuplicate = await response.json();
+		
+		        if (isDuplicate) {
+		            emailErrorDiv.textContent = "이미 사용 중인 이메일입니다.";
+		            emailErrorDiv.style.color = "red";
+		            emailInput.focus(); // <-- 이 코드를 추가하여 이메일 입력란으로 포커스
+		        } else {
+		            emailErrorDiv.textContent = "사용 가능한 이메일입니다.";
+		            emailErrorDiv.style.color = "green";
+		        }
+		    };
+		    
+		    // 닉네임 중복 체크 함수
+		    const checkNickname = async () => {
+		        const nickname = nicknameInput.value;
+		        if (nickname === "") {
+		            nicknameErrorDiv.textContent = "";
+		            return;
+		        }
+		        const response = await fetch(`/api/register/check-nickname?mbrNknm=${nickname}`);
+		        const isDuplicate = await response.json();
+		
+		        if (isDuplicate) {
+		            nicknameErrorDiv.textContent = "이미 사용 중인 닉네임입니다.";
+		            nicknameErrorDiv.style.color = "red";
+		            nicknameInput.focus(); // <-- 이 코드를 추가하여 닉네임 입력란으로 포커스
+		        } else {
+		            nicknameErrorDiv.textContent = "사용 가능한 닉네임입니다.";
+		            nicknameErrorDiv.style.color = "green";
+		        }
+		    };
+		
+		    emailInput.addEventListener('blur', checkEmail);
+		    nicknameInput.addEventListener('blur', checkNickname);
+		});
+    </script>
+
 	<div id="auth">
 		<div class="row h-100">
 			<div class="col-lg-5 col-12">
@@ -26,8 +99,12 @@
 					<p class="auth-subtitle mb-5">정보를 입력하여 계정을 생성하세요.</p>
 
 					<!-- 회원가입 폼 -->
-					<form th:action="@{/register}" method="post">
-						<!-- 이메일 -->
+					<form id="registerForm" th:action="@{/register}" method="post"
+						onsubmit="return validateForm()">
+						<div th:if="${errorMessage}" class="alert alert-danger"
+							role="alert" th:text="${errorMessage}">
+							<span th:text="${errorMessage}"></span>
+						</div>
 						<div class="form-group position-relative has-icon-left mb-4">
 							<input type="email" class="form-control form-control-xl"
 								placeholder="이메일" name="mbrEmail" required>
@@ -36,7 +113,6 @@
 							</div>
 						</div>
 
-						<!-- 닉네임 -->
 						<div class="form-group position-relative has-icon-left mb-4">
 							<input type="text" class="form-control form-control-xl"
 								placeholder="닉네임" name="mbrNknm" required>
@@ -45,25 +121,26 @@
 							</div>
 						</div>
 
-						<!-- 비밀번호 -->
 						<div class="form-group position-relative has-icon-left mb-4">
 							<input type="password" class="form-control form-control-xl"
-								placeholder="비밀번호" name="mbrPw" required>
+								placeholder="비밀번호" name="mbrPw" id="password" required>
 							<div class="form-control-icon">
 								<i class="bi bi-shield-lock"></i>
 							</div>
 						</div>
 
-						<!-- 비밀번호 확인 -->
 						<div class="form-group position-relative has-icon-left mb-4">
 							<input type="password" class="form-control form-control-xl"
-								placeholder="비밀번호 확인" name="confirmPw" required>
+								placeholder="비밀번호 확인" name="confirmPw" id="confirmPassword"
+								required>
 							<div class="form-control-icon">
 								<i class="bi bi-shield-lock"></i>
 							</div>
 						</div>
 
-						<!-- 제출 버튼 -->
+						<div id="password-error" class="text-danger mt-2"
+							style="display: none;">비밀번호가 일치하지 않습니다.</div>
+
 						<button type="submit"
 							class="btn btn-primary btn-block btn-lg shadow-lg mt-5">
 							회원가입</button>
@@ -82,5 +159,20 @@
 			</div>
 		</div>
 	</div>
+	<script>
+	    function validateForm() {
+	        var password = document.getElementById("password").value;
+	        var confirmPassword = document.getElementById("confirmPassword").value;
+	        var errorDiv = document.getElementById("password-error");
+	
+	        if (password !== confirmPassword) {
+	            errorDiv.style.display = "block"; // 오류 메시지 표시
+	            return false; // 폼 제출을 막음
+	        } else {
+	            errorDiv.style.display = "none"; // 오류 메시지 숨김
+	            return true; // 폼 제출 허용
+	        }
+	    }
+	</script>
 </body>
 </html>
