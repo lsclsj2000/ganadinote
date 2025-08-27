@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/mainLayoutView}">
+
+<head>
+    <title>할 일 생성</title>
+    <link rel="stylesheet" href="/assets/css/todo/addTodo.css">
+</head>
+
+<div layout:fragment="contents">
+    <div class="container todo-add-page"> <!-- [추천] 레이아웃 충돌 방지를 위해 고유 클래스 추가 -->
+        <header>
+            <div class="page-heading">
+                <h3>할 일 생성하기</h3>
+            </div>
+        </header>
+
+        <main>
+            <!-- [수정 1] form 태그에 th:action과 method를 명시합니다. -->
+            <form id="todo-form" th:action="@{/todo/add}" method="post">
+                <div class="form-group">
+                    <label for="todo-title">할 일 제목</label>
+                    <!-- [수정 2] name 속성을 DTO 필드명과 일치시킵니다 (todoTitle) -->
+                    <input type="text" id="todo-title" name="todoTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="pet-cd">대상 강아지</label>
+                    <!-- [수정 3] 이 부분이 하드코딩에서 동적 생성으로 변경됩니다. -->
+                    <select id="pet-cd" name="petCd">
+                        <!-- 컨트롤러가 보내준 "pets" 목록을 pet 변수로 하나씩 반복합니다. -->
+                        <option th:each="pet : ${pets}"
+                                th:value="${pet.petCd}"
+                                th:text="${pet.petName}">
+                            <!-- 예: <option value="1">루비</option> -->
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="todo-date">날짜</label>
+                    <!-- [수정 4] name 속성을 컨트롤러에서 받을 이름과 일치시킵니다 (todoDate) -->
+                    <input type="date" id="todo-date" name="todoDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="todo-time">시간 (선택)</label>
+                    <!-- [수정 5] name 속성을 컨트롤러에서 받을 이름과 일치시킵니다 (todoTime) -->
+                    <input type="time" id="todo-time" name="todoTime">
+                </div>
+
+                <div class="form-group">
+                    <label for="is-routine">루틴으로 등록</label>
+                    <input type="checkbox" id="is-routine" name="isRoutine">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">등록하기</button>
+            </form>
+        </main>
+    </div>
+
+</div>
+</html>
