@@ -2,6 +2,7 @@ package ganadinote.sns.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,7 +10,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import ganadinote.common.domain.FileMetaData;
 import ganadinote.common.domain.SnsPost;
+import ganadinote.common.file.FileMapper;
 import ganadinote.common.file.FileUtils;
+import ganadinote.sns.domain.FeedPost;
+import ganadinote.sns.domain.FollowUser;
 import ganadinote.sns.mapper.SnsMapper;
 import ganadinote.sns.service.SnsService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +24,8 @@ import lombok.RequiredArgsConstructor;
 public class SnsServiceImpl implements SnsService {
 
     private final SnsMapper snsMapper;
-    private final FileUtils fileUtils; // ✅ 파일 저장은 여기서 처리
+    private final FileUtils fileUtils; // 파일 저장은 여기서 처리
+    private final FileMapper fileMapper;
 
     @Override
     public Integer createPost(String content, Integer mbrCd, MultipartFile[] images) {
@@ -65,10 +70,69 @@ public class SnsServiceImpl implements SnsService {
             }
 
             if (!rows.isEmpty()) {
-                snsMapper.insertFilesBatch(rows); // `file` 테이블에 다중 insert
+            	fileMapper.addfiles(rows); // `file` 테이블에 다중 insert
             }
         }
 
         return post.getSpCd();
+    }
+    
+    // myfeed - 게시물 숫자
+    @Transactional(readOnly = true)
+    public long countPostsByMember(Integer mbrCd) {
+        return snsMapper.countPostsByMember(mbrCd);
+    }
+
+    
+    // myfeed - 팔로워 숫자
+    @Transactional(readOnly = true)
+    public long countFollowersOfMember(Integer mbrCd) {
+        return snsMapper.countFollowersOfMember(mbrCd);
+    }
+
+    
+    // myfeed - 팔로우 숫자
+    @Transactional(readOnly = true)
+    public long countFollowingsByMember(Integer mbrCd) {
+        return snsMapper.countFollowingsByMember(mbrCd);
+    }
+
+    // myfeed - 게시물 대표이미지
+    @Override
+    @Transactional(readOnly = true)
+    public List<FeedPost> getMyFeedPosts(Integer mbrCd) {
+        // 1) 내 게시물 목록
+    	List<SnsPost> posts = snsMapper.selectPostsByMember(mbrCd);
+        if (posts.isEmpty()) return java.util.Collections.emptyList();
+
+        // 2) 대표 이미지 일괄 조회
+        List<String> postIds = posts.stream()
+                                    .map(p -> String.valueOf(p.getSpCd()))
+                                    .collect(java.util.stream.Collectors.toList());
+        List<FileMetaData> firstFiles = fileMapper.selectFirstFilesByPostIds(postIds);
+        Map<String, String> repMap = firstFiles.stream()
+            .collect(java.util.stream.Collectors.toMap(FileMetaData::getPostId, FileMetaData::getFilePath));
+
+        // 3) DTO 머지
+        List<FeedPost> feedPost = new java.util.ArrayList<>(posts.size());
+        for (SnsPost p : posts) {
+            FeedPost fp = new FeedPost();
+            fp.setSpCd(p.getSpCd());
+            fp.setSpCn(p.getSpCn());
+            fp.setSpRegYmdt(p.getSpRegYmdt());
+            fp.setRepImagePath(repMap.get(String.valueOf(p.getSpCd())));
+            feedPost.add(fp);
+        }
+        return feedPost;
+    }
+    
+    @Override @Transactional(readOnly = true)
+    public List<FollowUser> getFollowers(Integer mbrCd) {
+        return snsMapper.selectFollowersOfMember(mbrCd);
+    }
+
+    @Override @Transactional(readOnly = true)
+    public List<FollowUser> getFollowings(Integer mbrCd) {
+        return snsMapper.selectFollowingsByMember(mbrCd);
     }
 }

@@ -99,8 +99,7 @@
 			  
 			// 업로드 버튼 클릭 -> 서버로 전송
 			  document.getElementById('btn-upload').addEventListener('click', async () => {
-			    const content = document.getElementById('sr_content').value.trim(); 
-			    const tags = document.getElementById('sr_tags').value.trim();
+			    const content = document.getElementById('sr_content').value.trim();
 
 			    // 서버에서 @RequestParam("content")가 필수이므로 최소 한 글자 체크
 			    if (!content) {
@@ -110,7 +109,6 @@
 
 			    const formData = new FormData();
 			    formData.append('content', content);
-			    formData.append('tags', tags);
 
 			    // FilePond 파일들 추가 (@RequestPart("images")로 받음)
 			    const files = pond.getFiles();
@@ -125,8 +123,8 @@
 			      if (!res.ok) throw new Error('업로드 실패');
 			      const json = await res.json();
 			      if (json.ok) {
-			        // 성공 시 마이피드로 이동 (원하면 상세로 바꿔도 됨)
-			        window.location.href = '/sns/myfeed';
+			    	  alert('업로드가 완료되었습니다.');
+			    	  window.location.href = '/sns/myfeed';
 			      } else {
 			        alert('업로드 실패: ' + (json.message || '알 수 없는 오류'));
 			      }
