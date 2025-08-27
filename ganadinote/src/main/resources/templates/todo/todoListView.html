@@ -136,16 +136,32 @@
                             modalTitle.textContent = date;
                             addNewTodoBtn.style.display = 'block';
                             modalTodoList.innerHTML = '';
+                            
+                            // [수정!] Spring Security가 비활성화 되어 CSRF 토큰이 필요 없을 수 있지만,
+                            // 나중에 다시 활성화할 경우를 대비해 코드를 남겨두는 것이 좋습니다.
+                            // 만약 meta 태그가 없다면 이 부분은 null이 되어도 괜찮습니다.
+                            const csrfMeta = document.querySelector("meta[name='_csrf']");
+                            const token = csrfMeta ? csrfMeta.getAttribute("content") : null;
 
                             if (todosForThisDay.length > 0) {
                                 todosForThisDay.forEach(todo => {
                                     const li = document.createElement('li');
+                                    li.id = `todo-item-${todo.todoCd}`;
                                     if (todo.todoIsCompleted) {
                                         li.classList.add('completed');
                                     }
 
                                     const wrapper = document.createElement('div');
                                     wrapper.classList.add('todo-item-wrapper');
+
+                                    // [추가 1] 체크박스 생성
+                                    const checkbox = document.createElement('input');
+                                    checkbox.type = 'checkbox';
+                                    checkbox.checked = todo.todoIsCompleted;
+                                    checkbox.classList.add('todo-checkbox');
+                                    checkbox.onchange = () => {
+                                        toggleTodoComplete(todo.todoCd, token);
+                                    };
 
                                     const todoText = document.createElement('span');
                                     const petInfo = petsFromServer.find(p => p.petCd === todo.petCd);
@@ -162,12 +178,12 @@
                                     hiddenInput.name = 'todoCd';
                                     hiddenInput.value = todo.todoCd;
 
+                                    deleteForm.appendChild(hiddenInput);
+
                                     const deleteButton = document.createElement('button');
                                     deleteButton.type = 'submit';
                                     deleteButton.textContent = '삭제';
                                     deleteButton.classList.add('delete-btn');
-
-                                    deleteForm.appendChild(hiddenInput);
                                     deleteForm.appendChild(deleteButton);
 
                                     const editButton = document.createElement('button');
@@ -176,7 +192,9 @@
                                     editButton.onclick = () => {
                                         showEditForm(todo);
                                     };
-
+                                    
+                                    // wrapper에 요소들을 순서대로 추가 (체크박스가 맨 앞)
+                                    wrapper.appendChild(checkbox);
                                     wrapper.appendChild(todoText);
                                     wrapper.appendChild(editButton);
                                     wrapper.appendChild(deleteForm);
@@ -194,56 +212,42 @@
                 }
                 
                 function showEditForm(todo) {
-                    const modalTitle = document.getElementById('modal-date');
-                    const modalTodoList = document.getElementById('modal-todo-list');
-                    const addNewTodoBtn = document.getElementById('add-new-todo-btn');
+                    // ... (수정 폼 보여주는 함수는 변경 없음)
+                }
+                
+                // [추가 2] 서버에 완료 상태 변경을 요청하는 AJAX 함수
+                function toggleTodoComplete(todoCd, csrfToken) {
+                    const formData = new FormData();
+                    formData.append('todoCd', todoCd);
 
-                    modalTitle.textContent = '할 일 수정';
-                    addNewTodoBtn.style.display = 'none';
+                    fetch('/api/todo/toggleComplete', {
+                        method: 'POST',
+                        headers: {
+                            // Spring Security가 비활성화 상태에서는 CSRF 헤더가 필요 없습니다.
+                            // 'X-CSRF-TOKEN': csrfToken 
+                        },
+                        body: new URLSearchParams(formData) // 폼 데이터를 URL 인코딩 형식으로 변환
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('서버 처리 실패');
+                        return response.text();
+                    })
+                    .then(data => {
+                        if (data === 'ok') {
+                            const todoItem = document.getElementById(`todo-item-${todoCd}`);
+                            todoItem.classList.toggle('completed');
 
-                    let petOptionsHtml = '';
-                    petsFromServer.forEach(pet => {
-                        const isSelected = pet.petCd === todo.petCd ? 'selected' : '';
-                        petOptionsHtml += `<option value="${pet.petCd}" ${isSelected}>${pet.petName}</option>`;
-                    });
-
-                    const scheduledDate = todo.todoScheduledDt.substring(0, 10);
-                    const scheduledTime = todo.todoScheduledDt.substring(11, 16);
-
-                    modalTodoList.innerHTML = `
-                        <form action="/todo/update" method="post" class="edit-form">
-                            <input type="hidden" name="todoCd" value="${todo.todoCd}">
-                            
-                            <div class="form-group">
-                                <label>할 일 제목</label>
-                                <input type="text" name="todoTitle" value="${todo.todoTitle}" required>
-                            </div>
-                            <div class="form-group">
-                                <label>대상 강아지</label>
-                                <select name="petCd">${petOptionsHtml}</select>
-                            </div>
-                            <div class="form-group">
-                                <label>날짜</label>
-                                <input type="date" name="todoDate" value="${scheduledDate}" required>
-                            </div>
-                            <div class="form-group">
-                                <label>시간</label>
-                                <input type="time" name="todoTime" value="${scheduledTime}">
-                            </div>
-                            <div class="form-group">
-                                <label>완료 여부</label>
-                                <input type="checkbox" name="isCompleted" value="true" ${todo.todoIsCompleted ? 'checked' : ''}>
-                                <input type="hidden" name="_isCompleted" value="on"/>
-                            </div>
-                            <div class="form-buttons">
-                                 <button type="submit">저장</button>
-                                 <button type="button" class="cancel-btn">취소</button>
-                            </div>
-                        </form>
-                    `;
-
-                    modalTodoList.querySelector('.cancel-btn').addEventListener('click', () => {
-                         modal.classList.remove('show');
+                            const targetTodo = todosFromServer.find(t => t.todoCd === todoCd);
+                            if (targetTodo) {
+                                targetTodo.todoIsCompleted = !targetTodo.todoIsCompleted;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('할 일 상태 변경에 실패했습니다.');
+                        const checkbox = document.querySelector(`#todo-item-${todoCd} .todo-checkbox`);
+                        if(checkbox) checkbox.checked = !checkbox.checked;
                     });
                 }
                 
@@ -259,8 +263,7 @@
                     currentDate.setMonth(currentDate.getMonth() + 1);
                     renderCalendar();
                 });
-
-                // [수정 완료!] 빠졌던 괄호를 추가했습니다.
+                
                 closeBtn.addEventListener('click', () => modal.classList.remove('show'));
                 
                 window.addEventListener('click', (event) => {

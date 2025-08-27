@@ -79,37 +79,26 @@
 			<!-- 상단 검색 + 정렬 -->
 			<div class="sticky-topbar p-2">
 				<div class="d-flex gap-2">
-				  <select class="form-select form-select-sm" style="max-width:120px" name="sort">
-				    <option th:value="latest"   th:selected="${param.sort ?: 'latest'} == 'latest'">최신순</option>
-				    <option th:value="popular"  th:selected="${param.sort} == 'popular'">인기순</option>
-				    <option th:value="comments" th:selected="${param.sort} == 'comments'">댓글많은순</option>
+				  <!-- ↓ 정렬 대신 검색대상 -->
+				  <select class="form-select form-select-sm" style="max-width:140px" name="qTarget">
+				    <option value="title"  th:selected="${param.qTarget ?: 'title'} == 'title'">제목</option>
+				    <option value="author" th:selected="${param.qTarget} == 'author'">작성자</option>
 				  </select>
+
 				  <input type="search"
 				         class="form-control form-control-sm"
 				         name="q"
-				         placeholder="검색(제목/작성자)"
+				         placeholder="검색어 입력 후 Enter"
 				         th:value="${param.q}">
 				</div>
 				<!-- 카테고리 칩 -->
 				<div class="chip-scroll mt-2 pb-1" id="catChips">
-				  <button class="chip"
-				          data-cat=""
-				          th:classappend="${#strings.isEmpty(param.categoryId)} ? ' active'">전체</button>
-
-				  <button class="chip" data-cat="1"
-				          th:classappend="${param.categoryId} == '1' ? ' active'">발자국 산책코스</button>
-
-				  <button class="chip" data-cat="2"
-				          th:classappend="${param.categoryId} == '2' ? ' active'">멍멍 쇼핑리뷰</button>
-
-				  <button class="chip" data-cat="3"
-				          th:classappend="${param.categoryId} == '3' ? ' active'">멍멍 수다방</button>
-
-				  <button class="chip" data-cat="4"
-				          th:classappend="${param.categoryId} == '4' ? ' active'">산책크루 모집해요!</button>
-
-				  <button class="chip" data-cat="5"
-				          th:classappend="${param.categoryId} == '5' ? ' active'">같이가요 스팟</button>
+				  <button class="chip" type="button" data-cat="">전체</button>
+				  <button class="chip" type="button" data-cat="1">발자국 산책코스</button>
+				  <button class="chip" type="button" data-cat="3">멍멍 쇼핑리뷰</button>
+				  <button class="chip" type="button" data-cat="4">멍멍 수다방</button>
+				  <button class="chip" type="button" data-cat="5">산책크루 모집해요!</button>
+				  <button class="chip" type="button" data-cat="2">같이가요 스팟</button>
 				</div>
 			</div>
 
@@ -148,7 +137,7 @@
 
 			<!-- 더보기 버튼 -->
 			<div class="p-3 text-center">
-				<button class="btn btn-outline-secondary btn-sm w-100">더보기</button>
+			  <button id="btnMore" class="btn btn-outline-secondary btn-sm w-100">더보기</button>
 			</div>
 		</div>
 
@@ -160,60 +149,134 @@
 	<th:block layout:fragment="pageScripts">
 		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 		<script>
-			function fmt(iso){
-			  if(!iso) return '';
-			  const d = new Date(iso);
-			  const z = n => String(n).padStart(2,'0');
-			  return `${d.getFullYear()}.${z(d.getMonth()+1)}.${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;
-			}
+		$(function(){
+		  const $list    = $('#list');
+		  const $btnMore = $('#btnMore');
+		  const $chips   = $('#catChips');
+		  const $q       = $('[name="q"]');
+		  const $qTarget = $('[name="qTarget"]');
 
-			function renderPosts(posts){
-			  if(!posts || posts.length===0){
-			    return '<div class="text-center text-muted py-4">게시글이 없습니다.</div>';
-			  }
-			  return posts.map(function(p){
-			    return `
-			      <div class="post-card card mb-3">
-			        <div class="card-body">
-			          <a class="stretched-link" href="/community/postDetail?postId=${p.postId}"></a>
-			          <span class="badge bg-secondary mb-3">${p.categoryNm ?? ''}</span>
-			          <h6>${p.postTtl ?? ''}</h6>
-			          <p class="card-text text-truncate">${p.postCtnt ?? ''}</p>
-			          <div class="post-meta small text-muted">
-			            <div>${p.mbrNknm ?? ''}</div>
-			            <div>${fmt(p.postRegDate)}</div>
-			            <div>조회 ${p.postViewCount ?? 0}</div>
-			          </div>
-			          <div class="d-flex justify-content-end gap-3 mt-2">
-			            <span>👍 ${p.postLikeCount ?? 0}</span>
-			            <span>💬 ${p.cmtCount ?? 0}</span>
-			          </div>
-			        </div>
-			      </div>`;
-			  }).join('');
-			}
-	
-		  // 칩 래퍼에 id 달아두기: <div class="chip-scroll ..." id="catChips">
-		  $(function(){
-		    $('#catChips').on('click', '.chip', function(){
-		      var $btn = $(this);
-		      var categoryId = $btn.data('cat'); // '' 또는 '1'~'5'
-	
-		      $('.chip').removeClass('active');
-		      $btn.addClass('active');
-	
-		      $('#list').html('<div class="text-center text-muted py-4">불러오는 중...</div>');
-	
-		      // 정렬/검색 파라미터 유지하고 categoryId만 갱신해서 호출하고 싶으면:
-		      var params = new URLSearchParams(window.location.search);
-		      if(categoryId !== undefined && categoryId !== '') params.set('categoryId', categoryId);
-		      else params.delete('categoryId');
-	
-		      $.getJSON('/community/api/list', Object.fromEntries(params.entries()))
-		        .done(function(posts){ $('#list').html(renderPosts(posts)); })
-		        .fail(function(){ $('#list').html('<div class="text-center text-danger py-4">목록을 불러오지 못했습니다.</div>'); });
-		    });
+		  const usp = new URLSearchParams(location.search);
+
+		  const state = {
+		    size: 10,
+		    offset: 0,
+		    loading: false,
+		    categoryId: usp.get('categoryId') || '',
+		    q:        usp.get('q')        || '',
+		    qTarget:  usp.get('qTarget')  || 'title'
+		  };
+
+		  // 초기 입력값 반영
+		  if (state.q) $q.val(state.q);
+		  $qTarget.val(state.qTarget);
+
+		  function fmt(iso){
+		    if(!iso) return '';
+		    const v = typeof iso === 'string' ? iso.replace(' ', 'T') : iso;
+		    const d = new Date(v);
+		    if (isNaN(d)) return iso;
+		    const z = n => String(n).padStart(2,'0');
+		    return d.getFullYear()+'.'+z(d.getMonth()+1)+'.'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes());
+		  }
+		  function esc(s){
+		    return (s ?? '').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+		  }
+		  function renderPosts(posts){
+		    if(!posts || posts.length===0){
+		      return '<div class="text-center text-muted py-4">게시글이 없습니다.</div>';
+		    }
+		    return posts.map(p => `
+		      <div class="post-card card mb-3">
+		        <div class="card-body">
+		          <a class="stretched-link" href="/community/postDetail?postId=${esc(p.postId)}"></a>
+		          <span class="badge bg-secondary mb-3">${esc(p.categoryNm || '')}</span>
+		          <h6>${esc(p.postTtl || '')}</h6>
+		          <p class="card-text text-truncate">${esc(p.postCtnt || '')}</p>
+		          <div class="post-meta small text-muted">
+		            <div>${esc(p.mbrNknm || '')}</div>
+		            <div>${fmt(p.postRegDate)}</div>
+		            <div>조회 ${p.postViewCount ?? 0}</div>
+		          </div>
+		          <div class="d-flex justify-content-end gap-3 mt-2">
+		            <span>👍 ${p.postLikeCount ?? 0}</span>
+		            <span>💬 ${p.cmtCount ?? 0}</span>
+		          </div>
+		        </div>
+		      </div>`).join('');
+		  }
+
+		  function pushUrl(){
+		    const u = new URL(location.href);
+		    const p = u.searchParams;
+		    if (state.categoryId) p.set('categoryId', state.categoryId); else p.delete('categoryId');
+		    if (state.q)         p.set('q', state.q);                     else p.delete('q');
+		    if (state.qTarget)   p.set('qTarget', state.qTarget);         else p.delete('qTarget');
+		    history.replaceState(null, '', u.pathname + '?' + p.toString());
+		  }
+
+		  function fetchPosts(append){
+		    if (state.loading) return;
+		    state.loading = true;
+
+		    if (!append){
+		      state.offset = 0;
+		      $list.html('<div class="text-center text-muted py-4">불러오는 중...</div>');
+		    }
+
+		    const params = { size: state.size, offset: state.offset };
+		    if (state.categoryId) params.categoryId = state.categoryId;
+		    if (state.q)         params.q = state.q.trim();
+		    if (state.qTarget)   params.qTarget = state.qTarget;
+
+		    $.getJSON('/community/api/list', params)
+		      .done(function(posts){
+		        if (append) $list.append(renderPosts(posts));
+		        else $list.html(renderPosts(posts));
+		        state.offset += (posts?.length || 0);
+		        $btnMore.toggle((posts?.length || 0) === state.size);
+		        pushUrl();
+		      })
+		      .fail(function(){
+		        if (!append) $list.html('<div class="text-center text-danger py-4">목록을 불러오지 못했습니다.</div>');
+		        $btnMore.hide();
+		      })
+		      .always(function(){ state.loading = false; });
+		  }
+
+		  function setActiveChip(cat){
+		    const $all = $chips.find('.chip');
+		    $all.removeClass('active');
+		    (cat ? $all.filter(`[data-cat="${cat}"]`) : $all.filter('[data-cat=""]')).addClass('active');
+		  }
+
+		  // 이벤트
+		  $chips.on('click', '.chip', function(e){
+		    e.preventDefault();
+		    state.categoryId = $(this).attr('data-cat') || '';
+		    setActiveChip(state.categoryId);
+		    fetchPosts(false);
 		  });
+
+		  $q.on('keydown', function(e){
+		    if (e.key === 'Enter'){
+		      state.q = $(this).val().trim();
+		      fetchPosts(false);
+		    }
+		  });
+
+		  $qTarget.on('change', function(){
+		    state.qTarget = $(this).val();
+		    state.q = $q.val().trim();     // 현재 입력값과 함께 적용
+		    fetchPosts(false);
+		  });
+
+		  $btnMore.on('click', function(){ fetchPosts(true); });
+
+		  // 초기 로드
+		  setActiveChip(state.categoryId);
+		  fetchPosts(false);
+		});
 		</script>
 	</th:block>
 </body>

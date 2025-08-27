@@ -1,6 +1,7 @@
 package ganadinote.sns.controller;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,8 +40,17 @@ public class snsController {
 
     // Home
     @GetMapping("/home")
-    public String getSnshomeView(HttpServletRequest req, Model model,
-                       @RequestParam(defaultValue = "1") int page) {
+    public String getSnshomeView(HttpServletRequest req, HttpSession session, Model model,
+            @RequestParam(defaultValue = "1") int page) {
+    	
+    	Integer mbrCd = Optional.ofNullable((String) session.getAttribute("SCD"))
+		         .map(Integer::valueOf)
+		         .orElse(1);
+    	
+    	var myPosts = snsService.getMyFeedPosts(mbrCd);
+    	
+    	model.addAttribute("myPosts", myPosts);
+    	
         if (isFetch(req)) {
             return "fragments/snsHomeFragment :: snsHomeFragment";
         }
@@ -64,8 +74,29 @@ public class snsController {
 
     // MyFeed
     @GetMapping("/myfeed")
-    public String getSnsmyfeedView(HttpServletRequest req, Model model,
-                         @RequestParam(defaultValue = "1") int page) {
+    public String getSnsmyfeedView(HttpServletRequest req, HttpSession session, Model model,
+            @RequestParam(defaultValue = "1") int page) {
+
+		Integer mbrCd = Optional.ofNullable((String) session.getAttribute("SCD"))
+		         .map(Integer::valueOf)
+		         .orElse(1);
+		
+		// 서비스에서 카운트 조회
+		long postCount      = snsService.countPostsByMember(mbrCd);
+		long followerCount  = snsService.countFollowersOfMember(mbrCd);
+		long followingCount = snsService.countFollowingsByMember(mbrCd);
+		var myPosts = snsService.getMyFeedPosts(mbrCd);
+		var followers  = snsService.getFollowers(mbrCd);
+		var followings = snsService.getFollowings(mbrCd);
+		
+		model.addAttribute("postCount", postCount);
+		model.addAttribute("followerCount", followerCount);
+		model.addAttribute("followingCount", followingCount);
+		model.addAttribute("myPosts", myPosts);
+		
+		model.addAttribute("followers", followers);
+		model.addAttribute("followings", followings);
+		
         if (isFetch(req)) {
             return "fragments/snsMyfeedFragment :: snsMyfeedFragment";
         }
@@ -89,11 +120,11 @@ public class snsController {
             @RequestPart(value="images", required=false) MultipartFile[] images,
             HttpSession session
     ) {
-        String scd = (String) session.getAttribute("SCD"); // 로그인 세션키 확인
-        if (scd == null) throw new RuntimeException("로그인이 필요합니다.");
-        Integer mbrCd = Integer.valueOf(scd);
+    	Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
+                .map(Integer::valueOf)
+                .orElse(1);
 
-        Integer spCd = snsService.createPost(content, mbrCd, images);
-        return Map.of("ok", true, "sp_cd", spCd);
+		Integer spCd = snsService.createPost(content, mbrCd, images);
+		return Map.of("ok", true, "sp_cd", spCd);
     }
 }
