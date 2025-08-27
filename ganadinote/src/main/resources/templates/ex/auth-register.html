@@ -16,7 +16,6 @@
 
 <body>
 	<script>
-        // 기존 비밀번호 확인 함수는 유지합니다.
         function validateForm() {
             var password = document.getElementById("password").value;
             var confirmPassword = document.getElementById("confirmPassword").value;
@@ -31,19 +30,20 @@
             }
         }
         
-        // 이메일 및 닉네임 중복 체크를 위한 새로운 코드
         document.addEventListener('DOMContentLoaded', function() {
 		    const emailInput = document.querySelector('input[name="mbrEmail"]');
 		    const nicknameInput = document.querySelector('input[name="mbrNknm"]');
+            const registerButton = document.querySelector('#registerButton');
+            const sendCodeBtn = document.querySelector('#sendCodeBtn');
+            const verifyCodeBtn = document.querySelector('#verifyCodeBtn');
+            const verificationCodeInput = document.querySelector('#verificationCodeInput');
+            const verificationMessageDiv = document.querySelector('#verificationMessage');
+            
+            let isEmailVerified = false;
 		    
-		    // 이메일 및 닉네임 에러 메시지를 표시할 div 추가
-		    const emailErrorDiv = document.createElement('div');
-		    emailInput.parentNode.appendChild(emailErrorDiv);
-		    
-		    const nicknameErrorDiv = document.createElement('div');
-		    nicknameInput.parentNode.appendChild(nicknameErrorDiv);
-		
-		    // 이메일 중복 체크 함수
+            const emailErrorDiv = document.getElementById('email-error');
+		    const nicknameErrorDiv = document.getElementById('nickname-error');
+
 		    const checkEmail = async () => {
 		        const email = emailInput.value;
 		        if (email === "") {
@@ -55,15 +55,19 @@
 		
 		        if (isDuplicate) {
 		            emailErrorDiv.textContent = "이미 사용 중인 이메일입니다.";
-		            emailErrorDiv.style.color = "red";
-		            emailInput.focus(); // <-- 이 코드를 추가하여 이메일 입력란으로 포커스
+		            emailErrorDiv.classList.remove('text-success');
+		            emailErrorDiv.classList.add('text-danger');
+		            isEmailVerified = false;
+                    registerButton.disabled = true;
 		        } else {
 		            emailErrorDiv.textContent = "사용 가능한 이메일입니다.";
-		            emailErrorDiv.style.color = "green";
+		            emailErrorDiv.classList.remove('text-danger');
+		            emailErrorDiv.classList.add('text-success');
+		            isEmailVerified = false;
+                    registerButton.disabled = true;
 		        }
 		    };
 		    
-		    // 닉네임 중복 체크 함수
 		    const checkNickname = async () => {
 		        const nickname = nicknameInput.value;
 		        if (nickname === "") {
@@ -75,16 +79,73 @@
 		
 		        if (isDuplicate) {
 		            nicknameErrorDiv.textContent = "이미 사용 중인 닉네임입니다.";
-		            nicknameErrorDiv.style.color = "red";
-		            nicknameInput.focus(); // <-- 이 코드를 추가하여 닉네임 입력란으로 포커스
+		            nicknameErrorDiv.classList.remove('text-success');
+		            nicknameErrorDiv.classList.add('text-danger');
 		        } else {
 		            nicknameErrorDiv.textContent = "사용 가능한 닉네임입니다.";
-		            nicknameErrorDiv.style.color = "green";
+		            nicknameErrorDiv.classList.remove('text-danger');
+		            nicknameErrorDiv.classList.add('text-success');
 		        }
 		    };
 		
 		    emailInput.addEventListener('blur', checkEmail);
 		    nicknameInput.addEventListener('blur', checkNickname);
+		    
+            sendCodeBtn.addEventListener('click', async () => {
+                const email = emailInput.value;
+                if (!email) {
+                    verificationMessageDiv.textContent = '이메일을 입력해 주세요.';
+                    verificationMessageDiv.style.color = 'red';
+                    return;
+                }
+                const response = await fetch('/api/email-send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mbrEmail: email })
+                });
+                const result = await response.text();
+                if (result === 'SUCCESS') {
+                    verificationMessageDiv.textContent = '인증번호가 전송되었습니다. 이메일을 확인해주세요.';
+                    verificationMessageDiv.style.color = 'green';
+                } else {
+                    verificationMessageDiv.textContent = '인증번호 전송에 실패했습니다. 잠시 후 다시 시도해주세요.';
+                    verificationMessageDiv.style.color = 'red';
+                }
+            });
+
+            verifyCodeBtn.addEventListener('click', async () => {
+                const email = emailInput.value;
+                const code = verificationCodeInput.value;
+                if (!email || !code) {
+                    verificationMessageDiv.textContent = '이메일과 인증번호를 모두 입력해 주세요.';
+                    verificationMessageDiv.style.color = 'red';
+                    return;
+                }
+                const response = await fetch('/api/email-verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mbrEmail: email, code: code })
+                });
+                const result = await response.text();
+                if (result === 'SUCCESS') {
+                    verificationMessageDiv.textContent = '이메일 인증이 완료되었습니다!';
+                    verificationMessageDiv.style.color = 'blue';
+                    isEmailVerified = true;
+                    registerButton.disabled = false;
+                } else {
+                    verificationMessageDiv.textContent = '인증번호가 올바르지 않습니다. 다시 확인해주세요.';
+                    verificationMessageDiv.style.color = 'red';
+                    isEmailVerified = false;
+                    registerButton.disabled = true;
+                }
+            });
+            
+            document.querySelector('form').addEventListener('submit', function(event) {
+                if (!isEmailVerified) {
+                    event.preventDefault();
+                    alert('이메일 인증을 먼저 완료해주세요.');
+                }
+            });
 		});
     </script>
 
@@ -93,26 +154,36 @@
 			<div class="col-lg-5 col-12">
 				<div id="auth-left">
 					<div class="auth-logo">
-						<a href="/"><img src="assets/images/logo/logo.png" alt="로고"></a>
+						<a th:href="@{/main}"><img th:src="@{/assets/images/logo/logo.png}" alt="로고"></a>
 					</div>
 					<h1 class="auth-title">회원가입</h1>
 					<p class="auth-subtitle mb-5">정보를 입력하여 계정을 생성하세요.</p>
 
-					<!-- 회원가입 폼 -->
 					<form id="registerForm" th:action="@{/register}" method="post"
 						onsubmit="return validateForm()">
 						<div th:if="${errorMessage}" class="alert alert-danger"
 							role="alert" th:text="${errorMessage}">
 							<span th:text="${errorMessage}"></span>
 						</div>
+                        <div id="email-error" class="text-danger mt-2" style="font-size: 0.8em;"></div>
 						<div class="form-group position-relative has-icon-left mb-4">
-							<input type="email" class="form-control form-control-xl"
-								placeholder="이메일" name="mbrEmail" required>
-							<div class="form-control-icon">
-								<i class="bi bi-envelope"></i>
-							</div>
-						</div>
+					    <div id="email-error" class="text-danger mb-1" style="font-size: 0.8em;"></div>
+					    <input type="email" class="form-control form-control-xl"
+					        placeholder="이메일" name="mbrEmail" required>
+					    <div class="form-control-icon">
+					        <i class="bi bi-envelope"></i>
+					    </div>
+					</div>
+					<div class="form-group position-relative has-icon-left mb-4">
+					    <input type="text" class="form-control form-control-xl" id="verificationCodeInput" placeholder="인증번호" aria-label="인증번호">
+					    <div class="d-flex justify-content-between mt-2">
+					        <button class="btn btn-outline-secondary flex-grow-1 me-2" type="button" id="sendCodeBtn">인증번호 전송</button>
+					        <button class="btn btn-outline-success flex-grow-1" type="button" id="verifyCodeBtn">확인</button>
+					    </div>
+					    <div id="verificationMessage" class="mt-2" style="font-size: 0.8em;"></div>
+					</div>
 
+                        <div id="nickname-error" class="text-danger mt-2" style="font-size: 0.8em;"></div>
 						<div class="form-group position-relative has-icon-left mb-4">
 							<input type="text" class="form-control form-control-xl"
 								placeholder="닉네임" name="mbrNknm" required>
@@ -141,12 +212,11 @@
 						<div id="password-error" class="text-danger mt-2"
 							style="display: none;">비밀번호가 일치하지 않습니다.</div>
 
-						<button type="submit"
-							class="btn btn-primary btn-block btn-lg shadow-lg mt-5">
+						<button type="submit" id="registerButton"
+							class="btn btn-primary btn-block btn-lg shadow-lg mt-5" disabled>
 							회원가입</button>
 					</form>
 
-					<!-- 로그인 안내 -->
 					<div class="text-center mt-5 text-lg fs-4">
 						<p class="text-gray-600">
 							이미 계정이 있으신가요? <a href="auth-login.html" class="font-bold">로그인</a>
@@ -159,20 +229,5 @@
 			</div>
 		</div>
 	</div>
-	<script>
-	    function validateForm() {
-	        var password = document.getElementById("password").value;
-	        var confirmPassword = document.getElementById("confirmPassword").value;
-	        var errorDiv = document.getElementById("password-error");
-	
-	        if (password !== confirmPassword) {
-	            errorDiv.style.display = "block"; // 오류 메시지 표시
-	            return false; // 폼 제출을 막음
-	        } else {
-	            errorDiv.style.display = "none"; // 오류 메시지 숨김
-	            return true; // 폼 제출 허용
-	        }
-	    }
-	</script>
 </body>
 </html>
