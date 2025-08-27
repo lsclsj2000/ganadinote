@@ -9,5 +9,6 @@ public class RegisterDTO {
     private String mbrPw;
     private String mbrNknm;
     private String confirmPw;
+    private String code;
     
 }
