@@ -17,4 +17,5 @@ public class PostDetailDTO {
 	private int postViewCount;
 	private int postLikeCount;
 	private int cmtCount;
+	private String postStatus;
 }

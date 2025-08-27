@@ -15,5 +15,5 @@ public class Comment {
 	private String commentCtnt; 
 	private LocalDateTime commentRegDate; 
 	private LocalDateTime commentMdfcnDate; 
-	private String commentStatusCd;
+	private String commentStatus;
 }

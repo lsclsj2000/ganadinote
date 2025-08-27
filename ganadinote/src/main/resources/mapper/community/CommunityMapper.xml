@@ -2,35 +2,69 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="ganadinote.community.mapper.CommunityMapper">
 
-	<select id="selectPostListBasic"
-		resultType="ganadinote.community.dto.PostListDTO"> 
-		SELECT 
-			p.post_id AS postId, 
-			c.category_id AS categoryId, 
-			c.category_nm AS categoryNm, 
-			p.post_ttl AS postTtl,
-			LEFT(COALESCE(p.post_ctnt,''),120) AS postCtnt, 
-			m.mbr_nknm AS mbrNknm,
-			p.post_reg_date AS postRegDate,
-			p.post_view_count AS postViewCount, 
-			p.post_like_count AS postLikeCount,
-			(SELECT COUNT(*) FROM `comment` cm WHERE cm.post_id = p.post_id) AS cmtCount 
-		FROM post p JOIN member m ON m.mbr_cd = p.mbr_cd JOIN category
-		c ON c.category_id = p.category_id <where>
-			<if test="categoryId != null"> AND c.category_id = #{categoryId} </if>
-		</where>
-		ORDER BY p.post_id DESC LIMIT #{size} OFFSET #{offset} </select>
+	<select id="selectPostListBasic" resultType="ganadinote.community.dto.PostListDTO">
+  SELECT
+    p.post_id AS postId,
+    c.category_id AS categoryId,
+    c.category_nm AS categoryNm,
+    p.post_ttl AS postTtl,
+    LEFT(COALESCE(p.post_ctnt,''),120) AS postCtnt,
+    m.mbr_nknm AS mbrNknm,
+    p.post_reg_date AS postRegDate,
+    p.post_view_count AS postViewCount,
+    p.post_like_count AS postLikeCount,
+    p.post_status AS postStatus,
+    (SELECT COUNT(*) FROM `comment` cm WHERE cm.post_id = p.post_id AND cm.comment_status='ACTIVE') AS cmtCount
+  FROM post p
+  JOIN member  m ON m.mbr_cd = p.mbr_cd
+  JOIN category c ON c.category_id = p.category_id
+  <where>
+    p.post_status = 'ACTIVE'
+    <if test="categoryId != null">
+      AND c.category_id = #{categoryId}
+    </if>
 
-	<!-- 총 개수 (페이징용) -->
-	<select id="countPostListBasic" resultType="int"> SELECT COUNT(*) FROM post
-		p INNER JOIN category c ON p.category_id = c.category_id <where>
-			<if test="categoryId != null"> AND c.category_id = #{categoryId} </if>
-		</where>
-	</select>
+    <!-- 검색 -->
+    <if test="q != null and q != ''">
+      <choose>
+        <when test="qTarget == 'author'">
+          AND m.mbr_nknm LIKE CONCAT('%', #{q}, '%')
+        </when>
+        <otherwise>
+          AND p.post_ttl LIKE CONCAT('%', #{q}, '%')
+        </otherwise>
+      </choose>
+    </if>
+  </where>
+  ORDER BY p.post_id DESC
+  LIMIT #{size} OFFSET #{offset}
+</select>
+
+<select id="countPostListBasic" resultType="int">
+  SELECT COUNT(*)
+  FROM post p
+  JOIN category c ON p.category_id = c.category_id
+  JOIN member   m ON m.mbr_cd = p.mbr_cd
+  <where>
+    p.post_status = 'ACTIVE'
+    <if test="categoryId != null">
+      AND c.category_id = #{categoryId}
+    </if>
+    <if test="q != null and q != ''">
+      <choose>
+        <when test="qTarget == 'author'">
+          AND m.mbr_nknm LIKE CONCAT('%', #{q}, '%')
+        </when>
+        <otherwise>
+          AND p.post_ttl LIKE CONCAT('%', #{q}, '%')
+        </otherwise>
+      </choose>
+    </if>
+  </where>
+</select>
 
 
-	<select id="selectPostDetail"
-		resultType="ganadinote.community.dto.PostDetailDTO">
+	<select id="selectPostDetail" resultType="ganadinote.community.dto.PostDetailDTO">
 		SELECT
 			p.post_id AS postId,
 			p.category_id AS categoryId,
@@ -41,12 +75,44 @@
 			p.post_reg_date AS postRegDate,
 			p.post_view_count AS postViewCount,
 			p.post_like_count AS postLikeCount,
-			(SELECT COUNT(*) FROM comment cm WHERE cm.post_id = p.post_id) AS cmtCount
+			p.post_status as postStatus,
+			(SELECT COUNT(*) FROM comment cm WHERE cm.post_id = p.post_id AND cm.comment_status = 'ACTIVE') AS cmtCount
 		FROM post p
 		JOIN category c ON c.category_id = p.category_id
 		JOIN member m ON m.mbr_cd = p.mbr_cd
-		WHERE p.post_id = #{postId}
+		WHERE p.post_id = #{postId} and  p.post_status = 'ACTIVE'
 	</select>
+	
+	<!-- 게시글 등록 -->
+	<insert id="insertPost" parameterType="ganadinote.community.dto.PostDetailDTO">
+	  INSERT INTO post (
+	    post_id, category_id, mbr_cd, post_ttl, post_ctnt,
+	    post_view_count, post_like_count, post_status, post_reg_date, post_mdfcn_date
+	  ) VALUES (
+	    #{postId}, #{categoryId}, #{mbrCd}, #{postTtl}, #{postCtnt},
+	    0, 0, 'ACTIVE', NOW(), NOW()
+	  )
+	</insert>
+	
+	<!-- 게시글 수정 (삭제글은 수정 금지) -->
+	<update id="updatePost" parameterType="ganadinote.community.dto.PostDetailDTO">
+	  UPDATE post
+	  SET post_ttl = #{postTtl},
+	      post_ctnt = #{postCtnt},
+	      category_id = #{categoryId},
+	      post_mdfcn_date = NOW()
+	  WHERE post_id = #{postId}
+	    AND post_status = 'ACTIVE'
+	</update>
+	
+	<!-- 게시글 논리삭제 -->
+	<update id="softDeletePost">
+	  UPDATE post
+	  SET post_status = 'DELETED',
+	      post_mdfcn_date = NOW()
+	  WHERE post_id = #{postId}
+	    AND post_status != 'DELETED'
+	</update>
 
 	<select id="selectComments" resultType="ganadinote.common.domain.Comment">
 		SELECT
@@ -59,6 +125,7 @@
 		FROM comment c
 		JOIN member m ON m.mbr_cd = c.mbr_cd
 		WHERE c.post_id = #{postId}
+		 AND c.comment_status = 'ACTIVE'
 		ORDER BY
 		CASE WHEN c.comment_parent_id IS NULL THEN 0 ELSE 1 END,
 		c.comment_id
@@ -66,9 +133,34 @@
 
 	<!-- 댓글/대댓글 등록 -->
 	<insert id="insertComment">
-	  INSERT INTO comment (post_id, comment_parent_id, mbr_cd, comment_ctnt, comment_reg_date)
-	  VALUES (#{postId}, #{commentParentId}, #{mbrCd}, #{commentCtnt}, NOW())
+	  INSERT INTO comment (post_id, comment_parent_id, mbr_cd, comment_ctnt, comment_reg_date, comment_status)
+	  VALUES (#{postId}, #{commentParentId}, #{mbrCd}, #{commentCtnt}, NOW(), 'ACTIVE')
 	</insert>
+	
+	<!-- 댓글/대댓글 수정 -->
+	<update id="updateComment" parameterType="ganadinote.common.domain.Comment">
+	  UPDATE comment
+	  SET comment_ctnt = #{commentCtnt},
+	      comment_mdfcn_date = NOW()
+	  WHERE comment_id = #{commentId}
+	    AND comment_status = 'ACTIVE' <!-- 삭제/숨김 댓글은 수정 불가 -->
+	</update>
+	
+	<!-- 논리 삭제 -->
+	<update id="softDeleteComment">
+	  UPDATE comment
+	  SET comment_status = 'DELETED',
+	      comment_mdfcn_date = NOW()
+	  WHERE comment_id = #{commentId}
+	    AND comment_status != 'DELETED'
+	</update>
+	
+	<!-- PostMapper.xml -->
+	<update id="increaseViewCount">
+	  UPDATE post
+	  SET post_view_count = post_view_count + 1
+	  WHERE post_id = #{postId}
+	</update>
 
 </mapper>
 
