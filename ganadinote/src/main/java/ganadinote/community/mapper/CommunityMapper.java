@@ -12,12 +12,16 @@ import ganadinote.community.dto.PostListDTO;
 @Mapper
 public interface CommunityMapper {
 	List<PostListDTO> selectPostListBasic(
-	      @Param("categoryId") Integer categoryId,
-	      @Param("size") int size,
-	      @Param("offset") int offset
-	  );
+		      @Param("categoryId") Integer categoryId,
+		      @Param("q") String q,
+		      @Param("qTarget") String qTarget,  // "title" | "author"
+		      @Param("size") int size,
+		      @Param("offset") int offset
+		  );
 
-	  int countPostListBasic(@Param("categoryId") Integer categoryId);
+		  int countPostListBasic(@Param("categoryId") Integer categoryId,
+		                         @Param("q") String q,
+		                         @Param("qTarget") String qTarget);
 	  
 	  
 	  PostDetailDTO selectPostDetail(@Param("postId") int postId);
@@ -28,4 +32,6 @@ public interface CommunityMapper {
 	                    @Param("commentParentId") Integer commentParentId,
 	                    @Param("mbrCd") String mbrCd,
 	                    @Param("commentCtnt") String commentCtnt);
+	  
+	  int increaseViewCount(@Param("postId") long postId);
 }

@@ -24,30 +24,38 @@ public class CommunityController {
 	
 	@GetMapping("")
 	public String getCommunityMain(@RequestParam(required = false) Integer categoryId,
-		    @RequestParam(required = false) String keyword,
-		    @RequestParam(defaultValue = "latest") String sort,
-		    @RequestParam(required = false) String statusCd,
-		    @RequestParam(defaultValue = "1") Integer page,
-		    @RequestParam(defaultValue = "10") Integer size,
-		    Model model) {
-		
-		Map<String, Object> res = communityService.getList(categoryId, keyword, sort, statusCd, page, size);
-		
-		// ▼ 뷰에서 반복할 대상: post (단수 키에 ‘리스트’가 들어감)
-		model.addAttribute("post", res.get("list"));
-		
-		// 필요하면 페이징/정렬 파라미터도 그대로 내려주기
-		model.addAttribute("total",  res.get("total"));
-		model.addAttribute("page",   res.get("page"));
-		model.addAttribute("size",   res.get("size"));
-		model.addAttribute("hasMore",res.get("hasMore"));
-		
-		// 현재 검색/정렬 상태 보존용(칩/셀렉트 활성화)
-		model.addAttribute("categoryId", categoryId);
-		model.addAttribute("keyword",    keyword);
-		model.addAttribute("sort",       sort);
-		return "community/communityMainView";
+	                               @RequestParam(required = false, name="q") String q,
+	                               @RequestParam(defaultValue = "title", name="qTarget") String qTarget,
+	                               @RequestParam(defaultValue = "1") Integer page,
+	                               @RequestParam(defaultValue = "10") Integer size,
+	                               Model model) {
+
+	    Map<String, Object> res = communityService.getList(categoryId, q, qTarget, "ACTIVE", page, size);
+
+	    model.addAttribute("post",   res.get("list"));
+	    model.addAttribute("total",  res.get("total"));
+	    model.addAttribute("page",   res.get("page"));
+	    model.addAttribute("size",   res.get("size"));
+	    model.addAttribute("hasMore",res.get("hasMore"));
+
+	    model.addAttribute("categoryId", categoryId);
+	    model.addAttribute("q",        q);
+	    model.addAttribute("qTarget",  qTarget);
+	    return "community/communityMainView";
 	}
+
+	@GetMapping("/api/list")
+	@ResponseBody
+	public List<PostListDTO> listApi(@RequestParam(required = false) Integer categoryId,
+	                                 @RequestParam(required = false, name="q") String q,
+	                                 @RequestParam(defaultValue = "title", name="qTarget") String qTarget,
+	                                 @RequestParam(defaultValue = "10") Integer size,
+	                                 @RequestParam(defaultValue = "0")  Integer offset) {
+	    int page = (size > 0) ? (offset / size) + 1 : 1;
+	    Map<String, Object> data = communityService.getList(categoryId, q, qTarget, "ACTIVE", page, size);
+	    return (List<PostListDTO>) data.get("list");
+	}
+	
 	@GetMapping("/addPost")
 	public String addPost() {
 		return "community/addPostView";
@@ -55,6 +63,9 @@ public class CommunityController {
 	
 	@GetMapping("/postDetail")
 	public String postDetail(@RequestParam int postId, Model model) {
+		// 1) 조회수 증가 (+1)
+	    communityService.increaseViewCount(postId);
+	    // 2) 상세/댓글 조회
 	    var post = communityService.getPostDetail(postId);
 	    var comments = communityService.getComments(postId);
 	    model.addAttribute("post", post);
@@ -73,15 +84,5 @@ public class CommunityController {
 	    return "redirect:/community/postDetail?postId=" + postId;
 	  }
 	
-	
-	@GetMapping("/community/api/list")
-	@ResponseBody
-	public List<PostListDTO> listApi(
-	        @RequestParam(required = false) Integer categoryId,
-	        @RequestParam(defaultValue = "latest") String sort,
-	        @RequestParam(defaultValue = "1") Integer page,
-	        @RequestParam(defaultValue = "10") Integer size) {
-	    var data = communityService.getList(categoryId, null, sort, null, page, size);
-	    return (List<PostListDTO>) data.get("list");
-	}
+
 }
