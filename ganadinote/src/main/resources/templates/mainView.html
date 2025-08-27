@@ -101,7 +101,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header"><h4 id="dong-name">위치 정보를 불러오는 중...</h4></div>
+                            <div class="card-header"><h4 id="entireLocation">위치 정보를 불러오는 중...</h4></div>
                             <div class="card-body weather-dashboard">
                                 <p id="status-message"></p>
                                 <div id="weather-cards-container" style="display:none;">
@@ -184,11 +184,10 @@
                 </div>
             `;
         }
-
         // --- 3. 위치 및 데이터 로드 기능 ---
         async function getLocationName() {
             const statusMessage = document.getElementById('status-message');
-            const locationNameElement = document.getElementById('dong-name');
+            const locationNameElement = document.getElementById('entireLocation');
             const processCoordinates = async (lat, lon) => {
                 try {
                     const locResponse = await fetch(`/locationapi/location`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ latitude: lat, longitude: lon }) });
