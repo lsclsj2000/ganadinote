@@ -13,6 +13,7 @@ public class PostDetailDTO {
 	private String postTtl;
 	private String postCtnt;
 	private String mbrNknm;
+	private Integer mbrCd;  
 	private LocalDateTime postRegDate;
 	private int postViewCount;
 	private int postLikeCount;

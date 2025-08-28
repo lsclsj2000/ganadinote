@@ -10,6 +10,7 @@
 		<result property="fileStoredNm" column="file_stored_nm"/>
 		<result property="filePath"    column="file_path"/>
 		<result property="fileSize"    column="file_size"/>
+		<result property="postType"    column="post_type"/>
 	</resultMap>
 
 	<delete id="deleteFileByIdx" parameterType="int">
@@ -60,6 +61,19 @@
 		WHERE rn = 1
 	</select>
 	
+
+	
+	<update id="bindFilesToPostByPaths">
+	  UPDATE `file`
+	  SET post_id = #{postId}
+	  WHERE post_id IS NULL
+	    AND file_path IN
+	    <foreach collection="paths" item="p" open="(" separator="," close=")">
+	      #{p}
+	    </foreach>
+	    AND file_reg_date >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+	</update>
+
 	<select id="selectAllFilesByPostIds" parameterType="list" resultMap="fileResultMap">
 	    /* sns - 게시물의 전체 이미지 */
 	    SELECT file_id, post_id, file_orgnl_nm, file_stored_nm, file_path, file_size
@@ -71,5 +85,6 @@
 	    </foreach>
 	    ORDER BY post_id, file_id
 	</select>
+
 
 </mapper>
