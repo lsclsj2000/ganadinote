@@ -14,14 +14,58 @@
             <div class="card p-4">
                 <p id="subscription-status">알림 상태를 확인 중입니다...</p>
                 <button id="toggle-subscribe-button" class="btn btn-primary mt-3" disabled>로딩 중...</button>
+                
+                <hr class="my-4">
+                
+                <h4>강아지별 산책 정보</h4>
+                <div th:each="pet : ${pets}" th:if="${pet}" class="border p-3 mb-3">
+                    <h5 th:text="${pet.petName}">강아지 이름</h5>
+                    <p>
+                        <span th:text="${pet.petBreed}">품종</span>, 
+                        <span th:text="${pet.petWeight}">체중</span>kg
+                    </p>
+                    <p>
+                        적정 온도: <span th:text="|${pet.minTemp}~${pet.maxTemp}°C|">정보 없음</span>
+                    </p>
+                    <p>
+                        활동량: <span th:text="${pet.activityLevel}">정보 없음</span>
+                    </p>
+                    <p>
+                        더위 민감도: <span th:text="${pet.heatSensitive == 'Y' ? '민감' : '보통'}"></span>
+                    </p>
+                    <p>
+                        추위 민감도: <span th:text="${pet.coldSensitive == 'Y' ? '민감' : '보통'}"></span>
+                    </p>
+                    <p>
+                        크기: <span th:text="${pet.dogSize}"></span>
+                    </p>
+                </div>
+                
+                <hr class="my-4">
+                
+                <h4>알림 시간 일괄 설정</h4>
+                <form id="notification-time-form">
+                    <div class="mb-3">
+                        <label for="notificationTime" class="form-label">알림 시간</label>
+                        <select class="form-select" id="notificationTime" required>
+                            <option value="">시간을 선택하세요</option>
+                            <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
+                                <option th:value="${hour}" th:text="|${hour}시|"></option>
+                            </th:block>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">시간 설정하기</button>
+                </form>
             </div>
         </div>
     </th:block>
+</body>
 
+<th:block layout:fragment="jsScripts">
     <script th:inline="javascript">
     /*<![CDATA[*/
-        const VAPID_PUBLIC_KEY = /*[[${vapidPublicKey}]]*/ '';
-        const MEMBER_CODE = /*[[${mbrCd}]]*/ '1';
+        const VAPID_PUBLIC_KEY = [[${vapidPublicKey}]];
+        const MEMBER_CODE = [[${mbrCd}]];
 
         const subscribeButton = document.getElementById('toggle-subscribe-button');
         const statusText = document.getElementById('subscription-status');
@@ -43,7 +87,6 @@
         // 알림 구독 상태를 확인하고 버튼을 업데이트하는 함수
         async function updateButtonStatus() {
             try {
-                // 알림 상태 텍스트를 '확인 중'으로 변경하고 버튼을 비활성화
                 statusText.textContent = "알림 상태를 확인 중입니다...";
                 subscribeButton.disabled = true;
 
@@ -67,7 +110,6 @@
                         subscribeButton.addEventListener('click', subscribeUserToPush);
                     }
                 } else {
-                    // 응답이 실패하면 로딩 실패 메시지 표시
                     statusText.textContent = "알림 상태를 불러오는 데 실패했습니다. 다시 시도해주세요.";
                     console.error('API 응답 실패:', response.status);
                 }
@@ -75,7 +117,6 @@
                 statusText.textContent = "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
                 console.error("알림 상태 확인 중 오류 발생:", error);
             } finally {
-                // 로딩이 완료되면 버튼을 활성화
                 subscribeButton.disabled = false;
             }
         }
@@ -107,7 +148,7 @@
                 } else {
                     alert("알림 구독에 실패했습니다. 다시 시도해주세요.");
                 }
-                updateButtonStatus(); // 상태를 다시 확인하여 버튼 업데이트
+                updateButtonStatus();
 
             } catch (err) {
                 console.error('푸시 알림 구독 실패:', err);
@@ -118,20 +159,24 @@
         
         // 구독 취소 로직
         async function unsubscribeUser() {
-            try {
-                const response = await fetch('/api/push/unsubscribe', {
-                    method: 'POST'
-                });
-                if (response.ok) {
-                    alert("알림이 취소되었습니다.");
-                } else {
-                    alert("알림 취소에 실패했습니다.");
-                }
-                updateButtonStatus(); // 상태를 다시 확인하여 버튼 업데이트
-            } catch (err) {
-                console.error("알림 취소 실패:", err);
-            }
-        }
+		    try {
+		        const response = await fetch('/api/push/unsubscribe', {
+		            method: 'POST',
+		            headers: { 'Content-Type': 'application/json' },
+		            body: JSON.stringify(MEMBER_CODE) // 회원 코드를 JSON 형식으로 전송
+		        });
+		
+		        if (response.ok) {
+		            alert("알림이 취소되었습니다.");
+		        } else {
+		            alert("알림 취소에 실패했습니다.");
+		        }
+		        updateButtonStatus();
+		    } catch (err) {
+		        console.error("알림 취소 실패:", err);
+		    }
+		}
+
 
         // 백엔드로 구독 정보 전송
         async function sendSubscriptionToBackend(subscription) {
@@ -143,9 +188,7 @@
             try {
                 const response = await fetch('/api/push/subscribe', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dto)
                 });
                 return response.text();
@@ -154,10 +197,50 @@
                 return 'fail';
             }
         }
+
+        // 알림 시간 설정 함수
+        async function setNotificationTime() {
+            const notificationTime = document.getElementById('notificationTime').value;
+
+            // 선택값 유효성 검사 (첫 번째 '시간을 선택하세요' 옵션)
+            if (!notificationTime) {
+                alert("알림 시간을 선택해주세요.");
+                return;
+            }
+
+            const payload = {
+                mbrCd: MEMBER_CODE,
+                notificationTime: notificationTime + ":00" // 서버에 시간:분 형식으로 보내기 위해 ":00" 추가
+            };
+
+            try {
+                const response = await fetch('/api/push/set-time', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.text();
+                if (result === 'success') {
+                    alert('알림 시간이 성공적으로 설정되었습니다!');
+                } else {
+                    alert('알림 시간 설정에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('알림 시간 설정 오류:', error);
+                alert('네트워크 오류가 발생했습니다.');
+            }
+        }
+
+        // 폼 제출 이벤트 리스너
+        document.getElementById('notification-time-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            setNotificationTime();
+        });
         
         // 페이지 로드 시 초기 상태 설정
         document.addEventListener('DOMContentLoaded', updateButtonStatus);
     /*]]>*/
     </script>
-</body>
+</th:block>
 </html>

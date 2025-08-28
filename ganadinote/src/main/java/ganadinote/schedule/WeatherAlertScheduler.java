@@ -1,4 +1,4 @@
-package schedule;
+package ganadinote.schedule;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

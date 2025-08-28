@@ -1,5 +1,8 @@
 package ganadinote.notification.service;
 
+import java.util.List;
+
+import ganadinote.notification.domain.PetWithBreedDTO;
 import ganadinote.notification.domain.PushSubDTO;
 
 public interface NotificationService {
@@ -17,4 +20,7 @@ public interface NotificationService {
     void reactivateSubscription(int mbrCd);
     
     void sendNotification(Integer mbrCd, String message);
+    
+     // mbrCd를 통해 pet의 정보를 가져옴
+    List<PetWithBreedDTO> getPetInfoForNotification(String mbrCd);
 }

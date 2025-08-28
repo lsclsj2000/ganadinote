@@ -1,10 +1,14 @@
 package ganadinote.notification.service.impl;
 
+import ganadinote.notification.domain.PetWithBreedDTO;
 import ganadinote.notification.domain.PushSubDTO;
 import ganadinote.notification.mapper.PushMapper;
 import ganadinote.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -67,4 +71,23 @@ public class NotificationServiceImpl implements NotificationService {
         // 이 부분에 실제 푸시 알림 전송 로직이 구현되어야 합니다.
         log.info("회원 {}에게 푸시 알림 전송: {}", mbrCd, message);
     }
+    
+    @Override
+    public List<PetWithBreedDTO> getPetInfoForNotification(String mbrCd) {
+    	List<PetWithBreedDTO> pets = pushMapper.getPetInfoForNotification(mbrCd);
+    	 log.info("반환 전 pets 리스트 크기: {}", pets.size());
+         if (!pets.isEmpty()) {
+             pets.forEach(pet -> {
+                 if (pet != null) {
+                     log.info("Pet 정보: petName={}, petWeight={}, petBreed={}", 
+                              pet.getPetName(), pet.getPetWeight(), pet.getPetBreed());
+                 } else {
+                     log.warn("리스트에 null 객체가 포함되어 있습니다.");
+                 }
+             });
+         }
+    	return pets;
+    }
+    
+    
 }

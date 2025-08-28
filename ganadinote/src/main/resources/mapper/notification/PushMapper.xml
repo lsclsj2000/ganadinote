@@ -2,6 +2,36 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="ganadinote.notification.mapper.PushMapper">
 
+<resultMap id="petWithBreedResultMap" 		type="ganadinote.notification.domain.PetWithBreedDTO">
+        <result column="breed_name" 		property="breedName"/>
+        <result column="min_temp" 			property="minTemp"/>
+        <result column="max_temp" 			property="maxTemp"/>
+        <result column="cold_sensitive" 	property="coldSensitive"/>
+        <result column="heat_sensitive" 	property="heatSensitive"/>
+        <result column="dog_size" 			property="dogSize"/>
+        <result column="activity_level" 	property="activityLevel"/>
+    </resultMap>
+    
+    <select id="getPetInfoForNotification" resultMap="petWithBreedResultMap">
+    	/*  mbrCd를 통해 받아오는 알림을 위한 pet 정보*/
+       SELECT 
+	        p.pet_name AS petName,
+	        p.pet_weight AS petWeight,
+	        db.breed_name AS petBreed,
+	        db.min_temp AS minTemp,
+	        db.max_temp AS maxTemp,
+	        db.cold_sensitive AS coldSensitive,
+	        db.heat_sensitive AS heatSensitive,
+	        db.dog_size AS dogSize,
+	        db.activity_level AS activityLevel
+	    FROM 
+	        pet AS p
+	    LEFT JOIN 
+	        dog_breed AS db ON p.pet_breed = db.breed_name
+	    WHERE
+	    	p.mbr_cd = #{mbrCd};
+    </select>
+    
     <select id="getSubInfoByMbrCd" resultType="ganadinote.common.domain.PushSubscription">
     	/* 알림 구독 정보 멤버 코드로 받아오기 */
 		SELECT
@@ -52,5 +82,15 @@
         	is_active = 1, p256dh = #{p256dh}, auth = #{auth}
         WHERE 
         	endpoint = #{endpoint} AND mbr_cd = #{mbrCd}
+    </update>
+    
+      <update id="deactivateSubscription" parameterType="int">
+    	/* 회원 코드로 알림 구독 비활성화 */
+        UPDATE
+            push_subscription
+        SET
+            is_active = 0
+        WHERE
+            mbr_cd = #{mbrCd}
     </update>
 </mapper>

@@ -62,8 +62,7 @@ public class NotificationAPIController {
 	 * 알림을 비활성화하는 API. DB의 is_active 컬럼을 0으로 업데이트합니다.
 	 */
 	@PostMapping("/unsubscribe")
-	public String unsubscribe() {
-		Integer mbrCd = 1; // 실제로는 로그인된 사용자의 mbrCd로 대체
+	public String unsubscribe(@RequestBody Integer mbrCd) {
 		try {
 			notificationService.deactivateSubscription(mbrCd);
 			log.info("알림 구독이 비활성화되었습니다.");
