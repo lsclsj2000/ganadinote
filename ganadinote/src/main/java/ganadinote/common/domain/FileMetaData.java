@@ -10,6 +10,7 @@ public class FileMetaData {
     private String fileStoredNm;
     private String filePath;
     private Long   fileSize;
+    private String  postType;
 	
 	public FileMetaData() {}
 	
@@ -20,6 +21,7 @@ public class FileMetaData {
 		this.fileStoredNm = builder.fileStoredNm;
 		this.filePath = builder.filePath;
 		this.fileSize = builder.fileSize;
+		this.postType = builder.postType;
 	}
 	
 	
@@ -49,6 +51,10 @@ public class FileMetaData {
 	public void setFileSize(Long fileSize) {
 		this.fileSize = fileSize;
 	}
+	
+	public void setPostType(String postType) {
+		this.postType = postType;
+	}
 
 
 	public Integer getfileId() {
@@ -74,6 +80,10 @@ public class FileMetaData {
 	public Long getFileSize() {
 		return fileSize;
 	}
+	
+	public String getPostType() {
+		return postType;
+	}
 
 	public static class Builder {
 	
@@ -83,6 +93,7 @@ public class FileMetaData {
 	    private String fileStoredNm;
 	    private String filePath;
 	    private Long   fileSize;
+	    private String  postType;
 		
 		public Builder() {}
 
@@ -93,6 +104,7 @@ public class FileMetaData {
 			this.fileStoredNm = fileMetaData.fileStoredNm;
 			this.filePath = fileMetaData.filePath;
 			this.fileSize = fileMetaData.fileSize;
+			this.postType = fileMetaData.postType;
 		}
 
 		public Builder fileId(Integer fileId) {
@@ -122,6 +134,11 @@ public class FileMetaData {
 
 		public Builder fileSize(Long fileSize) {
 			this.fileSize = fileSize;
+			return this;
+		}
+		
+		public Builder postType(String postType) {
+			this.postType = postType;
 			return this;
 		}
 		

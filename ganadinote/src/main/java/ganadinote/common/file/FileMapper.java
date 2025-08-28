@@ -14,4 +14,5 @@ public interface FileMapper {
 	int addfile(FileMetaData fileDto);
 	int addfiles(List<FileMetaData> fileDto);
 	List<FileMetaData> selectFirstFilesByPostIds(List<String> postIds);
+	List<FileMetaData> selectAllFilesByPostIds(List<String> postIds);
 }

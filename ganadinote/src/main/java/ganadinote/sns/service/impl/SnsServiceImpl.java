@@ -14,6 +14,7 @@ import ganadinote.common.file.FileMapper;
 import ganadinote.common.file.FileUtils;
 import ganadinote.sns.domain.FeedPost;
 import ganadinote.sns.domain.FollowUser;
+import ganadinote.sns.domain.HomeFeedPost;
 import ganadinote.sns.mapper.SnsMapper;
 import ganadinote.sns.service.SnsService;
 import lombok.RequiredArgsConstructor;
@@ -29,49 +30,37 @@ public class SnsServiceImpl implements SnsService {
 
     @Override
     public Integer createPost(String content, Integer mbrCd, MultipartFile[] images) {
-        // 1) 게시물 저장
+        // ✅ 서버 최종 방어: 사진 필수
+        if (images == null || images.length == 0) {
+            throw new IllegalArgumentException("사진은 최소 1장 이상 업로드해야 합니다.");
+        }
+        if (images.length > 10) {
+            throw new IllegalArgumentException("이미지는 최대 10장까지 업로드 가능합니다.");
+        }
+
+        // 1) 게시물 저장 (내용은 선택)
         SnsPost post = new SnsPost();
         post.setMbrCd(mbrCd);
-        post.setSpCn(content);
-        snsMapper.insertPost(post);   // spCd 채워짐 (useGeneratedKeys)
+        post.setSpCn(content == null ? "" : content);
+        snsMapper.insertPost(post);   // spCd 세팅됨
 
-        // 2) 이미지 저장 (최대 10장)
-        if (images != null && images.length > 0) {
-            if (images.length > 10) {
-                throw new IllegalArgumentException("이미지는 최대 10장까지 업로드 가능합니다.");
-            }
+        // 2) 이미지 저장
+        List<FileMetaData> uploaded = fileUtils.uploadFiles(images, "sns");
 
-            // --- [선택 A] FilesUtils가 ganadinote.common.domain.FileMetaData를 반환하도록 이미 수정된 경우 ---
-            List<FileMetaData> uploaded = fileUtils.uploadFiles(images, "sns");
+        List<FileMetaData> rows = new ArrayList<>();
+        for (var fm : uploaded) {
+            FileMetaData r = new FileMetaData();
+            r.setPostId(String.valueOf(post.getSpCd())); // file.post_id (varchar)
+            r.setFileOrgnlNm(fm.getFileOrgnlNm());
+            r.setFileStoredNm(fm.getFileStoredNm());
+            r.setFilePath(fm.getFilePath());
+            r.setFileSize(fm.getFileSize());
+            r.setPostType("sns"); // ✅ 새 컬럼
+            rows.add(r);
+        }
 
-            // --- [선택 B] FilesUtils가 예전 타입(outpolic.systems.file.domain.FileMetaData)을 반환한다면 매핑 필요 ---
-            // List<outpolic.systems.file.domain.FileMetaData> uploadedOld = filesUtils.uploadFiles(images, "sns");
-            // List<FileMetaData> uploaded = new ArrayList<>();
-            // for (var f : uploadedOld) {
-            //     FileMetaData m = new FileMetaData();
-            //     m.setPostId(String.valueOf(post.getSpCd()));
-            //     m.setFileOrgnlNm(f.getFileOriginalName());
-            //     m.setFileStoredNm(f.getFileNewName());
-            //     m.setFilePath(f.getFilePath());
-            //     m.setFileSize(f.getFileSize());
-            //     uploaded.add(m);
-            // }
-
-            // DB insert용으로 postId 채워 넣기
-            List<FileMetaData> rows = new ArrayList<>();
-            for (var fm : uploaded) {
-                FileMetaData r = new FileMetaData();
-                r.setPostId(String.valueOf(post.getSpCd())); // file.post_id (varchar)
-                r.setFileOrgnlNm(fm.getFileOrgnlNm());
-                r.setFileStoredNm(fm.getFileStoredNm());
-                r.setFilePath(fm.getFilePath());
-                r.setFileSize(fm.getFileSize());
-                rows.add(r);
-            }
-
-            if (!rows.isEmpty()) {
-            	fileMapper.addfiles(rows); // `file` 테이블에 다중 insert
-            }
+        if (!rows.isEmpty()) {
+            fileMapper.addfiles(rows); // `file` 테이블에 다중 insert
         }
 
         return post.getSpCd();
@@ -134,5 +123,39 @@ public class SnsServiceImpl implements SnsService {
     @Override @Transactional(readOnly = true)
     public List<FollowUser> getFollowings(Integer mbrCd) {
         return snsMapper.selectFollowingsByMember(mbrCd);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<HomeFeedPost> getHomeFeed(Integer mbrCd) {
+        List<HomeFeedPost> posts = snsMapper.selectHomeFeedPosts(mbrCd);
+        if (posts.isEmpty()) return java.util.Collections.emptyList();
+
+        // 1) 게시물 ID 수집
+        List<String> postIds = posts.stream()
+                .map(p -> String.valueOf(p.getSpCd()))
+                .collect(java.util.stream.Collectors.toList());
+
+        // 2) 전체 이미지 조회 후 매핑
+        List<FileMetaData> allFiles = fileMapper.selectAllFilesByPostIds(postIds);
+        if (allFiles == null) allFiles = java.util.Collections.emptyList();
+
+        Map<String, List<String>> imagesMap = new java.util.HashMap<>();
+        for (FileMetaData fm : allFiles) {
+            if (fm == null || fm.getPostId() == null || fm.getFilePath() == null) continue; // <— 방어
+            imagesMap.computeIfAbsent(fm.getPostId(), k -> new java.util.ArrayList<>())
+                     .add(fm.getFilePath());
+        }
+
+        // 3) DTO에 주입 (repImagePath는 첫 장)
+        for (HomeFeedPost p : posts) {
+            List<String> imgs = imagesMap.get(String.valueOf(p.getSpCd()));
+            p.setImagePaths(imgs);
+            if (imgs != null && !imgs.isEmpty()) {
+                p.setRepImagePath(imgs.get(0));
+            }
+        }
+
+        return posts;
     }
 }

@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import ganadinote.common.domain.SnsPost;
 import ganadinote.sns.domain.FollowUser;
+import ganadinote.sns.domain.HomeFeedPost;
 
 @Mapper
 public interface SnsMapper {
@@ -16,19 +17,17 @@ public interface SnsMapper {
     
     // myfeed - 게시물 숫자
     long countPostsByMember(Integer mbrCd);
-    
     // myfeed - 팔로워 숫자
     long countFollowersOfMember(Integer mbrCd);
-    
     // myfeed - 팔로우 숫자
     long countFollowingsByMember(Integer mbrCd);
-    
     // myfeed - 게시물 대표이미지
     List<SnsPost> selectPostsByMember(Integer mbrCd);
-    
     // myfeed- 팔로워 목록
     List<FollowUser> selectFollowersOfMember(Integer mbrCd);
-    
     // myfeed- 팔로우 목록
     List<FollowUser> selectFollowingsByMember(Integer mbrCd);
+    
+    // home - 게시물
+    List<HomeFeedPost> selectHomeFeedPosts(Integer mbrCd);
 }
