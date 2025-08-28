@@ -1,284 +1,308 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout/communityLayoutView}">
+      layout:decorate="~{layout/communityLayoutView}">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-	<title>커뮤니티</title>
-	<link th:href="@{/assets/css/bootstrap.css}" href="/assets/css/bootstrap.css" rel="stylesheet"/>
-	<th:block layout:fragment="pageStyles">
-		<style>
-			.mobile-wrap {
-				max-width: 460px;
-				margin: auto;
-			}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title>커뮤니티</title>
+  <link th:href="@{/assets/css/bootstrap.css}" href="/assets/css/bootstrap.css" rel="stylesheet"/>
 
-			.sticky-topbar {
-				position: sticky;
-				top: 0;
-				border-bottom: 1px solid #eee;
-				z-index: 1;
-				padding: .5rem;
-			}
+  <th:block layout:fragment="pageStyles">
+    <style>
+      .mobile-wrap{max-width:460px;margin:auto}
+      .sticky-topbar{position:sticky;top:0;border-bottom:1px solid #eee;z-index:1;padding:.5rem;background:#fff}
+      .sticky-topbar .d-flex{margin-bottom:.5rem}
+      .chip-scroll{overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:.3rem;margin-bottom:.6rem}
+      .chip{display:inline-block;padding:.45rem .9rem;margin-right:.4rem;border:1px solid #ddd;border-radius:999px;font-size:.95rem;background:#f8f9fa}
+      .chip.active{background:#e9ecef;font-weight:600}
+      .post-card{border-bottom:1px solid #f1f1f1;padding:20px 8px}
+      .fab{position:fixed;right:16px;bottom:calc(var(--footer-h) + 16px);z-index:1}
+      .card-text{font-size:.7rem;color:#6c757d}
+      .small{font-size:.7rem}
 
-			.sticky-topbar .d-flex {
-				margin-bottom: .5rem;
-			}
+      /* 썸네일 레이아웃 */
+      .post-card .media{display:grid;grid-template-columns:1fr 110px;gap:10px;align-items:start}
+      .post-card.no-thumb .media{grid-template-columns:1fr}
+      .post-card .thumb{width:110px;height:110px;object-fit:cover;border-radius:8px;border:1px solid #eee}
 
-			.chip-scroll {
-				overflow-x: auto;
-				white-space: nowrap;
-				-webkit-overflow-scrolling: touch;
-				padding-bottom: .3rem;
-				margin-bottom: .6rem;
-			}
-
-			.chip {
-				display: inline-block;
-				padding: .45rem .9rem;
-				margin-right: .4rem;
-				border: 1px solid #ddd;
-				border-radius: 999px;
-				font-size: .95rem;
-				background: #f8f9fa;
-			}
-
-			.chip.active {
-				background: #e9ecef;
-				font-weight: 600;
-			}
-
-			.post-card {
-				border-bottom: 1px solid #f1f1f1;
-				padding: 20px 8px;
-			}
-
-			.fab {
-				position: fixed;
-				right: 16px;
-				bottom: calc(var(--footer-h) + 16px);
-				z-index: 1;
-			}
-
-			.card-text {
-				font-size: 0.7rem;
-				color: #6c757d;
-			}
-
-			.small {
-				font-size: 0.7rem;
-			}
-		</style>
-	</th:block>
+      .post-excerpt{
+        font-size:.9rem;color:#495057;
+        display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+      }
+    </style>
+  </th:block>
 </head>
 
 <body>
-	<th:block layout:fragment="contents">
-		<div class="mobile-wrap">
-			<!-- 상단 검색 + 정렬 -->
-			<div class="sticky-topbar p-2">
-				<div class="d-flex gap-2">
-				  <!-- ↓ 정렬 대신 검색대상 -->
-				  <select class="form-select form-select-sm" style="max-width:140px" name="qTarget">
-				    <option value="title"  th:selected="${param.qTarget ?: 'title'} == 'title'">제목</option>
-				    <option value="author" th:selected="${param.qTarget} == 'author'">작성자</option>
-				  </select>
+<th:block layout:fragment="contents">
+  <div class="mobile-wrap">
 
-				  <input type="search"
-				         class="form-control form-control-sm"
-				         name="q"
-				         placeholder="검색어 입력 후 Enter"
-				         th:value="${param.q}">
-				</div>
-				<!-- 카테고리 칩 -->
-				<div class="chip-scroll mt-2 pb-1" id="catChips">
-				  <button class="chip" type="button" data-cat="">전체</button>
-				  <button class="chip" type="button" data-cat="1">발자국 산책코스</button>
-				  <button class="chip" type="button" data-cat="3">멍멍 쇼핑리뷰</button>
-				  <button class="chip" type="button" data-cat="4">멍멍 수다방</button>
-				  <button class="chip" type="button" data-cat="5">산책크루 모집해요!</button>
-				  <button class="chip" type="button" data-cat="2">같이가요 스팟</button>
-				</div>
-			</div>
+    <!-- 상단 검색 + 대상 선택 -->
+    <div class="sticky-topbar p-2">
+      <div class="d-flex gap-2">
+        <select class="form-select form-select-sm" style="max-width:140px" name="qTarget">
+          <option value="title"  th:selected="${param.qTarget ?: 'title'} == 'title'">제목</option>
+          <option value="author" th:selected="${param.qTarget} == 'author'">작성자</option>
+        </select>
+        <input type="search" class="form-control form-control-sm" name="q" placeholder="검색어 입력 후 Enter" th:value="${param.q}">
+      </div>
 
-			<!-- 게시글 리스트 -->
-			<div id="list">
-				<div th:if="${#lists.isEmpty(post)}"
-				       class="text-center text-muted py-4">게시글이 없습니다.</div>
+      <!-- 카테고리 칩 -->
+      <div class="chip-scroll mt-2 pb-1" id="catChips">
+        <button class="chip" type="button" data-cat="">전체</button>
+        <button class="chip" type="button" data-cat="1">발자국 산책코스</button>
+        <button class="chip" type="button" data-cat="3">멍멍 쇼핑리뷰</button>
+        <button class="chip" type="button" data-cat="4">멍멍 수다방</button>
+        <button class="chip" type="button" data-cat="5">산책크루 모집해요!</button>
+        <button class="chip" type="button" data-cat="2">같이가요 스팟</button>
+      </div>
+    </div>
 
-				  <!-- 목록 렌더링 -->
-				  <div th:each="p : ${post}" class="post-card card mb-3">
-				    <div class="card-body">
-				      <a class="stretched-link"
-				         th:href="@{/community/postDetail(postId=${p.postId})}"></a>
+    <!-- 게시글 리스트(SSR 제거, 항상 JS로 그림) -->
+    <div id="list" class="py-3">
+      <div class="text-center text-muted">불러오는 중...</div>
+    </div>
 
-				      <span class="badge bg-secondary mb-3"
-				            th:text="${p.categoryNm}">카테고리</span>
+    <!-- 더보기 버튼 -->
+    <div class="p-3 text-center">
+      <button id="btnMore" class="btn btn-outline-secondary btn-sm w-100" style="display:none">더보기</button>
+    </div>
+  </div>
 
-				      <h6 th:text="${p.postTtl}">제목</h6>
+  <!-- 새 글 쓰기 버튼 -->
+  <div class="fab">
+    <a th:href="@{/community/addPost}" class="btn btn-primary rounded-pill px-3 py-2">글쓰기</a>
+  </div>
+</th:block>
 
-					  <p class="card-text text-truncate"
-					     th:text="${p.postCtnt} ?: ''">미리보기</p>
+<th:block layout:fragment="pageScripts">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+$(function(){
+  const $list    = $('#list');
+  const $btnMore = $('#btnMore');
+  const $chips   = $('#catChips');
+  const $q       = $('[name="q"]');
+  const $qTarget = $('[name="qTarget"]');
 
-					 <div class="post-meta small text-muted">
-					   <div th:text="${p.mbrNknm}">작성자</div>
-					   <div th:text="${#temporals.format(p.postRegDate, 'yyyy.MM.dd HH:mm')}">2025.08.26 18:45</div>
-					   <div th:text="'조회 ' + ${p.postViewCount}">조회 10</div>
-					 </div>
+  const usp = new URLSearchParams(location.search);
 
-				      <div class="d-flex justify-content-end gap-3 mt-2">
-				        <span>👍 <span th:text="${p.postLikeCount}">0</span></span>
-				        <span>💬 <span th:text="${p.cmtCount}">0</span></span>
-				      </div>
-				    </div>
-				  </div>
-				</div>
+  const state = {
+    size: 10,
+    offset: 0,
+    loading: false,
+    categoryId: usp.get('categoryId') || '',
+    q:        usp.get('q')        || '',
+    qTarget:  usp.get('qTarget')  || 'title'
+  };
 
-			<!-- 더보기 버튼 -->
-			<div class="p-3 text-center">
-			  <button id="btnMore" class="btn btn-outline-secondary btn-sm w-100">더보기</button>
-			</div>
-		</div>
+  if (state.q) $q.val(state.q);
+  $qTarget.val(state.qTarget);
 
-		<!-- 새 글 쓰기 버튼 -->
-		<div class="fab">
-			<a th:href="@{/community/addPost}" class="btn btn-primary rounded-pill px-3 py-2">글쓰기</a>
-		</div>
-	</th:block>
-	<th:block layout:fragment="pageScripts">
-		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-		<script>
-		$(function(){
-		  const $list    = $('#list');
-		  const $btnMore = $('#btnMore');
-		  const $chips   = $('#catChips');
-		  const $q       = $('[name="q"]');
-		  const $qTarget = $('[name="qTarget"]');
+  function fmt(iso){
+    if(!iso) return '';
+    const v = typeof iso === 'string' ? iso.replace(' ', 'T') : iso;
+    const d = new Date(v);
+    if (isNaN(d)) return iso;
+    const z = n => String(n).padStart(2,'0');
+    return d.getFullYear()+'.'+z(d.getMonth()+1)+'.'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes());
+  }
+  function esc(s){
+    return (s ?? '').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
 
-		  const usp = new URLSearchParams(location.search);
+  // 1) 엔티티 복원
+  function decodeEntities(s){
+    if (s == null) return '';
+    const t = document.createElement('textarea');
+    t.innerHTML = s;
+    return t.value;
+  }
 
-		  const state = {
-		    size: 10,
-		    offset: 0,
-		    loading: false,
-		    categoryId: usp.get('categoryId') || '',
-		    q:        usp.get('q')        || '',
-		    qTarget:  usp.get('qTarget')  || 'title'
-		  };
+  // 2) 절대경로 보정
+  function toAbsUrl(url){
+    if(!url) return null;
+    // //example.com → https://example.com
+    if (url.startsWith('//')) return location.protocol + url;
+    if (/^(data:|https?:\/\/)/i.test(url)) return url;
+    try { return new URL(url, location.origin).toString(); } catch { return url; }
+  }
 
-		  // 초기 입력값 반영
-		  if (state.q) $q.val(state.q);
-		  $qTarget.val(state.qTarget);
+  // 3) 문자열에서 첫 이미지 URL을 최대한 뽑아내기
+  function extractFirstImageUrl(html){
+    if (!html) return null;
 
-		  function fmt(iso){
-		    if(!iso) return '';
-		    const v = typeof iso === 'string' ? iso.replace(' ', 'T') : iso;
-		    const d = new Date(v);
-		    if (isNaN(d)) return iso;
-		    const z = n => String(n).padStart(2,'0');
-		    return d.getFullYear()+'.'+z(d.getMonth()+1)+'.'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes());
-		  }
-		  function esc(s){
-		    return (s ?? '').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-		  }
-		  function renderPosts(posts){
-		    if(!posts || posts.length===0){
-		      return '<div class="text-center text-muted py-4">게시글이 없습니다.</div>';
-		    }
-		    return posts.map(p => `
-		      <div class="post-card card mb-3">
-		        <div class="card-body">
-		          <a class="stretched-link" href="/community/postDetail?postId=${esc(p.postId)}"></a>
-		          <span class="badge bg-secondary mb-3">${esc(p.categoryNm || '')}</span>
-		          <h6>${esc(p.postTtl || '')}</h6>
-		          <p class="card-text text-truncate">${esc(p.postCtnt || '')}</p>
-		          <div class="post-meta small text-muted">
-		            <div>${esc(p.mbrNknm || '')}</div>
-		            <div>${fmt(p.postRegDate)}</div>
-		            <div>조회 ${p.postViewCount ?? 0}</div>
-		          </div>
-		          <div class="d-flex justify-content-end gap-3 mt-2">
-		            <span>👍 ${p.postLikeCount ?? 0}</span>
-		            <span>💬 ${p.cmtCount ?? 0}</span>
-		          </div>
-		        </div>
-		      </div>`).join('');
-		  }
+    // a) 먼저 디코딩(서버가 &lt;img&gt;로 보낼 때)
+    const decoded = decodeEntities(html);
 
-		  function pushUrl(){
-		    const u = new URL(location.href);
-		    const p = u.searchParams;
-		    if (state.categoryId) p.set('categoryId', state.categoryId); else p.delete('categoryId');
-		    if (state.q)         p.set('q', state.q);                     else p.delete('q');
-		    if (state.qTarget)   p.set('qTarget', state.qTarget);         else p.delete('qTarget');
-		    history.replaceState(null, '', u.pathname + '?' + p.toString());
-		  }
+    // b) DOM 파싱 (표준 케이스)
+    const div = document.createElement('div');
+    div.innerHTML = decoded;
 
-		  function fetchPosts(append){
-		    if (state.loading) return;
-		    state.loading = true;
+    // <img> 우선 탐색
+    let imgEl = div.querySelector('img');
+    if (imgEl) {
+      const srcFromDom = imgEl.getAttribute('src')
+        || imgEl.getAttribute('data-src')
+        || (imgEl.getAttribute('srcset') ? imgEl.getAttribute('srcset').split(',')[0].trim().split(' ')[0] : null);
+      if (srcFromDom) return toAbsUrl(srcFromDom);
+    }
 
-		    if (!append){
-		      state.offset = 0;
-		      $list.html('<div class="text-center text-muted py-4">불러오는 중...</div>');
-		    }
+    // c) style="background-image:url(...)" 패턴 탐색
+    const anyWithBg = div.querySelector('[style*="background"]');
+    if (anyWithBg) {
+      const m = anyWithBg.getAttribute('style')?.match(/url\((['"]?)(.*?)\1\)/i);
+      if (m && m[2]) return toAbsUrl(m[2]);
+    }
 
-		    const params = { size: state.size, offset: state.offset };
-		    if (state.categoryId) params.categoryId = state.categoryId;
-		    if (state.q)         params.q = state.q.trim();
-		    if (state.qTarget)   params.qTarget = state.qTarget;
+    // d) 정규식 백업: src="..."/data-src="..."/srcset="..."
+    const m1 = decoded.match(/\b(?:src|data-src)\s*=\s*["']([^"']+)["']/i);
+    if (m1 && m1[1]) return toAbsUrl(m1[1]);
 
-		    $.getJSON('/community/api/list', params)
-		      .done(function(posts){
-		        if (append) $list.append(renderPosts(posts));
-		        else $list.html(renderPosts(posts));
-		        state.offset += (posts?.length || 0);
-		        $btnMore.toggle((posts?.length || 0) === state.size);
-		        pushUrl();
-		      })
-		      .fail(function(){
-		        if (!append) $list.html('<div class="text-center text-danger py-4">목록을 불러오지 못했습니다.</div>');
-		        $btnMore.hide();
-		      })
-		      .always(function(){ state.loading = false; });
-		  }
+    const m2 = decoded.match(/\bsrcset\s*=\s*["']([^"']+)["']/i);
+    if (m2 && m2[1]) {
+      const first = m2[1].split(',')[0].trim().split(' ')[0];
+      if (first) return toAbsUrl(first);
+    }
 
-		  function setActiveChip(cat){
-		    const $all = $chips.find('.chip');
-		    $all.removeClass('active');
-		    (cat ? $all.filter(`[data-cat="${cat}"]`) : $all.filter('[data-cat=""]')).addClass('active');
-		  }
+    // e) 아주 마지막: http(s) 이미지 URL 덩어리
+    const m3 = decoded.match(/https?:\/\/[^\s"'<>]+\.(?:png|jpe?g|gif|webp)/i);
+    if (m3 && m3[0]) return toAbsUrl(m3[0]);
 
-		  // 이벤트
-		  $chips.on('click', '.chip', function(e){
-		    e.preventDefault();
-		    state.categoryId = $(this).attr('data-cat') || '';
-		    setActiveChip(state.categoryId);
-		    fetchPosts(false);
-		  });
+    return null;
+  }
 
-		  $q.on('keydown', function(e){
-		    if (e.key === 'Enter'){
-		      state.q = $(this).val().trim();
-		      fetchPosts(false);
-		    }
-		  });
+  // 4) 본문 텍스트 추출
+  function extractText(html){
+    const decoded = decodeEntities(html || '');
+    const div = document.createElement('div');
+    div.innerHTML = decoded;
+    return (div.textContent || '').trim().replace(/\s+/g, ' ');
+  }
 
-		  $qTarget.on('change', function(){
-		    state.qTarget = $(this).val();
-		    state.q = $q.val().trim();     // 현재 입력값과 함께 적용
-		    fetchPosts(false);
-		  });
+  function ellipsis(s, n){ if(!s) return ''; return s.length>n ? s.slice(0,n).trim()+'…' : s; }
 
-		  $btnMore.on('click', function(){ fetchPosts(true); });
+  // 5) 렌더러 (오류/404시 썸네일 자동 숨김)
+  function renderPosts(posts){
+    if(!posts || posts.length===0){
+      return '<div class="text-center text-muted py-4">게시글이 없습니다.</div>';
+    }
 
-		  // 초기 로드
-		  setActiveChip(state.categoryId);
-		  fetchPosts(false);
-		});
-		</script>
-	</th:block>
+    // 디버그: 첫 3개 로깅 (원인 빠르게 확인)
+    console.groupCollapsed('[DEBUG] list thumbnails');
+    posts.slice(0,3).forEach((p,i)=>{
+      const raw = p.postCtnt;
+      const decoded = decodeEntities(raw || '');
+      const url = extractFirstImageUrl(raw || '');
+      console.log(`#${i+1}`, {postId:p.postId, raw, decodedSample: decoded.slice(0,120), img:url});
+    });
+    console.groupEnd();
+
+    return posts.map(p => {
+      const thumb = extractFirstImageUrl(p.postCtnt || '');
+      const preview = ellipsis(extractText(p.postCtnt || ''), 120);
+      const cardCls = thumb ? 'post-card card mb-3' : 'post-card card mb-3 no-thumb';
+
+      return `
+        <div class="${cardCls}">
+          <div class="card-body">
+            <a class="stretched-link" href="/community/postDetail?postId=${esc(p.postId)}"></a>
+            <span class="badge bg-secondary mb-2">${esc(p.categoryNm || '')}</span>
+            <h6 class="mb-2">${esc(p.postTtl || '')}</h6>
+
+            <div class="media">
+              <div>
+                <p class="post-excerpt mb-2">${esc(preview)}</p>
+                <div class="post-meta small text-muted d-flex gap-2 flex-wrap">
+                  <span>${esc(p.mbrNknm || '')}</span>
+                  <span>${fmt(p.postRegDate)}</span>
+                  <span>조회 ${p.postViewCount ?? 0}</span>
+                </div>
+              </div>
+              ${thumb ? `<img class="thumb" src="${esc(thumb)}" alt="thumbnail"
+                           onerror="this.closest('.post-card').classList.add('no-thumb');this.remove()">` : ``}
+            </div>
+
+            <div class="d-flex justify-content-end gap-3 mt-2">
+              <span>👍 ${p.postLikeCount ?? 0}</span>
+              <span>💬 ${p.cmtCount ?? 0}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function pushUrl(){
+    const u = new URL(location.href);
+    const p = u.searchParams;
+    if (state.categoryId) p.set('categoryId', state.categoryId); else p.delete('categoryId');
+    if (state.q)         p.set('q', state.q);                     else p.delete('q');
+    if (state.qTarget)   p.set('qTarget', state.qTarget);         else p.delete('qTarget');
+    history.replaceState(null, '', u.pathname + '?' + p.toString());
+  }
+
+  function fetchPosts(append){
+    if (state.loading) return;
+    state.loading = true;
+
+    if (!append){
+      state.offset = 0;
+      $list.html('<div class="text-center text-muted py-4">불러오는 중...</div>');
+    }
+
+    const params = { size: state.size, offset: state.offset };
+    if (state.categoryId) params.categoryId = state.categoryId;
+    if (state.q)         params.q = state.q.trim();
+    if (state.qTarget)   params.qTarget = state.qTarget;
+
+    $.getJSON('/community/api/list', params)
+      .done(function(posts){
+        if (append) $list.append(renderPosts(posts));
+        else $list.html(renderPosts(posts));
+        state.offset += (posts?.length || 0);
+        $btnMore.toggle((posts?.length || 0) === state.size);
+        pushUrl();
+      })
+      .fail(function(){
+        if (!append) $list.html('<div class="text-center text-danger py-4">목록을 불러오지 못했습니다.</div>');
+        $btnMore.hide();
+      })
+      .always(function(){ state.loading = false; });
+  }
+
+  function setActiveChip(cat){
+    const $all = $chips.find('.chip');
+    $all.removeClass('active');
+    (cat ? $all.filter(`[data-cat="${cat}"]`) : $all.filter('[data-cat=""]')).addClass('active');
+  }
+
+  $chips.on('click', '.chip', function(e){
+    e.preventDefault();
+    state.categoryId = $(this).attr('data-cat') || '';
+    setActiveChip(state.categoryId);
+    fetchPosts(false);
+  });
+
+  $q.on('keydown', function(e){
+    if (e.key === 'Enter'){
+      state.q = $(this).val().trim();
+      fetchPosts(false);
+    }
+  });
+
+  $qTarget.on('change', function(){
+    state.qTarget = $(this).val();
+    state.q = $q.val().trim();
+    fetchPosts(false);
+  });
+
+  $btnMore.on('click', function(){ fetchPosts(true); });
+
+  setActiveChip(state.categoryId);
+  fetchPosts(false);
+});
+</script>
+</th:block>
 </body>
-
 </html>
