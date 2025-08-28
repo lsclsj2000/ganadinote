@@ -10,6 +10,7 @@
 		<result property="fileStoredNm" column="file_stored_nm"/>
 		<result property="filePath"    column="file_path"/>
 		<result property="fileSize"    column="file_size"/>
+		<result property="postType"    column="post_type"/>
 	</resultMap>
 
 	<delete id="deleteFileByIdx" parameterType="int">
@@ -30,16 +31,16 @@
 	
 	<!-- 단일 insert: AUTO_INCREMENT file_id는 넣지 않는다 -->
 	<insert id="addfile" parameterType="ganadinote.common.domain.FileMetaData">
-		INSERT INTO `file` (post_id, file_orgnl_nm, file_stored_nm, file_path, file_size, file_reg_date)
-		VALUES (#{postId}, #{fileOrgnlNm}, #{fileStoredNm}, #{filePath}, #{fileSize}, NOW())
+		INSERT INTO `file` (post_id, file_orgnl_nm, file_stored_nm, file_path, file_size, file_reg_date, post_type)
+		VALUES (#{postId}, #{fileOrgnlNm}, #{fileStoredNm}, #{filePath}, #{fileSize}, NOW(), #{postType})
 	</insert>
 	
 	<!-- 다중 insert -->
 	<insert id="addfiles" parameterType="java.util.List">
-		INSERT INTO `file` (post_id, file_orgnl_nm, file_stored_nm, file_path, file_size, file_reg_date)
+		INSERT INTO `file` (post_id, file_orgnl_nm, file_stored_nm, file_path, file_size, file_reg_date, post_type)
 		VALUES
 		<foreach collection="list" item="f" separator=",">
-			(#{f.postId}, #{f.fileOrgnlNm}, #{f.fileStoredNm}, #{f.filePath}, #{f.fileSize}, NOW())
+			(#{f.postId}, #{f.fileOrgnlNm}, #{f.fileStoredNm}, #{f.filePath}, #{f.fileSize}, NOW(), #{postType})
 		</foreach>
 	</insert>
   
@@ -58,5 +59,17 @@
 		FROM ranked
 		WHERE rn = 1
 	</select>
+	
+	
+	<update id="bindFilesToPostByPaths">
+	  UPDATE `file`
+	  SET post_id = #{postId}
+	  WHERE post_id IS NULL
+	    AND file_path IN
+	    <foreach collection="paths" item="p" open="(" separator="," close=")">
+	      #{p}
+	    </foreach>
+	    AND file_reg_date >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+	</update>
 
 </mapper>

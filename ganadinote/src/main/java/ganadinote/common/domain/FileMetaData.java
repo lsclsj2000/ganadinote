@@ -10,6 +10,7 @@ public class FileMetaData {
     private String fileStoredNm;
     private String filePath;
     private Long   fileSize;
+    private String  postType;
 	
 	public FileMetaData() {}
 	

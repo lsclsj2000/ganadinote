@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import ganadinote.common.domain.Comment;
 import ganadinote.community.dto.PostDetailDTO;
+import ganadinote.community.dto.PostRequestDTO;
+
 
 @Service
 public interface CommunityService {
@@ -21,4 +24,8 @@ public interface CommunityService {
 	void addComment(int postId, Integer parentCmtId, String authorId, String cmtCtnt);
 	
 	 void increaseViewCount(long postId);
+	 
+	 Long createPost(PostRequestDTO req, String mbrCd);
+	 
+	 String uploadEditorImage(MultipartFile image);
 }
