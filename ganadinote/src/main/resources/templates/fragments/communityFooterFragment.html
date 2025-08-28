@@ -2,17 +2,17 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <footer id="snsFooter" class="fixed-bottom d-xl-none" th:fragment="communityFooterFragment">
 	<nav class="footer-tabs">
-        <a href="" class="tab-item">
+        <a th:href="@{/todo/list}" class="tab-item">
             <svg class="bi" width="24" height="24" fill="currentColor">
                 <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#house"></use>
             </svg>
-            <span class="tab-label">Main</span>
+            <span class="tab-label">To-do</span>
         </a>
-        <a href="" class="tab-item">
+        <a th:href="@{/routine/list}" class="tab-item">
             <svg class="bi" width="24" height="24" fill="currentColor">
                 <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#calendar2-check"></use>
             </svg>
-            <span class="tab-label">To-do</span>
+            <span class="tab-label">Routine</span>
         </a>
         <a th:href="@{/community}" class="tab-item  active">
             <svg class="bi" width="24" height="24" fill="currentColor">
