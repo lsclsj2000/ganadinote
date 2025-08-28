@@ -64,8 +64,8 @@
 <th:block layout:fragment="jsScripts">
     <script th:inline="javascript">
     /*<![CDATA[*/
-        const VAPID_PUBLIC_KEY = [[${vapidPublicKey}]];
-        const MEMBER_CODE = [[${mbrCd}]];
+        const VAPID_PUBLIC_KEY = /*[[${vapidPublicKey}]]*/ 'VAPID_PUBLIC_KEY_NOT_FOUND';
+    	const MEMBER_CODE = /*[[${mbrCd}]]*/ -1;
 
         const subscribeButton = document.getElementById('toggle-subscribe-button');
         const statusText = document.getElementById('subscription-status');
