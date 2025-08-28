@@ -16,6 +16,7 @@
     </resultMap>
     
     <select id="getPetInfoByMbrCd" resultMap="petResultMap">
+    	 /* 회원 코드를 기준으로 TBL_PET 테이블의 모든 정보를 가져옵니다. */
     	SELECT 
 			pet_cd, 
 			mbr_cd, 
@@ -34,5 +35,23 @@
 			mbr_cd = #{mbrCd};
     </select>
     
-	
+    <select id="getPetInfoWithBreedByMbrCd" resultType="ganadinote.notification.domain.PetWithBreedDTO">
+    	/* 회원 코드로 반려동물 정보와 품종별 온도 민감도(min_temp, max_temp)를 함께 조회합니다. */
+        SELECT
+            p.pet_cd,
+            p.pet_name,
+            p.pet_profile_img_url,
+            p.pet_gender,
+            p.pet_birth,
+            p.pet_breed_id,
+            b.max_temp,
+            b.min_temp
+        FROM
+            TBL_PET p
+        INNER JOIN
+            TBL_BREED b ON p.pet_breed_id = b.breed_cd
+        WHERE
+            p.mbr_cd = #{mbrCd}
+    </select>
+    
 </mapper>

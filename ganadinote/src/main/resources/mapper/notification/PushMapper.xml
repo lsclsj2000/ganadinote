@@ -2,31 +2,55 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="ganadinote.notification.mapper.PushMapper">
 
-<insert id="addSubscription">
-        INSERT INTO push_subscription (
-            mbr_cd,
-            endpoint,
-            p256dh,
-            auth
-        ) VALUES (
-            #{mbrCd},
-            #{endpoint},
-            #{p256dh},
-            #{auth}
-        )
-    </insert>
-
     <select id="getSubInfoByMbrCd" resultType="ganadinote.common.domain.PushSubscription">
+    	/* 알림 구독 정보 멤버 코드로 받아오기 */
+		SELECT
+		    id,
+		    mbr_cd,
+		    endpoint,
+		    p256dh,
+		    auth,
+		    created_at
+		FROM 
+		    push_subscription
+		WHERE
+		    mbr_cd = #{mbrCd}
+    </select>
+    
+    <select id="isSubscriptionActive" parameterType="int" resultType="boolean">
+    	/* mbr_cd와 is_active=1 조건을 만족하는 레코드를 찾습니다. */
         SELECT
-            id,
-            mbr_cd,
-            endpoint,
-            p256dh,
-            auth,
-            created_at
-        FROM 
+            COUNT(*) > 0
+        FROM
             push_subscription
         WHERE
-            mbr_cd = #{mbrCd}
+            mbr_cd = #{mbrCd} AND is_active = 1
     </select>
+    
+    <select id="getSubscriptionByEndpoint" parameterType="String" resultType="int">
+    
+        SELECT 
+        	COUNT(*) 
+        FROM 
+        	push_subscription
+        WHERE 
+        	endpoint = #{endpoint}
+    </select>
+    
+    <insert id="addSubscription" parameterType="ganadinote.notification.domain.PushSubDTO">
+        INSERT INTO 
+        	push_subscription 
+        		(mbr_cd, endpoint, p256dh, auth, is_active)
+        VALUES 
+        (#{mbrCd}, #{endpoint}, #{p256dh}, #{auth}, 1)
+    </insert>
+
+    <update id="updateSubscription" parameterType="ganadinote.notification.domain.PushSubDTO">
+        UPDATE 
+        	push_subscription
+        SET 
+        	is_active = 1, p256dh = #{p256dh}, auth = #{auth}
+        WHERE 
+        	endpoint = #{endpoint} AND mbr_cd = #{mbrCd}
+    </update>
 </mapper>

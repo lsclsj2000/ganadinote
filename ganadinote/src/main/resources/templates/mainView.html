@@ -86,7 +86,7 @@
     </style>
 </head>
 
-<div layout:fragment="contents">
+<th:block layout:fragment="contents">
     <div class="page-heading mt-3">
         <h3>내 강아지</h3>
     </div>
@@ -141,8 +141,7 @@
             </div>
         </section>
     </div>
-</div>
-
+</th:block>
 <th:block layout:fragment="jsScripts">
     <script th:inline="javascript">
         // --- 1. 유틸리티 함수 ---
