@@ -6,9 +6,11 @@ import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Pet {
 	private int 			petCd;                   // 반려동물 코드 (Primary Key, 자동 증가)
     private int 			mbrCd;                   // 회원 코드 (Foreign Key)
