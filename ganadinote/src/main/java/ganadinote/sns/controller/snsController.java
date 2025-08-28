@@ -25,13 +25,19 @@ public class snsController {
 	
 	private final SnsService snsService;
 
-    @GetMapping
-    public String getSnsMainView(Model model) {
-        // 기본 진입은 홈 프래그먼트를 초기 주입
-    	model.addAttribute("initialTpl", "fragments/snsHomeFragment");
-    	model.addAttribute("initialFrag", "snsHomeFragment");
-        return "layout/snsLayoutMainView";
-    }
+	@GetMapping
+	public String getSnsMainView(HttpSession session, Model model) {
+	    Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
+	            .map(Integer::valueOf)
+	            .orElse(1);
+
+	    var homePosts = snsService.getHomeFeed(mbrCd);
+	    model.addAttribute("homePosts", homePosts);
+
+	    model.addAttribute("initialTpl", "fragments/snsHomeFragment");
+	    model.addAttribute("initialFrag", "snsHomeFragment");
+	    return "layout/snsLayoutMainView";
+	}
 
     private boolean isFetch(HttpServletRequest req) {
         String v = req.getHeader("X-Requested-With");
@@ -42,20 +48,19 @@ public class snsController {
     @GetMapping("/home")
     public String getSnshomeView(HttpServletRequest req, HttpSession session, Model model,
             @RequestParam(defaultValue = "1") int page) {
-    	
-    	Integer mbrCd = Optional.ofNullable((String) session.getAttribute("SCD"))
-		         .map(Integer::valueOf)
-		         .orElse(1);
-    	
-    	var myPosts = snsService.getMyFeedPosts(mbrCd);
-    	
-    	model.addAttribute("myPosts", myPosts);
-    	
+
+        Integer mbrCd = Optional.ofNullable((String) session.getAttribute("SCD"))
+                .map(Integer::valueOf)
+                .orElse(2);
+
+        var homePosts = snsService.getHomeFeed(mbrCd);
+        model.addAttribute("homePosts", homePosts);
+
         if (isFetch(req)) {
             return "fragments/snsHomeFragment :: snsHomeFragment";
         }
         model.addAttribute("initialTpl", "fragments/snsHomeFragment");
-    	model.addAttribute("initialFrag", "snsHomeFragment");
+        model.addAttribute("initialFrag", "snsHomeFragment");
         return "layout/snsLayoutMainView";
     }
 
@@ -115,16 +120,21 @@ public class snsController {
     @PostMapping(value = "/api/posts", consumes = {"multipart/form-data"})
     @ResponseBody
     public Map<String, Object> createPost(
-            @RequestParam("content") String content,
+            @RequestParam(value="content", required=false, defaultValue="") String content,
             @RequestParam(value="tags", required=false) String tags,
             @RequestPart(value="images", required=false) MultipartFile[] images,
             HttpSession session
     ) {
-    	Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
+        Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
                 .map(Integer::valueOf)
                 .orElse(1);
 
-		Integer spCd = snsService.createPost(content, mbrCd, images);
-		return Map.of("ok", true, "sp_cd", spCd);
+        // ✅ 사진 필수
+        if (images == null || images.length == 0) {
+            return Map.of("ok", false, "message", "사진을 최소 1장 업로드해 주세요.");
+        }
+
+        Integer spCd = snsService.createPost(content, mbrCd, images);
+        return Map.of("ok", true, "sp_cd", spCd);
     }
 }

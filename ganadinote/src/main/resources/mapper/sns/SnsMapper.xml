@@ -15,6 +15,16 @@
 		<result property="nickname" column="mbr_nknm"/>
 		<result property="handle"   column="handle"/>
 	</resultMap>
+	
+	<resultMap id="homeFeedMap" type="ganadinote.sns.domain.HomeFeedPost">
+		<result property="spCd"       column="sp_cd"/>
+		<result property="mbrCd"      column="mbr_cd"/>
+		<result property="spCn"       column="sp_cn"/>
+		<result property="spRegYmdt"  column="sp_reg_ymdt"/>
+		<result property="nickname"   column="mbr_nknm"/>
+		<result property="handle"     column="handle"/>
+		<result property="profilePath"  column="mbr_profile"/>
+	</resultMap>
 
 	<insert id="insertPost"
         	parameterType="ganadinote.common.domain.SnsPost"
@@ -75,6 +85,41 @@
 		JOIN member m ON m.mbr_cd = f.following_mbr_cd
 		WHERE f.follow_mbr_cd = #{mbrCd}
 		ORDER BY f.follow_ymdt DESC
+	</select>
+	
+	<select id="selectHomeFeedPosts" parameterType="int" resultMap="homeFeedMap">
+    	/* home - 내가 팔로우한 회원들의 최근 1주 게시물 */
+	    (
+		  SELECT
+		    p.sp_cd,
+		    p.mbr_cd,
+		    p.sp_cn,
+		    p.sp_reg_ymdt,
+		    m.mbr_nknm,
+		    CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
+		    m.mbr_profile
+		  FROM sns_post p
+		  JOIN member m ON m.mbr_cd = p.mbr_cd
+		  WHERE p.mbr_cd = #{mbrCd}
+		    AND p.sp_reg_ymdt >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+		)
+		UNION ALL
+		(
+		  SELECT
+		    p.sp_cd,
+		    p.mbr_cd,
+		    p.sp_cn,
+		    p.sp_reg_ymdt,
+		    m.mbr_nknm,
+		    CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
+		    m.mbr_profile
+		  FROM sns_post p
+		  JOIN follow f ON f.following_mbr_cd = p.mbr_cd
+		  JOIN member m ON m.mbr_cd = p.mbr_cd
+		  WHERE f.follow_mbr_cd = #{mbrCd}
+		    AND p.sp_reg_ymdt >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+		)
+		ORDER BY sp_reg_ymdt DESC
 	</select>
 	
 
