@@ -275,4 +275,56 @@ public class SnsServiceImpl implements SnsService {
             return true;
         }
     }
+    
+    // 게시물 삭제
+    @Override
+    @Transactional
+    public void deletePost(Integer me, Integer spCd) {
+        Integer owner = snsMapper.selectPostOwner(spCd);
+        if (owner == null) throw new IllegalArgumentException("게시물이 존재하지 않습니다.");
+        if (!owner.equals(me)) throw new IllegalArgumentException("삭제 권한이 없습니다.");
+
+        // 1) 파일 목록 조회 (post_type='sns')
+        var files = fileMapper.selectFilesByPostId("sns", String.valueOf(spCd));
+
+        // 2) (선택) 물리 파일 삭제 - 실패해도 DB는 지움
+        if (files != null) {
+            for (var f : files) {
+                try {
+                    // FileUtils에 삭제 유틸이 있다면 호출 (예: fileUtils.deleteQuietly)
+                    // 없다면 저장경로 규칙에 맞춰 직접 삭제 로직을 구현
+                    fileUtils.deleteQuietly(f.getFilePath());
+                } catch (Exception ignore) {}
+            }
+        }
+
+        // 3) file 테이블 삭제 → sns_post 삭제
+        fileMapper.deleteFilesByPostId("sns", String.valueOf(spCd));
+        snsMapper.deletePost(spCd);
+    }
+    
+    // myfeed - 게시물 상세 모달
+    @Override
+    @Transactional(readOnly = true)
+    public HomeFeedPost getPostDetail(Integer viewerMbrCd, Integer spCd) {
+        HomeFeedPost p = snsMapper.selectPostDetail(viewerMbrCd, spCd);
+        if (p == null) return null;
+
+        var files = fileMapper.selectFilesByPostId("sns", String.valueOf(spCd));
+
+        List<String> imgs = new ArrayList<>();
+        if (files != null) {
+            for (FileMetaData f : files) {
+                if (f == null) continue;  
+                String path = f.getFilePath();
+                if (path == null || path.isBlank()) continue;
+                imgs.add(path);
+            }
+        }
+
+        p.setImagePaths(imgs);
+        if (!imgs.isEmpty()) p.setRepImagePath(imgs.get(0));
+
+        return p;
+    }
 }

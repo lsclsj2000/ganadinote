@@ -12,6 +12,8 @@ import ganadinote.sns.domain.HomeFeedPost;
 public interface SnsService {
 	// 게시물 업로드
     Integer createPost(String content, Integer mbrCd, MultipartFile[] images);
+    // 게시물 삭제
+    void deletePost(Integer me, Integer spCd);
     
     // myfeed - 게시물 숫자
     long countPostsByMember(Integer mbrCd);
@@ -39,7 +41,11 @@ public interface SnsService {
     boolean isFollowing(Integer me, Integer target);
     // myfeed - 프로필 - 팔로우 토글
     boolean toggleFollow(Integer me, Integer target);
+    // myfeed - 게시물 상세 모달
+    HomeFeedPost getPostDetail(Integer viewerMbrCd, Integer spCd);
     
     // home - 게시물
     List<HomeFeedPost> getHomeFeed(Integer mbrCd);
+    
+    
 }

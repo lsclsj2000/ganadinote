@@ -198,6 +198,7 @@
   align-items: center;
   gap: .75rem;
   padding: .5rem 0;
+  justify-content: space-between;
 }
 
 .sr_follow-item:last-child { border-bottom: 0; }
@@ -469,6 +470,93 @@
 .sr_feed-content p {
     font-size: 1rem;
     line-height: 1.5;
+}
+
+.sr_three-dots-btn {
+	background-color: transparent;
+	border: none;
+	padding: 0;
+}
+
+/* Offcanvas 모달 관련 스타일 */
+.sr_offcanvas {
+	width: 100%;
+	max-width: 400px; /* PC 환경에서 최대 너비 제한 */
+	margin: 0 auto;
+}
+
+@media (max-width: 576px) {
+	.sr_offcanvas {
+		max-width: 100%;
+		border-radius: 1rem 1rem 0 0;
+	}
+}
+
+.sr_offcanvas-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	padding: 1rem;
+	font-size: 1rem;
+	font-weight: 500;
+	transition: background-color 0.2s;
+}
+
+.sr_offcanvas-btn svg {
+	margin-right: 0.5rem;
+}
+
+.sr_offcanvas-btn:hover {
+	background-color: #f0f0f0;
+}
+
+.sr_post-modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35);
+  display: none;
+  z-index: 1999;   /* 시트 바로 아래 */
+}
+
+.sr_post-modal-sheet {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display: none;
+  z-index: 2000;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  transform: translateY(100%);
+  transition: transform .28s ease;
+}
+
+/* 실제 시트 영역 */
+.sr_post-modal-sheet .sr_post-modal-content {
+  background: #fff;
+  width: 100%;
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+}
+
+/* 열릴 때 활성화 상태 */
+.sr_post-modal-sheet.show {
+  transform: translateY(0);
+  display: flex;
+}
+.sr_post-modal-sheet.show .sr_post-modal-content {
+  transform: translateY(0);
+}
+
+/* 닫기 버튼 */
+.sr_post-modal-close-btn {
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  float: right;
+  cursor: pointer;
 }
 
 /* sns-walking */
