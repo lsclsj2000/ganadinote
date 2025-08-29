@@ -3,7 +3,9 @@ package ganadinote.sns.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
+import ganadinote.common.domain.Member;
 import ganadinote.common.domain.SnsPost;
 import ganadinote.sns.domain.FollowUser;
 import ganadinote.sns.domain.HomeFeedPost;
@@ -27,6 +29,22 @@ public interface SnsMapper {
     List<FollowUser> selectFollowersOfMember(Integer mbrCd);
     // myfeed- 팔로우 목록
     List<FollowUser> selectFollowingsByMember(Integer mbrCd);
+    // myfeed - 프로필 수정 내역 조회
+    Member selectMemberById(Integer mbrCd);
+    // myfeed - 프로필 수정 - 닉네임 유효성 검증
+    long countNickname(String mbrNknm, Integer excludeMbrCd);
+    // myfeed - 프로필 수정 - 업데이트
+    int updateMemberProfile(Integer mbrCd, String mbrNknm, String mbrProfile);
+    // myfeed - 프로필 수정 - 비밀번호 유효성 검증
+    String selectEncodedPasswordByMbrCd(@Param("mbrCd") Integer mbrCd);
+    // myfeed - 프로필 수정 - 비밀번호 변경
+    int updatePassword(@Param("mbrCd") Integer mbrCd, @Param("mbrPw") String encodedPw);
+    // myfeed - 팔로우 여부 
+    long existsFollow(@Param("me") Integer me, @Param("target") Integer target);
+    // myfeed - 팔로우
+    int insertFollow(@Param("me") Integer me, @Param("target") Integer target);
+    // myfeed - 팔로우 삭제
+    int deleteFollow(@Param("me") Integer me, @Param("target") Integer target);
     
     // home - 게시물
     List<HomeFeedPost> selectHomeFeedPosts(Integer mbrCd);

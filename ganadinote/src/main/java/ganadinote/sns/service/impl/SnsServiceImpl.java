@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import ganadinote.common.domain.FileMetaData;
+import ganadinote.common.domain.Member;
 import ganadinote.common.domain.SnsPost;
 import ganadinote.common.file.FileMapper;
 import ganadinote.common.file.FileUtils;
@@ -27,6 +29,7 @@ public class SnsServiceImpl implements SnsService {
     private final SnsMapper snsMapper;
     private final FileUtils fileUtils; // 파일 저장은 여기서 처리
     private final FileMapper fileMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Integer createPost(String content, Integer mbrCd, MultipartFile[] images) {
@@ -115,16 +118,19 @@ public class SnsServiceImpl implements SnsService {
         return feedPost;
     }
     
+    // myfeed- 팔로워 목록
     @Override @Transactional(readOnly = true)
     public List<FollowUser> getFollowers(Integer mbrCd) {
         return snsMapper.selectFollowersOfMember(mbrCd);
     }
-
+    
+    // myfeed- 팔로우 목록
     @Override @Transactional(readOnly = true)
     public List<FollowUser> getFollowings(Integer mbrCd) {
         return snsMapper.selectFollowingsByMember(mbrCd);
     }
     
+    // home - 게시물
     @Override
     @Transactional(readOnly = true)
     public List<HomeFeedPost> getHomeFeed(Integer mbrCd) {
@@ -157,5 +163,116 @@ public class SnsServiceImpl implements SnsService {
         }
 
         return posts;
+    }
+    
+    // myfeed - 프로필 수정 내역 조회
+	@Override
+	public Member getMemberProfile(Integer mbrCd) {
+		return snsMapper.selectMemberById(mbrCd);
+	}
+	
+	// myfeed - 프로필 수정 - 닉네임 유효성 검증
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isNicknameDuplicate(String mbrNknm, Integer excludeMbrCd) {
+	    if (mbrNknm == null || mbrNknm.isBlank()) return false;
+	    return snsMapper.countNickname(mbrNknm, excludeMbrCd) > 0;
+	}
+
+    // myfeed - 프로필 수정 - 업데이트
+	@Override
+	public int updateProfile(Integer mbrCd, String newNickname, MultipartFile profileImage) {
+	    // 현재 회원 정보
+	    Member me = snsMapper.selectMemberById(mbrCd);
+	    if (me == null) throw new IllegalArgumentException("회원이 존재하지 않습니다.");
+
+	    String nicknameToSet = null;
+	    String profilePathToSet = null;
+
+	    // 닉네임 변경 여부
+	    if (newNickname != null) {
+	        String trimmed = newNickname.trim();
+	        if (trimmed.length() == 0) throw new IllegalArgumentException("닉네임을 입력하세요.");
+	        if (trimmed.length() > 50)  throw new IllegalArgumentException("닉네임은 50자 이하여야 합니다.");
+	        if (!trimmed.equals(me.getMbrNknm())) {
+	            // 최종 중복 체크
+	            if (isNicknameDuplicate(trimmed, mbrCd)) {
+	                throw new org.springframework.dao.DuplicateKeyException("닉네임 중복");
+	            }
+	            nicknameToSet = trimmed;
+	        }
+	    }
+
+	    // 이미지 변경 여부
+	    if (profileImage != null && !profileImage.isEmpty()) {
+	        // 기존 FileUtils가 다중 업로드만 있다면 이렇게 감싸서 1건 사용
+	        List<FileMetaData> uploaded = fileUtils.uploadFiles(
+	                new MultipartFile[]{ profileImage }, "sns"
+	        );
+	        if (uploaded != null && !uploaded.isEmpty()) {
+	            profilePathToSet = uploaded.get(0).getFilePath(); // 예: /attachment/sns/20250827/image/xxx.png
+	        }
+	    }
+
+	    // 둘 다 없으면 변경사항 없음
+	    if (nicknameToSet == null && profilePathToSet == null) return 0;
+
+	    // 동적 업데이트
+	    return snsMapper.updateMemberProfile(mbrCd, nicknameToSet, profilePathToSet);
+	}
+	
+    // myfeed - 프로필 수정 - 비밀번호 유효성 검증
+	@Override
+    @Transactional(readOnly = true)
+    public boolean checkCurrentPassword(Integer mbrCd, String rawPassword) {
+        String encoded = snsMapper.selectEncodedPasswordByMbrCd(mbrCd);
+        if (encoded == null) return false;
+        return passwordEncoder.matches(rawPassword, encoded);
+    }
+
+    // myfeed - 프로필 수정 - 비밀번호 변경
+    @Override
+    public void changePassword(Integer mbrCd, String currentPassword, String newPassword) {
+        // 현재 비번 검증
+        String encoded = snsMapper.selectEncodedPasswordByMbrCd(mbrCd);
+        if (encoded == null || !passwordEncoder.matches(currentPassword, encoded)) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+        // 새 비번 규칙(서버측 2차 방어)
+        if (newPassword == null || newPassword.length() < 8)
+            throw new IllegalArgumentException("비밀번호는 8자 이상이어야 합니다.");
+        if (newPassword.length() > 64)
+            throw new IllegalArgumentException("비밀번호는 64자를 넘길 수 없습니다.");
+        if (newPassword.contains(" "))
+            throw new IllegalArgumentException("비밀번호에 공백을 사용할 수 없습니다.");
+
+        // 현재와 동일 금지(선택)
+        if (passwordEncoder.matches(newPassword, encoded))
+            throw new IllegalArgumentException("현재 비밀번호와 동일할 수 없습니다.");
+
+        String newEncoded = passwordEncoder.encode(newPassword);
+        int updated = snsMapper.updatePassword(mbrCd, newEncoded);
+        if (updated == 0)
+            throw new IllegalStateException("비밀번호 변경에 실패했습니다.");
+    }
+    
+    // myfeed - 프로필 - 팔로우 여부
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isFollowing(Integer me, Integer target) {
+        return snsMapper.existsFollow(me, target) > 0;
+    }
+
+    // myfeed - 프로필 - 팔로우 토글
+    @Override
+    public boolean toggleFollow(Integer me, Integer target) {
+        boolean now = isFollowing(me, target);
+        if (now) {
+            snsMapper.deleteFollow(me, target);
+            return false;
+        } else {
+            snsMapper.insertFollow(me, target);
+            return true;
+        }
     }
 }
