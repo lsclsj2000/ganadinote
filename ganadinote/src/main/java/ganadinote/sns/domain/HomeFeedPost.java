@@ -14,8 +14,9 @@ public class HomeFeedPost {
     private String  nickname;
     private String  handle;
 
-    // 새로 추가
     private String  profilePath;
     private String  repImagePath;
     private List<String> imagePaths;
+    
+    private Boolean following;
 }

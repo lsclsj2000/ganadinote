@@ -15,6 +15,10 @@ public interface SnsMapper {
 	
 	// 게시물 업로드
 	int insertPost(SnsPost post);
+	// 게시물 삭제 조건
+	Integer selectPostOwner(@Param("spCd") Integer spCd);
+	// 게시물 삭제
+	int deletePost(@Param("spCd") Integer spCd);
     
     
     // myfeed - 게시물 숫자
@@ -45,7 +49,10 @@ public interface SnsMapper {
     int insertFollow(@Param("me") Integer me, @Param("target") Integer target);
     // myfeed - 팔로우 삭제
     int deleteFollow(@Param("me") Integer me, @Param("target") Integer target);
+    // myfeed - 게시물 상세 모달
+    HomeFeedPost selectPostDetail(@Param("viewerMbrCd") Integer viewerMbrCd,
+            @Param("spCd") Integer spCd);
     
     // home - 게시물
-    List<HomeFeedPost> selectHomeFeedPosts(Integer mbrCd);
+    List<HomeFeedPost> selectHomeFeedPosts(@Param("loginMbrCd") Integer loginMbrCd);
 }

@@ -27,14 +27,17 @@ public class snsController {
 	
 	private final SnsService snsService;
 
+
 	@GetMapping
 	public String getSnsMainView(HttpSession session, Model model) {
-	    Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
+	    Integer mbrCd = Optional.ofNullable((String) session.getAttribute("SCD"))
 	            .map(Integer::valueOf)
-	            .orElse(1);
+	            .orElse(9);
 
 	    var homePosts = snsService.getHomeFeed(mbrCd);
 	    model.addAttribute("homePosts", homePosts);
+
+	    model.addAttribute("loginMbrCd", mbrCd);
 
 	    model.addAttribute("initialTpl", "fragments/snsHomeFragment");
 	    model.addAttribute("initialFrag", "snsHomeFragment");
@@ -53,10 +56,13 @@ public class snsController {
 
         Integer mbrCd = Optional.ofNullable((String) session.getAttribute("SCD"))
                 .map(Integer::valueOf)
-                .orElse(2);
+                .orElse(9);
 
         var homePosts = snsService.getHomeFeed(mbrCd);
         model.addAttribute("homePosts", homePosts);
+
+        // ▼ 추가
+        model.addAttribute("loginMbrCd", mbrCd);
 
         if (isFetch(req)) {
             return "fragments/snsHomeFragment :: snsHomeFragment";
@@ -90,7 +96,7 @@ public class snsController {
     ) {
         Integer loginMbrCd = Optional.ofNullable((String) session.getAttribute("SCD"))
                 .map(Integer::valueOf)
-                .orElse(1);
+                .orElse(9);
 
         Integer viewMbrCd = (targetMbrCd != null) ? targetMbrCd : loginMbrCd;
         boolean isOwner = loginMbrCd.equals(viewMbrCd);
@@ -102,22 +108,43 @@ public class snsController {
         var followers  = snsService.getFollowers(viewMbrCd);
         var followings = snsService.getFollowings(viewMbrCd);
 
+        // 1) 프로필 조회 + 표시용 값 계산 (★ isFetch 체크보다 먼저)
+        var profile = snsService.getMemberProfile(viewMbrCd);
+        String displayName = "사용자";
+        String profileImg = "/assets/img/avatar-default.png";
+
+        if (profile != null) {
+            if (profile.getMbrProfile() != null && !profile.getMbrProfile().isBlank()) {
+                profileImg = profile.getMbrProfile();
+            }
+            if (profile.getMbrNknm() != null && !profile.getMbrNknm().isBlank()) {
+                displayName = profile.getMbrNknm();
+            } else if (profile.getMbrEmail() != null && !profile.getMbrEmail().isBlank()) {
+                int at = profile.getMbrEmail().indexOf('@');
+                displayName = (at >= 0) ? profile.getMbrEmail().substring(0, at) : profile.getMbrEmail();
+            }
+        }
+
+        // 2) 모델 주입 (★ 여기까지가 프래그먼트 렌더에도 필요)
+        model.addAttribute("profile", profile);
+        model.addAttribute("displayName", displayName);
+        model.addAttribute("profileImg", profileImg);
+
         model.addAttribute("postCount", postCount);
         model.addAttribute("followerCount", followerCount);
         model.addAttribute("followingCount", followingCount);
         model.addAttribute("myPosts", myPosts);
         model.addAttribute("followers", followers);
         model.addAttribute("followings", followings);
-
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("viewMbrCd", viewMbrCd);
 
-        // 현재 팔로우 여부도 내려주기
         if (!isOwner) {
             boolean isFollowing = snsService.isFollowing(loginMbrCd, viewMbrCd);
             model.addAttribute("isFollowing", isFollowing);
         }
 
+        // 3) 이후에 프래그먼트/레이아웃 분기
         if (isFetch(req)) {
             return "fragments/snsMyfeedFragment :: snsMyfeedFragment";
         }
@@ -131,7 +158,7 @@ public class snsController {
     public Map<String, Object> toggleFollow(@RequestBody Map<String, Integer> body, HttpSession session) {
         Integer loginMbrCd = Optional.ofNullable((String) session.getAttribute("SCD"))
                 .map(Integer::valueOf)
-                .orElse(1);
+                .orElse(9);
         Integer target = body.get("targetMbrCd");
         if (target == null || target <= 0) return Map.of("ok", false, "message", "잘못된 대상");
 
@@ -159,7 +186,7 @@ public class snsController {
     ) {
         Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
                 .map(Integer::valueOf)
-                .orElse(1);
+                .orElse(9);
 
         // ✅ 사진 필수
         if (images == null || images.length == 0) {
@@ -175,7 +202,7 @@ public class snsController {
     public String updateProfile(HttpSession session, Model model) {
     	Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
     			.map(Integer::valueOf)
-    			.orElse(1); // 디폴트는 개발용
+    			.orElse(9); // 디폴트는 개발용
     	
     	Member me = snsService.getMemberProfile(mbrCd);
     	model.addAttribute("updatePf", me);
@@ -190,7 +217,7 @@ public class snsController {
             HttpSession session) {
         Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
                 .map(Integer::valueOf)
-                .orElse(1);
+                .orElse(9);
         boolean duplicate = snsService.isNicknameDuplicate(mbrNknm, mbrCd); // 자기 자신 제외
         return Map.of("duplicate", duplicate);
     }
@@ -205,7 +232,7 @@ public class snsController {
 
         Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
                 .map(Integer::valueOf)
-                .orElse(1);
+                .orElse(9);
 
         try {
             int changed = snsService.updateProfile(mbrCd, mbrNknm, profileImage);
@@ -230,7 +257,7 @@ public class snsController {
             HttpSession session) {
         Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
                 .map(Integer::valueOf)
-                .orElse(1);
+                .orElse(9);
         boolean ok = snsService.checkCurrentPassword(mbrCd, pw);
         return Map.of("ok", ok);
     }
@@ -243,7 +270,7 @@ public class snsController {
             HttpSession session) {
         Integer mbrCd = java.util.Optional.ofNullable((String) session.getAttribute("SCD"))
                 .map(Integer::valueOf)
-                .orElse(1);
+                .orElse(9);
 
         String currentPassword = body.getOrDefault("currentPassword", "");
         String newPassword     = body.getOrDefault("newPassword", "");
@@ -258,5 +285,46 @@ public class snsController {
         }
     }
     
+    // 게시물 삭제
+    @PostMapping("/api/posts/delete")
+    @ResponseBody
+    public Map<String, Object> deletePost(@RequestBody Map<String, Integer> body, HttpSession session) {
+        Integer loginMbrCd = Optional.ofNullable((String) session.getAttribute("SCD"))
+                .map(Integer::valueOf)
+                .orElse(9);
+
+        Integer spCd = body.get("spCd");
+        if (spCd == null || spCd <= 0) {
+            return Map.of("ok", false, "message", "잘못된 게시물입니다.");
+        }
+
+        try {
+            snsService.deletePost(loginMbrCd, spCd);
+            return Map.of("ok", true);
+        } catch (IllegalArgumentException e) {
+            return Map.of("ok", false, "message", e.getMessage());
+        } catch (Exception e) {
+            return Map.of("ok", false, "message", "삭제 중 오류가 발생했습니다.");
+        }
+    }
+    
+    // myfeed - 게시물 상세 모달
+    @GetMapping("/api/posts/detail")
+    @ResponseBody
+    public Map<String, Object> getPostDetail(
+            @RequestParam("spCd") Integer spCd,
+            HttpSession session) {
+        Integer viewer = Optional.ofNullable((String) session.getAttribute("SCD"))
+                .map(Integer::valueOf).orElse(9);
+
+        if (spCd == null || spCd <= 0) {
+            return Map.of("ok", false, "message", "잘못된 게시물입니다.");
+        }
+
+        var dto = snsService.getPostDetail(viewer, spCd);
+        if (dto == null) return Map.of("ok", false, "message", "게시물이 존재하지 않습니다.");
+
+        return Map.of("ok", true, "post", dto);
+    }
     
 }

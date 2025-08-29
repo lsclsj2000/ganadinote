@@ -85,6 +85,22 @@
 	    </foreach>
 	    ORDER BY post_id, file_id
 	</select>
+	
+	<select id="selectFilesByPostId" resultMap="fileResultMap">
+		/* sns - 삭제 대상 확인 */
+		SELECT file_id, post_type, post_id, file_orgnl_nm, file_stored_nm, file_path, file_size
+		FROM `file`
+		WHERE post_type = #{postType}
+		  AND post_id   = #{postId}
+		ORDER BY file_id
+	</select>
+	
+	<delete id="deleteFilesByPostId">
+		/* sns - 게시물 파일 삭제 */
+		DELETE FROM `file`
+		WHERE post_type = #{postType}
+		  AND post_id   = #{postId}
+	</delete>
 
 
 </mapper>
