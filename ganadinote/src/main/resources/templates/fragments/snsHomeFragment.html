@@ -59,10 +59,12 @@
 					    		<!-- 헤더 -->
 								<div class="sr_feed-header d-flex align-items-center mb-1 mt-1" style="justify-content:space-between;">
 									<div style="display:flex; align-items:center;">
-										<div class="avatar avatar-md me-3">
-											<img th:src="${p.profilePath != null} ? @{${p.profilePath}} : @{/assets/images/samples/dogdefault.png}"
-											     alt="게시자 프로필">
-										</div>
+										<a th:href="@{/sns/myfeed(m=${p.mbrCd})}" class="d-flex align-items-center" style="text-decoration:none;">
+											<div class="avatar avatar-md me-3">
+											  <img th:src="${p.profilePath != null} ? @{${p.profilePath}} : @{/assets/images/samples/dogdefault.png}"
+											       alt="게시자 프로필">
+											</div>
+										</a>
 										<div class="sr_feed-user-name">
 					  						<p class="mb-0" style="font-size: small;font-weight: bolder;" th:text="${p.nickname}">닉네임</p>
 											<p class="mb-0" style="font-size: xx-small;" th:text="${#temporals.format(p.spRegYmdt, 'M월 d일')}">8월 20일</p>

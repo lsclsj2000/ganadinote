@@ -40,10 +40,26 @@
 										<span>팔로우</span>
 									</button>
 								</div>
-                                <div class="sr_profile-buttons">
-                                	<a href="#" class="sr_btn-profile">프로필 수정</a>
-                                	<a th:href="@{/sns/addSnsPost}" class="sr_btn-profile">게시물 업로드</a>
-                                </div>
+                                <!-- 내 페이지일 때 -->
+								<div class="sr_profile-buttons" th:if="${isOwner}">
+									<a th:href="@{/sns/updateProfile}" class="sr_btn-profile">프로필 수정</a>
+									<a th:href="@{/sns/addSnsPost}" class="sr_btn-profile">게시물 업로드</a>
+								</div>
+								
+								<!-- 남의 페이지일 때 -->
+								<div class="sr_profile-buttons" th:if="${!isOwner}">
+									<!-- 펫 프로필 카드: 라우트는 원하는 곳으로 연결 -->
+									<a th:href="@{/sns/petcards(m=${viewMbrCd})}" class="sr_btn-profile">펫 프로필 카드</a>
+								
+								  <!-- 팔로우/취소 -->
+								  <button id="btnFollow"
+								          class="sr_btn-profile"
+								          type="button"
+								          th:attr="data-target=${viewMbrCd}"
+								          th:text="${isFollowing} ? '팔로우 취소' : '팔로우'">
+								    팔로우
+								  </button>
+								</div>
                             </div>
                         </div>
                     </div>

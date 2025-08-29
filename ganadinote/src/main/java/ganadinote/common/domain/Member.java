@@ -1,12 +1,15 @@
 package ganadinote.common.domain;
 
 import java.time.LocalDateTime;
+
 import ganadinote.common.domain.type.MemberStatus;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.AccessLevel;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
@@ -14,6 +17,7 @@ public class Member {
     private String mbrEmail;
     private String mbrPw;
     private String mbrNknm;
+    private String mbrProfile;
     private MemberStatus mbrStatus;
     private LocalDateTime mbrRegDate;
     private LocalDateTime mbrMdfcnDate;

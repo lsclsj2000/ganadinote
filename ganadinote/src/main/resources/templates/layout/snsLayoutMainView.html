@@ -165,6 +165,28 @@
 		  });
 		});
 	</script>
+	
+	<script>
+		document.addEventListener('click', async (e) => {
+		  const btn = e.target.closest('#btnFollow');
+		  if (!btn) return;
+		
+		  const target = btn.getAttribute('data-target');
+		  try {
+		    const res = await fetch('/sns/api/follow/toggle', {
+		      method: 'POST',
+		      headers: {'Content-Type':'application/json'},
+		      body: JSON.stringify({ targetMbrCd: Number(target) })
+		    });
+		    const data = await res.json();
+		    if (!data.ok) return alert(data.message || '처리 실패');
+		
+		    btn.textContent = data.following ? '팔로우 취소' : '팔로우';
+		  } catch (err) {
+		    alert('네트워크 오류가 발생했습니다.');
+		  }
+		});
+	</script>
 
 </body>
 </html>
