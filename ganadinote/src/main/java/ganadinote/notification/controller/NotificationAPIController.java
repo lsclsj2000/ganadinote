@@ -1,7 +1,7 @@
 package ganadinote.notification.controller;
 
-import java.time.LocalTime;
-import java.util.Map;
+import java.util.Collections;
+import java.util.Map;import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import ganadinote.notification.domain.PushSubDTO;
 import ganadinote.notification.service.NotificationService;
@@ -22,6 +26,7 @@ import lombok.extern.log4j.Log4j2;
 public class NotificationAPIController {
 	
 	private final NotificationService notificationService;
+	private final ObjectMapper objectMapper;
 	
 	/**
 	 * 푸시 알림 구독 정보를 저장하거나 업데이트하는 API.
@@ -101,17 +106,40 @@ public class NotificationAPIController {
 	}
 	
 	@PostMapping("/set-time")
-	public String setNotificationTime(@RequestBody Map<String, Object> payload) {
+	public String setNotificationTime(@RequestBody JsonNode payload) {
 		try {
-			Integer petCd = (Integer) payload.get("petCd");
-			String notificationTimeStr = (String) payload.get("notificationTime");
-			LocalTime time = LocalTime.parse(notificationTimeStr);
+			// 페이로드에서 mbrCd와 notificationSchedule 값을 가져옴
+			Integer mbrCd = payload.get("mbrCd").asInt();
+			String notificationScheduleJson = payload.get("notificationSchedule").asText();
 			
-			log.info("반려동물 코드 " + petCd + "의 알림 시간이 " + time + "으로 설정되었습니다.");
+			// 서비스 계층을 호출하여 DB에 알림 스케줄 업데이트
+			notificationService.updateNotificationSchedule(mbrCd, notificationScheduleJson);
+			
+			log.info("회원 코드 {}의 알림 스케줄이 {}로 설정되었습니다.", mbrCd, notificationScheduleJson);
 			return "success";
 		} catch (Exception e) {
 			log.error("알림 시간 설정 실패", e);
 			return "fail";
+		}
+	}
+	
+	@GetMapping("/schedule")
+	public Map<String, Object> getNotificationSchedule(@RequestParam("mbrCd") Integer mbrCd){
+		try {
+			String scheduleJson = notificationService.getNotificationSchedule(mbrCd);
+			
+			if(scheduleJson != null && !scheduleJson.isEmpty()) {
+				Map<String, String> scheduleMap = objectMapper.readValue(scheduleJson, new TypeReference<Map<String, String>>() {});
+				
+				log.info("회원 코드 {}의 알림 스케줄을 성공적으로 조회했습니다.", mbrCd);
+				return Map.of("notificationSchedule", scheduleMap);
+			}
+			
+			log.info("회원 코드 {}에 대한 알림 스케줄이 없습니다.", mbrCd);
+			return Map.of("notificationSchedule", Collections.emptyMap()); // 빈 맵 반환
+		} catch (Exception e) {
+			log.error("알림 스케줄 조회 실패", e);
+			return Map.of("notificationSchedule", Collections.emptyMap());
 		}
 	}
 }

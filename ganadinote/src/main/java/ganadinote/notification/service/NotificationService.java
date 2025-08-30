@@ -21,6 +21,12 @@ public interface NotificationService {
     
     void sendNotification(Integer mbrCd, String message);
     
-     // mbrCd를 통해 pet의 정보를 가져옴
+    // mbrCd를 통해 pet의 정보를 가져옴
     List<PetWithBreedDTO> getPetInfoForNotification(String mbrCd);
+    
+    // 구독 시간 설정
+    void updateNotificationSchedule(Integer mbrCd, String notificationScheduleJson);
+    
+    // 회원의 알림 스케줄(JSON 형태)을 조회
+    String getNotificationSchedule(Integer mbrCd);
 }

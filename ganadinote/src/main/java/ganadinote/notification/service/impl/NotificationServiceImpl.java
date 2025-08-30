@@ -72,6 +72,10 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("회원 {}에게 푸시 알림 전송: {}", mbrCd, message);
     }
     
+    
+    /**
+     * 멤버 코드로 펫 정보를 받아오는 메소드.
+     */
     @Override
     public List<PetWithBreedDTO> getPetInfoForNotification(String mbrCd) {
     	List<PetWithBreedDTO> pets = pushMapper.getPetInfoForNotification(mbrCd);
@@ -89,5 +93,20 @@ public class NotificationServiceImpl implements NotificationService {
     	return pets;
     }
     
+    /**
+     * 알림 시간 설정
+     */
+    @Override
+    public void updateNotificationSchedule(Integer mbrCd, String notificationScheduleJson) {
+    	pushMapper.updateNotificationSchedule(mbrCd, notificationScheduleJson);
+    	log.info("회원 코드 {}의 알림 시간이 {}로 업데이트되었습니다.", mbrCd, notificationScheduleJson);
+    }
     
+    /**
+     * 알림 시간 조회
+     */
+    @Override
+    public String getNotificationSchedule(Integer mbrCd) {
+    	return pushMapper.getNotificationSchedule(mbrCd);    	
+    }
 }

@@ -39,5 +39,11 @@ public interface PushMapper {
     
     // mbrCd를 통해 pet 알림 정보 가져오기
     List<PetWithBreedDTO> getPetInfoForNotification(@Param("mbrCd") String mbrCd);
+    
+    // 구독 시간 설정
+    void updateNotificationSchedule(Integer mbrCd, String notificationScheduleJson);
+    
+    // 회원의 알림 스케줄(JSON 형태)을 조회
+    String getNotificationSchedule(@Param("mbrCd") Integer mbrCd);
 
 }

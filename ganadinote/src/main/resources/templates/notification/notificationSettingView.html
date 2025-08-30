@@ -6,6 +6,16 @@
 <head>
     <meta charset="UTF-8">
     <title>알림 설정</title>
+    <style>
+        .day-label {
+            width: 80px; /* 요일 라벨 너비 증가 */
+            min-width: 80px;
+        }
+        .current-time-display {
+            width: 100px; /* 현재 시간 표시 너비 증가 */
+            min-width: 100px;
+        }
+    </style>
 </head>
 <body>
     <th:block layout:fragment="contents">
@@ -43,18 +53,83 @@
                 
                 <hr class="my-4">
                 
-                <h4>알림 시간 일괄 설정</h4>
+                <h4>알림 시간 설정</h4>
                 <form id="notification-time-form">
-                    <div class="mb-3">
-                        <label for="notificationTime" class="form-label">알림 시간</label>
-                        <select class="form-select" id="notificationTime" required>
-                            <option value="">시간을 선택하세요</option>
-                            <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
-                                <option th:value="${hour}" th:text="|${hour}시|"></option>
-                            </th:block>
-                        </select>
+                    <p>요일별 시간을 선택해주세요:</p>
+                    <div id="day-time-options">
+                        <div class="d-flex align-items-center mb-2">
+                            <label class="form-label mb-0 day-label">월요일</label>
+                            <span class="ms-2 me-3 current-time-display" data-day="mon">설정 안됨</span>
+                            <select class="form-select time-select" data-day="mon">
+                                <option value="">알림 안 받기</option>
+                                <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
+                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <label class="form-label mb-0 day-label">화요일</label>
+                            <span class="ms-2 me-3 current-time-display" data-day="tue">설정 안됨</span>
+                            <select class="form-select time-select" data-day="tue">
+                                <option value="">알림 안 받기</option>
+                                <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
+                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <label class="form-label mb-0 day-label">수요일</label>
+                            <span class="ms-2 me-3 current-time-display" data-day="wed">설정 안됨</span>
+                            <select class="form-select time-select" data-day="wed">
+                                <option value="">알림 안 받기</option>
+                                <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
+                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <label class="form-label mb-0 day-label">목요일</label>
+                            <span class="ms-2 me-3 current-time-display" data-day="thu">설정 안됨</span>
+                            <select class="form-select time-select" data-day="thu">
+                                <option value="">알림 안 받기</option>
+                                <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
+                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <label class="form-label mb-0 day-label">금요일</label>
+                            <span class="ms-2 me-3 current-time-display" data-day="fri">설정 안됨</span>
+                            <select class="form-select time-select" data-day="fri">
+                                <option value="">알림 안 받기</option>
+                                <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
+                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <label class="form-label mb-0 day-label">토요일</label>
+                            <span class="ms-2 me-3 current-time-display" data-day="sat">설정 안됨</span>
+                            <select class="form-select time-select" data-day="sat">
+                                <option value="">알림 안 받기</option>
+                                <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
+                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <label class="form-label mb-0 day-label">일요일</label>
+                            <span class="ms-2 me-3 current-time-display" data-day="sun">설정 안됨</span>
+                            <select class="form-select time-select" data-day="sun">
+                                <option value="">알림 안 받기</option>
+                                <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
+                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></option>
+                                </th:block>
+                            </select>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-secondary">시간 설정하기</button>
+                    <input type="hidden" id="notificationSchedule" name="notificationSchedule" />
+                    <button type="submit" class="btn btn-secondary mt-3">시간 설정하기</button>
                 </form>
             </div>
         </div>
@@ -69,7 +144,9 @@
 
         const subscribeButton = document.getElementById('toggle-subscribe-button');
         const statusText = document.getElementById('subscription-status');
-        
+        const notificationTimeForm = document.getElementById('notification-time-form');
+        const hiddenScheduleInput = document.getElementById('notificationSchedule');
+
         // 유틸리티 함수
         function urlBase64ToUint8Array(base64String) {
             const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -123,7 +200,7 @@
 
         // 서비스 워커 등록
         if ('serviceWorker' in navigator && 'PushManager' in window) {
-            navigator.serviceWorker.register('/serviceWorker.js')
+            navigator.serviceWorker.register('/service-worker.js')
                 .then(function(reg) {
                     console.log('서비스 워커가 성공적으로 등록되었습니다.', reg);
                 })
@@ -163,7 +240,7 @@
 		        const response = await fetch('/api/push/unsubscribe', {
 		            method: 'POST',
 		            headers: { 'Content-Type': 'application/json' },
-		            body: JSON.stringify(MEMBER_CODE) // 회원 코드를 JSON 형식으로 전송
+		            body: JSON.stringify(MEMBER_CODE)
 		        });
 		
 		        if (response.ok) {
@@ -176,7 +253,6 @@
 		        console.error("알림 취소 실패:", err);
 		    }
 		}
-
 
         // 백엔드로 구독 정보 전송
         async function sendSubscriptionToBackend(subscription) {
@@ -197,20 +273,54 @@
                 return 'fail';
             }
         }
-
-        // 알림 시간 설정 함수
-        async function setNotificationTime() {
-            const notificationTime = document.getElementById('notificationTime').value;
-
-            // 선택값 유효성 검사 (첫 번째 '시간을 선택하세요' 옵션)
-            if (!notificationTime) {
-                alert("알림 시간을 선택해주세요.");
-                return;
+        
+        // 알림 스케줄을 백엔드에서 불러와 UI에 적용
+        async function loadNotificationSchedule() {
+            try {
+                const response = await fetch(`/api/push/schedule?mbrCd=${MEMBER_CODE}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.notificationSchedule) {
+                        // 백엔드에서 이미 객체로 변환되어 왔으므로, JSON.parse()를 제거하고 바로 사용합니다.
+                        const savedSchedule = data.notificationSchedule;
+                        
+                        for (const day in savedSchedule) {
+                            const selectElement = document.querySelector(`.time-select[data-day="${day}"]`);
+                            const displayElement = document.querySelector(`.current-time-display[data-day="${day}"]`);
+                            if (selectElement) {
+                                selectElement.value = savedSchedule[day];
+                            }
+                            if (displayElement) {
+                                displayElement.textContent = savedSchedule[day];
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('알림 스케줄 로딩 실패:', error);
             }
+        }
+
+        // 폼 제출 이벤트 리스너
+        notificationTimeForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const notificationSchedule = {};
+            const timeSelects = document.querySelectorAll('.time-select');
+            
+            timeSelects.forEach(select => {
+                const day = select.getAttribute('data-day');
+                const time = select.value;
+                if (time) {
+                    notificationSchedule[day] = time;
+                }
+            });
+
+            hiddenScheduleInput.value = JSON.stringify(notificationSchedule);
 
             const payload = {
                 mbrCd: MEMBER_CODE,
-                notificationTime: notificationTime + ":00" // 서버에 시간:분 형식으로 보내기 위해 ":00" 추가
+                notificationSchedule: hiddenScheduleInput.value
             };
 
             try {
@@ -223,6 +333,7 @@
                 const result = await response.text();
                 if (result === 'success') {
                     alert('알림 시간이 성공적으로 설정되었습니다!');
+                    await loadNotificationSchedule();
                 } else {
                     alert('알림 시간 설정에 실패했습니다.');
                 }
@@ -230,16 +341,13 @@
                 console.error('알림 시간 설정 오류:', error);
                 alert('네트워크 오류가 발생했습니다.');
             }
-        }
-
-        // 폼 제출 이벤트 리스너
-        document.getElementById('notification-time-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            setNotificationTime();
         });
         
         // 페이지 로드 시 초기 상태 설정
-        document.addEventListener('DOMContentLoaded', updateButtonStatus);
+        document.addEventListener('DOMContentLoaded', async () => {
+            await updateButtonStatus();
+            await loadNotificationSchedule();
+        });
     /*]]>*/
     </script>
 </th:block>
