@@ -27,6 +27,9 @@
 			<div th:replace="~{${initialTpl} :: ${initialFrag}}"></div>
 		</div>
 		<footer th:replace="~{fragments/snsFooterFragment :: snsFooterFragment}"></footer>
+		
+		<div id="customBackdrop" class="sr_post-modal-backdrop" style="display:none"></div>
+		<div id="customSheet" class="sr_post-modal-sheet" style="display:none"></div>
 	</div>
 	
 
@@ -35,6 +38,8 @@
     <script src="/assets/js/bootstrap.bundle.min.js"></script>
 
     <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/loginInfo.js"></script>
+    
     
     <script>
 		(function(){
@@ -131,53 +136,334 @@
 	</script>
 	
 	<script>
-        (function(){
-            // srPostModal 요소는 페이지 로드 시점에 존재하지 않기 때문에 document에 이벤트를 위임합니다.
-            // 이렇게 하면 모달이 DOM에 추가된 후에도 이벤트가 감지됩니다.
-            document.addEventListener('show.bs.modal', function (event) {
-                // 이벤트가 'srPostModal'에서 발생했는지 확인합니다.
-                if (event.target.id === 'srPostModal') {
-                    // 모달을 트리거한 게시물 아이템을 찾습니다.
-                    const button = event.relatedTarget; 
+	(function(){
+		  function withCtx(p) {
+		    if (!p) return '';
+		    if (/^https?:\/\//i.test(p)) return p; // 절대 URL
+		    const base = (window.APP_CTX || '/').replace(/\/$/,'');
+		    return p.startsWith('/') ? (base + p) : (base + '/' + p);
+		  }
+		  
+		  function formatKoreanMd(str){
+			  if (!str) return '';
+			  // 공백 들어온 경우 보정
+			  const iso = str.replace(' ', 'T');
+			  const d = new Date(iso);
+			  if (isNaN(d)) return str;  // 혹시 파싱 실패하면 원본 출력
+			  return `${d.getMonth()+1}월 ${d.getDate()}일`;
+			}
 
-                    // data-* 속성에서 게시물 정보를 가져옵니다.
-                    const imageSrc = button.getAttribute('data-image-src');
-                    const profileSrc = button.getAttribute('data-profile-src');
-                    const userName = button.getAttribute('data-user-name');
-                    const postDate = button.getAttribute('data-post-date');
-                    const tags = button.getAttribute('data-tags');
+		  // 홈 카드와 동일 마크업을 문자열로 생성
+		  function buildPostCardHTML(p, loginMbrCd){
+		    const profile = p.profilePath && p.profilePath.trim() !== ''
+		      ? withCtx(p.profilePath)
+		      : withCtx('/assets/images/samples/dogdefault.png');
 
-                    // 모달 내부의 요소들을 찾습니다.
-                    const srPostModal = document.getElementById('srPostModal');
-                    const modalPostImg = srPostModal.querySelector('#modalPostImg');
-                    const modalProfileImg = srPostModal.querySelector('#modalProfileImg');
-                    const modalUserName = srPostModal.querySelector('#modalUserName');
-                    const modalPostDate = srPostModal.querySelector('#modalPostDate');
-                    const modalTags = srPostModal.querySelector('#modalTags');
+		    const isOwner   = (String(p.mbrCd) === String(loginMbrCd));
+		    const following = !!p.following;
+		    const dateText = formatKoreanMd(p.spRegYmdtStr || p.spRegYmdt);
 
-                    // 찾은 정보로 모달 내용을 채웁니다.
-                    modalPostImg.src = imageSrc;
-                    modalPostImg.alt = "게시물 이미지"; 
-                    modalProfileImg.src = profileSrc;
-                    modalProfileImg.alt = `${userName} 프로필 사진`;
-                    modalUserName.textContent = userName;
-                    modalPostDate.textContent = postDate;
-                    
-                    // 태그를 동적으로 생성하여 추가
-                    modalTags.innerHTML = ''; // 기존 태그 초기화
-                    if (tags) {
-                        tags.split(' ').forEach(tag => {
-                            const span = document.createElement('span');
-                            span.className = 'badge bg-light-secondary';
-                            span.style.fontSize = '.65em';
-                            span.textContent = tag;
-                            modalTags.appendChild(span);
-                            modalTags.appendChild(document.createTextNode(' ')); // 태그 사이 공백 추가
-                        });
-                    }
-                }
-            });
-        })();
-    </script>
+		    // 태그: 공백 제거 → 콤마 split → 고유화
+		    const raw  = (p.spCn || '').replace(/\s+/g,'');
+		    const tags = [...new Set(raw.split(',').map(s=>s.trim()).filter(Boolean))];
+
+		    let imgs = Array.isArray(p.imagePaths) ? p.imagePaths.filter(Boolean) : [];
+
+		    // (핵심 수정) 리스트가 비었으면 repImagePath라도 사용
+		    if ((!imgs || imgs.length === 0) && p.repImagePath) {
+		      imgs = [p.repImagePath];
+		    }
+
+		    // 경로 보정 적용
+		    imgs = imgs.map(withCtx);
+
+		    const hasMany = imgs.length > 1;
+		    const hasOne  = imgs.length === 1;
+		    const cid     = `modal_carousel_${p.spCd}`;
+
+		    const carouselHTML = hasMany ? `
+		      <div class="carousel slide" data-bs-ride="carousel" id="${cid}">
+		        <ol class="carousel-indicators">
+		          ${imgs.map((_,i)=>`<li data-bs-target="#${cid}" data-bs-slide-to="${i}" ${i===0?'class="active"':''}></li>`).join('')}
+		        </ol>
+		        <div class="carousel-inner" style="border-radius:0px;">
+		          ${imgs.map((src,i)=>`
+		            <div class="sr_feed-img carousel-item mb-3${i===0?' active':''}">
+		              <img src="${src}" class="d-block w-100" alt="게시자 이미지">
+		            </div>
+		          `).join('')}
+		        </div>
+		        <a class="carousel-control-prev" href="#${cid}" role="button" data-bs-slide="prev">
+		          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+		          <span class="visually-hidden">Previous</span>
+		        </a>
+		        <a class="carousel-control-next" href="#${cid}" role="button" data-bs-slide="next">
+		          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+		          <span class="visually-hidden">Next</span>
+		        </a>
+		      </div>
+		    ` : '';
+
+		    const singleImageHTML = hasOne ? `
+		      <div class="sr_feed-img mb-3">
+		        <img src="${imgs[0]}" class="d-block w-100" alt="게시물 이미지">
+		      </div>
+		    ` : '';
+
+		    // === snsHomeFragment 카드 마크업과 동일 ===
+		    return `
+		      <div class="card sr_feed-item mb-0">
+		        <div class="card-body p-0">
+		          <!-- 헤더 -->
+		          <div class="sr_feed-header d-flex align-items-center mb-1 mt-1" style="justify-content:space-between;">
+		            <div style="display:flex; align-items:center;">
+		              <a href="/sns/myfeed?m=${p.mbrCd}" class="d-flex align-items-center" style="text-decoration:none;">
+		                <div class="avatar avatar-md me-3">
+		                  <img src="${profile}" alt="게시자 프로필">
+		                </div>
+		              </a>
+		              <div class="sr_feed-user-name">
+		                <p class="mb-0" style="font-size: small;font-weight: bolder;">${p.nickname ?? ''}</p>
+		                <p class="mb-0" style="font-size: xx-small;">${dateText}</p>
+		                <!-- 필요하면 핸들 표시
+		                <p class="mb-0" style="font-size: xx-small;">${p.handle ?? ''}</p> -->
+		              </div>
+		            </div>
+		            <button class="sr_three-dots-btn" type="button"
+		                    data-post-id="${p.spCd}"
+		                    data-author-id="${p.mbrCd}"
+		                    data-is-owner="${isOwner}"
+		                    data-is-following="${following}">
+		              <svg class="bi" width="24" height="24" fill="currentColor">
+		                <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#three-dots-vertical"></use>
+		              </svg>
+		            </button>
+		          </div>
+
+		          <!-- 이미지 -->
+		          ${hasMany ? carouselHTML : ''}
+		          ${hasOne ? singleImageHTML : ''}
+
+		          <!-- 좋아요 버튼 (UI만) -->
+		          <div class="sr_feed-actions d-flex align-items-center mb-2">
+		            <i class="bi bi-heart text-danger"></i>
+		          </div>
+
+		          <!-- 태그 -->
+		          <div class="sr_feed-content">
+		            ${tags.map(t=>`<span class="badge bg-light-secondary mr-2" style="font-size:.65em; margin-right:5px;">#${t.startsWith('#')?t.slice(1):t}</span>`).join('')}
+		          </div>
+		        </div>
+		      </div>
+		    `;
+		  }
+
+		  // 모달 오픈 시 카드 로드
+		  document.addEventListener('show.bs.modal', async function (event) {
+		    if (event.target.id !== 'srPostModal') return;
+
+		    const trigger = event.relatedTarget; // .sr_feed-post-item
+		    const spCd    = trigger?.getAttribute('data-feed-id');
+		    if (!spCd) return;
+
+		    const body = document.getElementById('srPostModalBody');
+		    body.innerHTML = '<div class="p-3 text-muted">불러오는 중...</div>';
+
+		    try {
+		      const res  = await fetch(`/sns/api/posts/detail?spCd=${encodeURIComponent(spCd)}`);
+		      const json = await res.json();
+		      if (!json?.ok) throw new Error(json?.message || '불러오기 실패');
+
+		      const html = buildPostCardHTML(json.post, window.LOGIN_MBR_CD);
+		      body.innerHTML = html;
+		      // Bootstrap 캐러셀은 data-bs-*로 자동 동작
+
+		    } catch (e) {
+		      body.innerHTML = '<div class="p-3 text-danger">게시물 정보를 불러오지 못했습니다.</div>';
+		    }
+		  });
+		})();
+	</script>
+	
+	<script>
+		document.addEventListener('click', async (e) => {
+		  const btn = e.target.closest('#btnFollow');
+		  if (!btn) return;
+		
+		  const target = btn.getAttribute('data-target');
+		  try {
+		    const res = await fetch('/sns/api/follow/toggle', {
+		      method: 'POST',
+		      headers: {'Content-Type':'application/json'},
+		      body: JSON.stringify({ targetMbrCd: Number(target) })
+		    });
+		    const data = await res.json();
+		    if (!data.ok) return alert(data.message || '처리 실패');
+		
+		    btn.textContent = data.following ? '팔로우 취소' : '팔로우';
+		  } catch (err) {
+		    alert('네트워크 오류가 발생했습니다.');
+		  }
+		});
+	</script>
+	
+	<script>
+		// 열기/닫기 유틸
+		  function openCustomSheet() {
+		    const backdrop = document.getElementById('customBackdrop');
+		    const sheet = document.getElementById('customSheet');
+		    backdrop.style.display = 'block';
+		    sheet.style.display = 'block';
+		    requestAnimationFrame(() => sheet.classList.add('show'));
+		  }
+		  function closeCustomSheet() {
+		    const backdrop = document.getElementById('customBackdrop');
+		    const sheet = document.getElementById('customSheet');
+		    backdrop.style.display = 'none';
+		    sheet.classList.remove('show');
+		    setTimeout(() => sheet.style.display = 'none', 280);
+		  }
+	
+		  // 시트 메뉴 렌더 (기존 코드 그대로 사용해도 됨)
+		  function renderSheetMenu({ postId, authorId, isOwner, isFollowing }) {
+		    const sheet = document.getElementById('customSheet');
+		    if (isOwner) {
+		      sheet.innerHTML = `
+		        <div class="d-grid gap-2 p-3">
+		          <button class="btn btn-light rounded-pill sr_offcanvas-btn"
+		                  type="button" data-action="delete" data-post-id="${postId}">
+		            게시물 삭제
+		          </button>
+		        </div>
+		      `;
+		    } else {
+		      const followLabel = isFollowing ? '팔로우 취소' : '팔로우';
+		      sheet.innerHTML = `
+		        <div class="d-grid gap-2 p-3">
+		          <a class="btn btn-light rounded-pill sr_offcanvas-btn"
+		             href="/sns/myfeed?m=${authorId}">
+		            프로필 보기
+		          </a>
+		          <button class="btn btn-light rounded-pill sr_offcanvas-btn"
+		                  type="button" data-action="follow-toggle" data-target="${authorId}">
+		            ${followLabel}
+		          </button>
+		        </div>
+		      `;
+		    }
+		  }
+	
+		  // ▼▼▼ "문서 위임"으로 클릭 처리 (프래그먼트가 바뀌어도 동작)
+		  document.addEventListener('click', (e) => {
+		    // ① 세 점 버튼 → 시트 열기
+		    const menuBtn = e.target.closest('.sr_three-dots-btn');
+		    if (menuBtn) {
+		      e.preventDefault();
+		      const postId      = menuBtn.getAttribute('data-post-id');
+		      const authorId    = menuBtn.getAttribute('data-author-id');
+		      const isOwner = String(authorId) === String(window.LOGIN_MBR_CD);
+		      const isFollowing = (menuBtn.getAttribute('data-is-following') === 'true');
+	
+		      renderSheetMenu({ postId, authorId, isOwner, isFollowing });
+		      openCustomSheet();
+		      return;
+		    }
+	
+		    // ② 시트 내부 버튼 액션들
+		    const actionBtn = e.target.closest('#customSheet [data-action]');
+		    if (actionBtn) {
+		      const action = actionBtn.getAttribute('data-action');
+	
+		      if (action === 'delete') {
+		        const postId = actionBtn.getAttribute('data-post-id');
+		        if (postId) window.handlePostDelete?.(postId);
+		        closeCustomSheet();
+		        return;
+		      }
+	
+		      if (action === 'follow-toggle') {
+		        const targetMbrCd = Number(actionBtn.getAttribute('data-target'));
+		        (async () => {
+		          try {
+		            const res = await fetch('/sns/api/follow/toggle', {
+		              method: 'POST',
+		              headers: {'Content-Type':'application/json'},
+		              body: JSON.stringify({ targetMbrCd })
+		            });
+		            const data = await res.json();
+		            if (!data.ok) return alert(data.message || '처리 실패');
+		            actionBtn.textContent = data.following ? '팔로우 취소' : '팔로우';
+		            closeCustomSheet();
+		          } catch {
+		            alert('네트워크 오류가 발생했습니다.');
+		          }
+		        })();
+		        return;
+		      }
+		    }
+	
+		    // ③ 배경 클릭 → 닫기
+		    if (e.target.id === 'customBackdrop') {
+		      closeCustomSheet();
+		      return;
+		    }
+		  });
+	
+		  // 삭제 API 호출(이미 전역에 있으니 유지)
+		  window.handlePostDelete = async function(postId){
+		    if (!confirm('정말 삭제하시겠어요?')) return;
+	
+		    try {
+		      const res = await fetch('/sns/api/posts/delete', {
+		        method: 'POST',
+		        headers: {'Content-Type':'application/json'},
+		        body: JSON.stringify({ spCd: Number(postId) })
+		      });
+		      const data = await res.json();
+		      if (!data.ok) return alert(data.message || '삭제 실패');
+	
+		      // DOM에서 카드 제거
+		      const btn = document.querySelector(`.sr_three-dots-btn[data-post-id="${postId}"]`);
+		      btn?.closest('.sr_feed-item')?.remove();
+		    } catch {
+		      alert('네트워크 오류가 발생했습니다.');
+		    }
+		  };
+	</script>
+	
+	<script>
+	  window.handlePostDelete = async function(postId){
+	    if (!confirm('정말 삭제하시겠어요?')) return;
+	
+	    try {
+	      const res = await fetch('/sns/api/posts/delete', {
+	        method: 'POST',
+	        headers: {'Content-Type':'application/json'},
+	        body: JSON.stringify({ spCd: Number(postId) })
+	      });
+	      const data = await res.json();
+	      if (!data.ok) {
+	        return alert(data.message || '삭제 실패');
+	      }
+	
+	      // DOM에서 카드 제거
+	      const btn = document.querySelector(`.sr_three-dots-btn[data-post-id="${postId}"]`);
+	      const card = btn?.closest('.sr_feed-item');
+	      if (card) card.remove();
+	
+	      // 시트 닫기 (이미 호출 흐름상 닫히지만 안전하게 한 번 더)
+	      const backdrop = document.getElementById('customBackdrop');
+	      const sheet = document.getElementById('customSheet');
+	      if (backdrop && sheet) {
+	        backdrop.style.display = 'none';
+	        sheet.classList.remove('show');
+	        setTimeout(()=> sheet.style.display = 'none', 280);
+	      }
+	    } catch (e) {
+	      alert('네트워크 오류가 발생했습니다.');
+	    }
+	  }
+	</script>
+
 </body>
 </html>

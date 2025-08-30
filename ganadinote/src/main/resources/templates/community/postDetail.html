@@ -9,40 +9,35 @@
   <title>게시글 상세</title>
   <th:block layout:fragment="pageStyles">
     <style>
-		.post-title{word-break:keep-all}
-		.post-content{white-space:pre-line;line-height:1.8}
-		.author-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover}
-		.comment-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
-		.comment-item{border-bottom:1px solid #f5f5f5}
+      .post-title{word-break:keep-all}
+      .post-content{white-space:pre-line;line-height:1.8}
+      .author-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover}
+      .comment-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
+      .comment-item{border-bottom:1px solid #f5f5f5}
 
-		/* 폼 토글 */
-		.reply-form{display:none}
-		.reply-form.show{display:block}
+      /* 폼 토글 */
+      .reply-form{display:none}
+      .reply-form.show{display:block}
 
-		/* 부모/자식 공통: 기준점만 */
-		.comment-item{
-		  position: relative;
-		}
+      /* 부모/자식 공통: 기준점만 */
+      .comment-item{ position: relative; }
 
-		/* 대댓글 전용(부모엔 적용 X) */
-		.child-reply{
-		  position: relative;
-		  margin-left: 28px;   /* 들여쓰기 */
-		  padding-left: 16px;  /* 본문과 ㄴ자 간격 */
-		}
-
-		/* ㄴ자 커넥터: 대댓글에만 출력 */
-		.child-reply::before{
-		  content: "";
-		  position: absolute;
-		  left: 6px;           /* ㄴ자의 시작 x 위치 (미세조정 가능) */
-		  top: 14px;           /* 첫 줄 높이에 맞춤 */
-		  width: 16px;
-		  height: 16px;
-		  border-left: 2px solid #e5e7eb;
-		  border-bottom: 2px solid #e5e7eb;
-		  border-bottom-left-radius: 6px;
-		}
+      /* 대댓글 전용(부모엔 적용 X) */
+      .child-reply{
+        position: relative;
+        margin-left: 28px;   /* 들여쓰기 */
+        padding-left: 16px;  /* 본문과 ㄴ자 간격 */
+      }
+      /* ㄴ자 커넥터: 대댓글에만 출력 */
+      .child-reply::before{
+        content: "";
+        position: absolute;
+        left: 6px; top: 14px;
+        width: 16px; height: 16px;
+        border-left: 2px solid #e5e7eb;
+        border-bottom: 2px solid #e5e7eb;
+        border-bottom-left-radius: 6px;
+      }
     </style>
   </th:block>
 </head>
@@ -83,17 +78,17 @@
         <!-- 본문 -->
         <article class="bg-white border rounded-3 p-3 p-md-4">
           <h3 class="post-title mb-3" th:text="${post.postTtl}">제목</h3>
-          <div class="post-content" th:text="${post.postCtnt}">
+          <div class="post-content" th:utext="${post.postCtnt}">
             본문 내용
           </div>
 
           <!-- 툴바 -->
           <div class="d-flex align-items-center justify-content-between mt-4 pt-3 pb-3 border-top border-bottom">
             <div class="d-flex align-items-center gap-2">
+              <!-- 좋아요는 추후 fetch로 교체 -->
               <button type="button" class="btn btn-outline-primary btn-sm">
                 👍 <span class="badge text-bg-light ms-1" th:text="${post.postLikeCount}">0</span>
               </button>
-              <!-- 스크랩 등 필요 시 여기에 -->
             </div>
             <a class="btn btn-dark btn-sm" th:href="@{/community}">목록으로</a>
           </div>
@@ -102,7 +97,7 @@
         <!-- 댓글 작성 -->
         <section class="bg-white border rounded-3 p-3 p-md-4 mt-3">
           <h6 class="mb-3">댓글</h6>
-          <form th:action="@{/community/comment/add}" method="post" class="d-flex gap-2">
+          <form id="commentForm" class="d-flex gap-2">
             <input type="hidden" name="postId" th:value="${post.postId}" />
             <input type="text" name="commentCtnt" class="form-control" placeholder="댓글을 입력하세요" required />
             <button type="submit" class="btn btn-primary">등록</button>
@@ -116,9 +111,9 @@
               아직 댓글이 없습니다.
             </li>
 
-			<li th:each="c : ${comments}"
-			    class="comment-item p-3"
-			    th:classappend="${c.commentParentId > 0} ? ' child-reply' : ''">
+            <li th:each="c : ${comments}"
+                class="comment-item p-3"
+                th:classappend="${c.commentParentId > 0} ? ' child-reply' : ''">
               <div class="d-flex align-items-start gap-2">
                 <img class="comment-avatar" src="https://placehold.co/72x72" alt="아바타" />
                 <div class="flex-grow-1">
@@ -140,10 +135,8 @@
                   </div>
 
                   <!-- 대댓글 폼 -->
-                  <form class="reply-form mt-2"
-                        th:id="${'replyForm-' + c.commentId}"
-                        th:action="@{/community/comment/reply}"
-                        method="post">
+                  <form class="reply-form mt-2 reply-form-item"
+                        th:id="${'replyForm-' + c.commentId}">
                     <input type="hidden" name="postId" th:value="${post.postId}" />
                     <input type="hidden" name="commentParentId" th:value="${c.commentId}" />
                     <div class="d-flex gap-2">
@@ -165,13 +158,69 @@
     </div>
   </main>
 
-  <script>
-    function toggleReplyForm(btn){
-      var id = btn.getAttribute('data-target');
-      var el = document.getElementById(id);
-      if(!el) return;
-      el.classList.toggle('show');
-    }
-  </script>
+  <th:block layout:fragment="pageScripts">
+    <script src="/assets/js/loginInfo.js"></script>
+    <script>
+      const LOGIN_PAGE = '/login'; // 필요에 맞게 변경
+
+      function toggleReplyForm(btn){
+        var id = btn.getAttribute('data-target');
+        var el = document.getElementById(id);
+        if(!el) return;
+        el.classList.toggle('show');
+      }
+
+      // 공통: x-www-form-urlencoded 요청 유틸
+      async function postFormUrlencoded(url, data){
+        const body = new URLSearchParams();
+        Object.entries(data).forEach(([k,v]) => body.append(k, v));
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
+          // Authorization 헤더는 loginInfo.js가 자동으로 붙임
+          , body
+        });
+        if (res.status === 401) {
+          alert('로그인이 필요합니다.');
+          location.href = LOGIN_PAGE;
+          return null;
+        }
+        if (!res.ok) {
+          const t = await res.text().catch(()=> '');
+          console.error('요청 실패', t);
+          alert('처리 중 오류가 발생했습니다.');
+          return null;
+        }
+        return await res.json().catch(()=> ({}));
+      }
+
+      // 원댓글 등록
+      document.getElementById('commentForm')?.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        const postId = fd.get('postId');
+        const commentCtnt = fd.get('commentCtnt')?.trim();
+        if (!commentCtnt) return;
+
+        const res = await postFormUrlencoded('/community/api/comment', { postId, commentCtnt });
+        if (res) location.reload();
+      });
+
+      // 대댓글 등록 (동적 다수 폼)
+      document.querySelectorAll('.reply-form-item').forEach(form => {
+        form.addEventListener('submit', async (e)=>{
+          e.preventDefault();
+          const fd = new FormData(e.currentTarget);
+          const postId = fd.get('postId');
+          const commentParentId = fd.get('commentParentId');
+          const commentCtnt = fd.get('commentCtnt')?.trim();
+          if (!commentCtnt) return;
+
+          const res = await postFormUrlencoded('/community/api/comment', { postId, commentParentId, commentCtnt });
+          if (res) location.reload();
+        });
+      });
+    </script>
+  </th:block>
 </th:block>
 </html>

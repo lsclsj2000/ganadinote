@@ -6,8 +6,8 @@ import lombok.Data;
 
 @Data
 public class PostRequestDTO {
-
-
-
+	private int categoryId;
+    private String postTtl;
+    private String postCtnt;
 
 }

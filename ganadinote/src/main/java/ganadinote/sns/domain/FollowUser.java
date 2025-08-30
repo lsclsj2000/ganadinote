@@ -7,4 +7,5 @@ public class FollowUser {
 	private Integer mbrCd;
     private String nickname;
     private String handle;
+    private String profilePath;
 }

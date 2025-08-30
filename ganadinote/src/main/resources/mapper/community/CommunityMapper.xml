@@ -161,6 +161,29 @@
 	  SET post_view_count = post_view_count + 1
 	  WHERE post_id = #{postId}
 	</update>
+	
+	
+	<insert id="insertPostAndReturnId"
+        parameterType="ganadinote.community.dto.PostDetailDTO"
+        useGeneratedKeys="true"
+        keyProperty="postId"
+        keyColumn="post_id">
+	  INSERT INTO post (
+	      category_id,
+	      post_ttl,
+	      post_ctnt,
+	      mbr_cd,
+	      post_reg_date,
+	      post_status
+	  ) VALUES (
+	      #{categoryId},
+	      #{postTtl},
+	      #{postCtnt},
+	      #{mbrCd},
+	      NOW(),
+	      'ACTIVE'
+	  )
+	</insert>
 
 </mapper>
 
