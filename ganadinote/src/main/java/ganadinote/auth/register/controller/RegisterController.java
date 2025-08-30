@@ -1,9 +1,12 @@
 package ganadinote.auth.register.controller;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -32,7 +35,7 @@ public class RegisterController {
             return "redirect:/register";
         }
 
-        return "redirect:/todo/list";
+        return "redirect:/main";
     }
     
     @GetMapping("/api/register/check-email")
@@ -47,5 +50,29 @@ public class RegisterController {
     public ResponseEntity<Boolean> checkNicknameDuplicate(@RequestParam("mbrNknm") String mbrNknm) {
         boolean isDuplicate = registerService.isNicknameDuplicate(mbrNknm);
         return ResponseEntity.ok(isDuplicate);
+    }
+    
+    @PostMapping("/api/email-send")
+    @ResponseBody
+    public ResponseEntity<String> sendVerificationCode(@RequestBody Map<String, String> payload) {
+        try {
+            String mbrEmail = payload.get("mbrEmail"); // "mbrEmail" 키를 사용하여 이메일 값 추출
+            if (mbrEmail == null || mbrEmail.isEmpty()) {
+                return ResponseEntity.badRequest().body("이메일 주소가 누락되었습니다.");
+            }
+            registerService.sendVerificationCode(mbrEmail);
+            return ResponseEntity.ok("SUCCESS");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("FAILURE");
+        }
+    }
+    
+    @PostMapping("/api/email-verify")
+    @ResponseBody
+    public ResponseEntity<String> verifyCode(@RequestBody RegisterDTO registerDTO) {
+        if (registerService.verifyCode(registerDTO.getMbrEmail(), registerDTO.getCode())) {
+            return ResponseEntity.ok("SUCCESS");
+        }
+        return ResponseEntity.ok("FAILURE");
     }
 }

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/addPostLayoutView}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>댕댕그램 프로필 수정</title>
+
+	<th:block layout:fragment="pageStyles">
+    	<link rel="stylesheet" href="/assets/vendors/summernote/summernote-lite.min.css" />
+    	<link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+		<link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css" rel="stylesheet">
+		<style>
+			.hidden {
+                display: none !important;
+            }
+		</style>
+	</th:block>
+	
+</head>
+
+<body>
+	<th:block layout:fragment="contents">
+		<div class="mt-10">
+	        <section class="section">
+	            <div class="row no-gutter-x justify-content-center">
+	                <div class="col-12 col-md-8">
+	                    <div class="card mb-2">
+	                        <div class="card-body">
+	                            <!-- 프로필 사진 섹션 -->
+                                <div class="sr_profile-container" style="padding-bottom:20px;">
+                                    <div class="avatar avatar-xl mb-3">
+                                        <!-- 프로필 사진이 여기에 표시됩니다. -->
+                                        <img id="profile-img"
+										     th:src="${#strings.isEmpty(updatePf.mbrProfile)} 
+										                 ? @{/assets/images/samples/dogdefault.png} 
+										                 : @{${updatePf.mbrProfile}}"
+										     th:attr="data-origin-profile=${updatePf.mbrProfile}"
+										     alt="프로필 사진">
+     								</div>
+                                    <p class="sr_profile_label" style="color: #2752c7;">사진 편집</p>
+                                    <!-- 사진을 업로드할 숨겨진 input[file] -->
+                                    <input type="file" id="profile-input" accept="image/*" class="hidden" style="display: none !important;" />
+                                </div>
+
+                                <!-- 프로필 정보 수정 섹션 -->
+                                <div class="space-y-6">
+                                    <!-- 이메일 (수정 불가) -->
+                                    <div class="sr_input-group">
+                                        <label for="email" class="sr_profile_label">이메일</label>
+                                        <input type="email" id="email" th:value="${updatePf.mbrEmail}" readonly disabled class="text-gray-500">
+                                    </div>
+
+                                    <!-- 닉네임 수정 -->
+                                    <div class="sr_input-group">
+                                        <label for="nickname" class="sr_profile_label">닉네임</label>
+                                        <input type="text" id="nickname" th:value="${updatePf.mbrNknm}">
+                                       	<div id="nickname-error" class="mt-1" style="font-size:0.7em; margin-left:4px;"></div>
+                                    </div>
+
+                                    <!-- 비밀번호 수정 -->
+                                    
+                                    <h5 id="password-toggle" class="mt-5" style="font-size: smaller; cursor: pointer;">
+                                    	<svg class="bi" width="1em" height="1em" fill="currentColor">
+                                            <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#caret-down"></use>
+                                        </svg>
+                                        비밀번호 변경
+                                    </h5>
+                                    <div id="password-fields" class="hidden">
+                                        <div class="sr_input-group">
+                                            <label for="current-password" class="text-sm sm:text-base">현재 비밀번호</label>
+                                            <input type="password" id="current-password">
+                                            <div id="current-pw-msg" class="mt-1" style="font-size:0.7em; margin-left:4px;"></div>
+                                        </div>
+                                        <div class="sr_input-group">
+                                            <label for="new-password" class="text-sm sm:text-base">새 비밀번호</label>
+                                            <input type="password" id="new-password">
+                                            <div id="new-pw-msg" class="mt-1" style="font-size:0.7em; margin-left:4px;"></div>
+                                        </div>
+                                        <div class="sr_input-group">
+                                            <label for="confirm-password" class="text-sm sm:text-base">새 비밀번호 확인</label>
+                                            <input type="password" id="confirm-password">
+                                            <div id="confirm-pw-msg" class="mt-1" style="font-size:0.7em; margin-left:4px;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- 버튼 그룹 -->
+        <div class="sr_profile-buttons mt-2">
+			<a th:href="@{/sns/myfeed}" class="sr_btn-profile">취소</a>
+			<button id="btn-saveProfile" type="button" class="sr_btn-profile">저장</button>
+		</div>
+    </th:block>
+	
+	<th:block layout:fragment="pageScripts">
+		<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			  const profileImg      = document.getElementById('profile-img');
+			  const profileLabel    = document.querySelector('.sr_profile_label');
+			  const profileInput    = document.getElementById('profile-input');
+			  const saveButton      = document.getElementById('btn-saveProfile');
+			  const passwordToggle  = document.getElementById('password-toggle');
+			  const passwordFields  = document.getElementById('password-fields');
+
+			  const nicknameInput   = document.getElementById('nickname');
+			  const nicknameError   = document.getElementById('nickname-error');
+
+			  const curPwInput   = document.getElementById('current-password');
+			  const newPwInput   = document.getElementById('new-password');
+			  const confPwInput  = document.getElementById('confirm-password');
+
+			  const curPwMsg   = document.getElementById('current-pw-msg');
+			  const newPwMsg   = document.getElementById('new-pw-msg');
+			  const confPwMsg  = document.getElementById('confirm-pw-msg');
+
+			  // 원본값
+			  const originNickname = nicknameInput.value.trim();
+			  const originProfile  = profileImg.getAttribute('data-origin-profile') || '';
+
+			  // 메시지 헬퍼
+			  const msgOk  = (el, text) => { el.textContent = text; el.classList.remove('text-danger'); el.classList.add('text-success'); };
+			  const msgBad = (el, text) => { el.textContent = text; el.classList.remove('text-success'); el.classList.add('text-danger'); };
+			  const msgClr = (el) => { el.textContent = ''; el.classList.remove('text-danger','text-success'); };
+
+			  // 새 비밀번호 규칙(예시): 8~64자, 공백 금지
+			  function validateNewPw(pw) {
+			    if (!pw || pw.length < 8) return '비밀번호는 8자 이상이어야 합니다.';
+			    if (pw.length > 64)      return '비밀번호는 64자를 넘길 수 없습니다.';
+			    if (/\s/.test(pw))       return '비밀번호에 공백을 사용할 수 없습니다.';
+			    return '';
+			  }
+
+			  let selectedImageFile = null; // 사용자가 새 파일 선택했는지 여부
+			  let currentPwValid = false;   // 서버로 확인 결과
+			  let newPwValid     = false;   // 클라 규칙 통과
+			  let confirmPwValid = false;   // 새 비번과 일치
+
+			  // 이미지/라벨 클릭 → 파일선택
+			  [profileImg, profileLabel].forEach(el => {
+			    el?.addEventListener('click', () => profileInput.click());
+			  });
+
+			  // 파일 미리보기 & 변경 플래그
+			  profileInput.addEventListener('change', (e) => {
+			    const file = e.target.files[0];
+			    if (!file) return;
+			    selectedImageFile = file;
+			    const reader = new FileReader();
+			    reader.onload = (ev) => { profileImg.src = ev.target.result; };
+			    reader.readAsDataURL(file);
+			  });
+
+			  // 비밀번호 토글
+			  passwordToggle.addEventListener('click', () => {
+			    passwordFields.classList.toggle('hidden');
+			  });
+
+			  // 닉네임 유효성(blur 시)
+			  nicknameInput.addEventListener('blur', async () => {
+			    const nn = nicknameInput.value.trim();
+			    nicknameError.textContent = '';
+			    nicknameError.classList.remove('text-danger','text-success');
+
+			    if (nn.length === 0) {
+			      nicknameError.textContent = '닉네임을 입력하세요.';
+			      nicknameError.classList.add('text-danger');
+			      return;
+			    }
+			    if (nn.length > 50) {
+			      nicknameError.textContent = '닉네임은 50자 이하여야 합니다.';
+			      nicknameError.classList.add('text-danger');
+			      return;
+			    }
+			    // 원래 닉네임과 동일하면 중복검사 불필요
+			    if (nn === originNickname) {
+			      nicknameError.textContent = '변경 없음';
+			      nicknameError.classList.add('text-success');
+			      return;
+			    }
+			    try {
+			      const resp = await fetch(`/sns/api/profile/check-nickname?mbrNknm=${encodeURIComponent(nn)}`);
+			      const { duplicate } = await resp.json();
+			      if (duplicate) {
+			        nicknameError.textContent = '이미 사용 중인 닉네임입니다.';
+			        nicknameError.classList.add('text-danger');
+			      } else {
+			        nicknameError.textContent = '사용 가능한 닉네임입니다.';
+			        nicknameError.classList.add('text-success');
+			      }
+			    } catch (e) {
+			      nicknameError.textContent = '닉네임 확인 중 오류가 발생했습니다.';
+			      nicknameError.classList.add('text-danger');
+			    }
+			  });
+
+			  // === 비밀번호 변경 관련: blur 유효성 ===
+
+			  // 1) 현재 비밀번호 blur 시 서버 확인
+			  curPwInput?.addEventListener('blur', async () => {
+			    if (passwordFields.classList.contains('hidden')) return; // 접혀있으면 무시
+			    const cur = curPwInput.value || '';
+			    msgClr(curPwMsg);
+			    currentPwValid = false;
+
+			    if (!cur) { msgBad(curPwMsg, '현재 비밀번호를 입력하세요.'); return; }
+
+			    try {
+			      const resp = await fetch(`/sns/api/profile/check-current-password?pw=${encodeURIComponent(cur)}`);
+			      const { ok } = await resp.json();
+			      if (ok) { currentPwValid = true; msgOk(curPwMsg, '현재 비밀번호가 일치합니다.'); }
+			      else    { msgBad(curPwMsg, '현재 비밀번호가 일치하지 않습니다.'); }
+			    } catch {
+			      msgBad(curPwMsg, '현재 비밀번호 확인 중 오류가 발생했습니다.');
+			    }
+			  });
+
+			  // 2) 새 비밀번호 blur 시 규칙 검사
+			  newPwInput?.addEventListener('blur', () => {
+			    if (passwordFields.classList.contains('hidden')) return;
+			    const n = newPwInput.value || '';
+			    msgClr(newPwMsg);
+			    newPwValid = false;
+
+			    const err = validateNewPw(n);
+			    if (err) { msgBad(newPwMsg, err); return; }
+
+			    if (curPwInput.value && curPwInput.value === n) {
+			      msgBad(newPwMsg, '현재 비밀번호와 동일할 수 없습니다.');
+			      return;
+			    }
+
+			    newPwValid = true;
+			    msgOk(newPwMsg, '사용 가능한 비밀번호입니다.');
+			  });
+
+			  // 3) 새 비밀번호 확인 blur 시 일치 검사
+			  confPwInput?.addEventListener('blur', () => {
+			    if (passwordFields.classList.contains('hidden')) return;
+			    const n = newPwInput.value || '';
+			    const c = confPwInput.value || '';
+			    msgClr(confPwMsg);
+			    confirmPwValid = false;
+
+			    if (!c) { msgBad(confPwMsg, '비밀번호 확인을 입력하세요.'); return; }
+			    if (n !== c) { msgBad(confPwMsg, '새 비밀번호와 일치하지 않습니다.'); return; }
+
+			    confirmPwValid = true;
+			    msgOk(confPwMsg, '비밀번호가 일치합니다.');
+			  });
+
+			  // 저장 클릭
+			  saveButton.addEventListener('click', async () => {
+			    const nn = nicknameInput.value.trim();
+
+			    // 변경 여부 판단
+			    const nicknameChanged = nn !== originNickname;
+			    const imageChanged    = !!selectedImageFile;
+
+			    const pwSectionOpen = !passwordFields.classList.contains('hidden');
+			    const wantChangePw  = pwSectionOpen && (curPwInput.value || newPwInput.value || confPwInput.value);
+
+			    // 변경 없음(닉/이미지/비번 모두 미변경)
+			    if (!nicknameChanged && !imageChanged && !wantChangePw) {
+			      alert('수정내용이 없습니다.');
+			      window.location.href = '/sns/myfeed';
+			      return;
+			    }
+
+			    // A) 비밀번호 변경이 포함되어 있으면 먼저 처리
+			    if (wantChangePw) {
+			      // blur 유효성 트리거
+			      curPwInput.dispatchEvent(new Event('blur'));
+			      newPwInput.dispatchEvent(new Event('blur'));
+			      confPwInput.dispatchEvent(new Event('blur'));
+			      await new Promise(r => setTimeout(r, 50));
+
+			      if (!currentPwValid) { alert('현재 비밀번호를 확인해주세요.'); return; }
+			      if (!newPwValid)     { alert('새 비밀번호가 규칙에 맞지 않습니다.'); return; }
+			      if (!confirmPwValid) { alert('비밀번호 확인이 일치하지 않습니다.'); return; }
+
+			      try {
+			        const resp = await fetch('/sns/api/profile/password', {
+			          method: 'POST',
+			          headers: { 'Content-Type': 'application/json' },
+			          body: JSON.stringify({
+			            currentPassword: curPwInput.value,
+			            newPassword: newPwInput.value
+			          })
+			        });
+			        const data = await resp.json();
+			        if (!data.ok) {
+			          alert(data.message || '비밀번호 변경에 실패했습니다.');
+			          return;
+			        }
+			        // 성공 안내
+			        msgOk(curPwMsg, '현재 비밀번호가 일치합니다.');
+			        msgOk(newPwMsg, '비밀번호가 변경되었습니다.');
+			        msgOk(confPwMsg, '비밀번호가 변경되었습니다.');
+			      } catch {
+			        alert('비밀번호 변경 중 통신 오류가 발생했습니다.');
+			        return;
+			      }
+			    }
+
+			    // B) 닉네임/이미지 변경 처리 (기존 로직 유지)
+			    if (!nicknameChanged && !imageChanged) {
+			      // 비밀번호만 변경한 경우
+			      alert('프로필이 저장되었습니다.');
+			      window.location.href = '/sns/myfeed';
+			      return;
+			    }
+
+			    // 닉네임 검증
+			    if (nicknameChanged) {
+			      if (nn.length === 0) { alert('닉네임을 입력해주세요.'); return; }
+			      if (nn.length > 50)  { alert('닉네임은 50자 이하여야 합니다.'); return; }
+			      // 중복 재확인(백엔드에서도 최종 검증)
+			      try {
+			        const resp = await fetch(`/sns/api/profile/check-nickname?mbrNknm=${encodeURIComponent(nn)}`);
+			        const { duplicate } = await resp.json();
+			        if (duplicate) { alert('이미 사용 중인 닉네임입니다.'); return; }
+			      } catch (_) { alert('닉네임 확인 중 오류가 발생했습니다.'); return; }
+			    }
+
+			    // FormData 구성 (변경된 것만)
+			    const fd = new FormData();
+			    if (nicknameChanged) fd.append('mbrNknm', nn);
+			    if (imageChanged)    fd.append('profileImage', selectedImageFile);
+
+			    try {
+			      const resp = await fetch('/sns/api/profile', { method: 'POST', body: fd });
+			      const data = await resp.json();
+			      if (data.ok) {
+			        alert('프로필이 저장되었습니다.');
+			        window.location.href = '/sns/myfeed';
+			      } else {
+			        alert(data.message || '저장 중 오류가 발생했습니다.');
+			      }
+			    } catch (e) {
+			      alert('통신 오류가 발생했습니다.');
+			    }
+			  });
+			});
+		</script>
+	</th:block>
+</body>
+
+</html>

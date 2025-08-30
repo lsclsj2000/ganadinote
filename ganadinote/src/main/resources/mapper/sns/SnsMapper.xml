@@ -11,9 +11,28 @@
 	</resultMap>
 	
 	<resultMap id="followUserMap" type="ganadinote.sns.domain.FollowUser">
-		<result property="mbrCd"   column="mbr_cd"/>
-		<result property="nickname" column="mbr_nknm"/>
-		<result property="handle"   column="handle"/>
+		<result property="mbrCd"   		column="mbr_cd"/>
+		<result property="nickname" 	column="mbr_nknm"/>
+		<result property="handle"   	column="handle"/>
+		<result property="profilePath" 	column="mbr_profile"/>
+	</resultMap>
+	
+	<resultMap id="homeFeedMap" type="ganadinote.sns.domain.HomeFeedPost">
+		<result property="spCd"       	column="sp_cd"/>
+		<result property="mbrCd"      	column="mbr_cd"/>
+		<result property="spCn"       	column="sp_cn"/>
+		<result property="spRegYmdt"  	column="sp_reg_ymdt"/>
+		<result property="nickname"   	column="mbr_nknm"/>
+		<result property="handle"     	column="handle"/>
+		<result property="profilePath"  column="mbr_profile"/>
+		<result property="following"   column="following"/>
+	</resultMap>
+	
+	<resultMap id="updateMyfeed" type="ganadinote.common.domain.Member">
+		<result property="mbrCd"       	column="mbr_cd"/>
+		<result property="mbrEmail"     column="mbr_email"/>
+		<result property="mbrNknm"      column="mbr_nknm"/>
+		<result property="mbrProfile"   column="mbr_profile"/>
 	</resultMap>
 
 	<insert id="insertPost"
@@ -58,7 +77,8 @@
 		SELECT
 		  m.mbr_cd,
 		  m.mbr_nknm,
-		  CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle
+		  CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
+		  m.mbr_profile
 		FROM follow f
 		JOIN member m ON m.mbr_cd = f.follow_mbr_cd
 		WHERE f.following_mbr_cd = #{mbrCd}
@@ -70,12 +90,151 @@
 		SELECT
 		  m.mbr_cd,
 		  m.mbr_nknm,
-		  CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle
+		  CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
+		  m.mbr_profile
 		FROM follow f
 		JOIN member m ON m.mbr_cd = f.following_mbr_cd
 		WHERE f.follow_mbr_cd = #{mbrCd}
 		ORDER BY f.follow_ymdt DESC
 	</select>
 	
+	<select id="selectHomeFeedPosts" parameterType="int" resultMap="homeFeedMap">
+    	/* home - 내가 팔로우한 회원들의 최근 1주 게시물 */
+	    (
+		    SELECT
+		      p.sp_cd,
+		      p.mbr_cd,
+		      p.sp_cn,
+		      p.sp_reg_ymdt,
+		      m.mbr_nknm,
+		      CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
+		      m.mbr_profile,
+		      /* 로그인 사용자가 작성자를 팔로우 중인지 */
+		      EXISTS (
+		        SELECT 1
+		        FROM follow f2
+		        WHERE f2.follow_mbr_cd   = #{loginMbrCd}
+		          AND f2.following_mbr_cd = p.mbr_cd
+		      ) AS following
+		    FROM sns_post p
+		    JOIN member m ON m.mbr_cd = p.mbr_cd
+		    WHERE p.mbr_cd = #{loginMbrCd}
+		      AND p.sp_reg_ymdt >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+		  )
+		  UNION ALL
+		  (
+		    SELECT
+		      p.sp_cd,
+		      p.mbr_cd,
+		      p.sp_cn,
+		      p.sp_reg_ymdt,
+		      m.mbr_nknm,
+		      CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
+		      m.mbr_profile,
+		      EXISTS (
+		        SELECT 1
+		        FROM follow f2
+		        WHERE f2.follow_mbr_cd   = #{loginMbrCd}
+		          AND f2.following_mbr_cd = p.mbr_cd
+		      ) AS following
+		    FROM sns_post p
+		    JOIN follow f ON f.following_mbr_cd = p.mbr_cd
+		    JOIN member m ON m.mbr_cd = p.mbr_cd
+		    WHERE f.follow_mbr_cd = #{loginMbrCd}
+		      AND p.sp_reg_ymdt >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+		  )
+		  ORDER BY sp_reg_ymdt DESC
+	</select>
+	
+	<select id="selectMemberById" parameterType="int" resultMap="updateMyfeed">
+		/* myfeed - 프로필 수정 내역 조회 */
+		SELECT mbr_cd, mbr_email, mbr_nknm, mbr_profile
+		FROM member
+		WHERE mbr_cd = #{mbrCd}
+	</select>
+	
+	<select id="countNickname" resultType="long">
+		/* myfeed - 프로필 수정 - 닉네임 유효성 검증 */
+		SELECT COUNT(*)
+		FROM member
+		WHERE mbr_nknm = #{mbrNknm}
+		  AND mbr_cd &lt;&gt; #{excludeMbrCd}
+	</select>
+	
+	<update id="updateMemberProfile">
+	  /* myfeed - 프로필 수정 - 업데이트 */
+	  UPDATE member
+	  <set>
+	    <if test="mbrNknm != null">
+	      mbr_nknm = #{mbrNknm},
+	    </if>
+	    <if test="mbrProfile != null">
+	      mbr_profile = #{mbrProfile},
+	    </if>
+	  </set>
+	  WHERE mbr_cd = #{mbrCd}
+	</update>
+	
+	<select id="selectEncodedPasswordByMbrCd" resultType="string">
+		/* myfeed - 프로필 수정 - 비밀번호 유효성 검증(해시조회) */
+		SELECT mbr_pw
+		FROM member
+		WHERE mbr_cd = #{mbrCd}
+	</select>
+	
+	<update id="updatePassword">
+		/* myfeed - 프로필 수정 - 비밀번호 변경 */
+		UPDATE member
+		SET mbr_pw = #{mbrPw}
+		WHERE mbr_cd = #{mbrCd}
+	</update>
+	
+	<select id="existsFollow" resultType="long">
+		/* myfeed - 팔로우 여부  */
+		SELECT COUNT(*) FROM follow
+		WHERE follow_mbr_cd = #{me} AND following_mbr_cd = #{target}
+	</select>
+	
+	<insert id="insertFollow">
+		/* myfeed - 팔로우  */
+		INSERT INTO follow (follow_mbr_cd, following_mbr_cd, follow_ymdt)
+		VALUES (#{me}, #{target}, NOW())
+	</insert>
+	
+	<delete id="deleteFollow">
+		/* myfeed - 팔로우 삭제  */
+		DELETE FROM follow
+		WHERE follow_mbr_cd = #{me} AND following_mbr_cd = #{target}
+	</delete>
+	
+	<select id="selectPostOwner" parameterType="int" resultType="int">
+		/* 게시물 삭제 조건  */
+ 		SELECT mbr_cd FROM sns_post WHERE sp_cd = #{spCd}
+	</select>
+	
+	<delete id="deletePost" parameterType="int">
+		/* 게시물 삭제  */
+		DELETE FROM sns_post WHERE sp_cd = #{spCd}
+	</delete>
+	
+	<select id="selectPostDetail" resultMap="homeFeedMap">
+		/* myfeed - 게시물 상세 모달 */
+		SELECT
+		  p.sp_cd,
+		  p.mbr_cd,
+		  p.sp_cn,
+		  p.sp_reg_ymdt,
+		  m.mbr_nknm,
+		  CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
+		  m.mbr_profile,
+		  EXISTS (
+		    SELECT 1 FROM follow f2
+		    WHERE f2.follow_mbr_cd = #{viewerMbrCd}
+		      AND f2.following_mbr_cd = p.mbr_cd
+		  ) AS following
+		FROM sns_post p
+		JOIN member m ON m.mbr_cd = p.mbr_cd
+		WHERE p.sp_cd = #{spCd}
+	</select>
 
 </mapper>

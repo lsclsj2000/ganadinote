@@ -31,9 +31,11 @@ public class WeatherServiceImpl implements WeatherService{
 		        );
 			
 			 try {
-					log.info("OpenWeatherMap API 호출 URL: {}", url); // ⚠️ 추가된 디버깅 라인
+				 	// OpenWeatherMap 호출 url
+					log.info("OpenWeatherMap API 호출 URL: {}", url);
 					String response = restTemplate.getForObject(url, String.class);
-					log.info("OpenWeatherMap API 응답: {}", response); // ⚠️ 추가된 디버깅 라인
+					// 날씨 정보 로그
+					// log.info("OpenWeatherMap API 응답: {}", response); 
 					return response;
 				}catch(HttpClientErrorException e) {
 					log.error("날씨 API 호출 중 클라이언트 오류 발생: HTTP 상태 코드 = {}", e.getStatusCode(), e);

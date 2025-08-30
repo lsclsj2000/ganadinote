@@ -34,4 +34,6 @@ public interface CommunityMapper {
 	                    @Param("commentCtnt") String commentCtnt);
 	  
 	  int increaseViewCount(@Param("postId") long postId);
+	  
+	  int insertPostAndReturnId(PostDetailDTO dto);
 }

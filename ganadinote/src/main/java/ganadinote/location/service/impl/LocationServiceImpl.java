@@ -16,7 +16,7 @@ public class LocationServiceImpl implements LocationService {
 	public String processLocation(double latitude, double longitude) {
 		System.out.println("LocationServiceImpl : 위치정보처리 시작");
 		
-		// '동' 정보 가져오기
+		// 위치 정보 가져오기
 		String LocationName = reverseGeocodingService.getLocationName(longitude, latitude);
 		
 	if(LocationName == null || LocationName.isEmpty()) {

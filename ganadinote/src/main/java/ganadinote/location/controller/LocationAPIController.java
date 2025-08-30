@@ -37,6 +37,7 @@ public class LocationAPIController {
 		
 		try{
 			String locationName = locationService.processLocation(locationDTO.getLatitude(),locationDTO.getLongitude());
+			System.out.println("gps 주소로 위치 정보 처리 시작: " +  locationName);
 			responseDTO.setLocationName(locationName);
 			responseDTO.setError(null);
 		} catch(Exception e){
