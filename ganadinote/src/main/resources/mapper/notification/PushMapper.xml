@@ -163,4 +163,15 @@
             AND m.latitude IS NOT NULL
             AND m.longitude IS NOT NULL
     </select>
+    
+    <update id="updateLocation" parameterType="ganadinote.notification.domain.LocationUpdateDTO">
+    	 /* 회원의 위치 정보(위도, 경도)를 업데이트합니다. */
+	    UPDATE 
+	    	push_subscription
+	    SET
+	        latitude = #{latitude},
+	        longitude = #{longitude}
+	    WHERE
+	        mbr_cd = #{mbrCd}
+</update>
 </mapper>

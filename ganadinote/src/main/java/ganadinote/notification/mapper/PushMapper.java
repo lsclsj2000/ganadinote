@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 
 import ganadinote.common.domain.PushSubscription;
+import ganadinote.notification.domain.LocationUpdateDTO;
 import ganadinote.notification.domain.PetWithBreedDTO;
 import ganadinote.notification.domain.PushSubDTO;
 
@@ -48,4 +49,7 @@ public interface PushMapper {
 
     // 위치 정보가 포함된 모든 활성화된 구독 정보 가져오기
     List<PushSubscription> findSubscriptionsWithLocation();
+    
+    // 회원의 위치 정보(위도, 경도)를 업데이트합니다.
+   void updateLocation(LocationUpdateDTO locationUpdateDto);
 }

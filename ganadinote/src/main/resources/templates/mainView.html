@@ -185,56 +185,102 @@
         }
         // --- 3. 위치 및 데이터 로드 기능 ---
         async function getLocationName() {
-            const statusMessage = document.getElementById('status-message');
-            const locationNameElement = document.getElementById('entireLocation');
-            const processCoordinates = async (lat, lon) => {
-                try {
-                    const locResponse = await fetch(`/locationapi/location`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ latitude: lat, longitude: lon }) });
-                    const locData = await locResponse.json();
-                    if (locData.locationName) locationNameElement.textContent = `현재 위치: '${locData.locationName}'`;
-                    await Promise.all([ fetchWeatherData(lat, lon), fetchAirPollution(lat, lon) ]);
-                } catch (error) { statusMessage.textContent = "위치/날씨 처리 중 오류 발생"; }
-            };
-            const fetchIpLocation = async () => {
-                try {
-                    statusMessage.textContent = 'GPS 사용 불가. IP 기반 위치 추정 중...';
-                    const response = await fetch('/locationapi/ipLocation');
-                    const data = await response.json();
-                    if (data.locationName) locationNameElement.textContent = `현재 위치(대략): '${data.locationName}'`;
-                    if (data.lat && data.lon) await processCoordinates(data.lat, data.lon);
-                } catch (error) { statusMessage.textContent = `오류: ${error.message}`; }
-            };
-            try {
-                if (!navigator.geolocation) { await fetchIpLocation(); return; }
-                statusMessage.textContent = '위치 정보 가져오는 중...';
-                locationNameElement.textContent = '위치 정보를 분석 중입니다...';
-                const position = await new Promise((resolve, reject) => { navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 }); });
-                await processCoordinates(position.coords.latitude, position.coords.longitude);
-            } catch (error) { await fetchIpLocation(); }
-        }
+		    const statusMessage = document.getElementById('status-message');
+		    const locationNameElement = document.getElementById('entireLocation');
+		    const weatherContainer = document.getElementById('weather-cards-container'); // ⭐ 추가
+		
+		    const processCoordinates = async (lat, lon) => {
+		        try {
+		            const locResponse = await fetch(`/locationapi/location`, { 
+		                method: 'POST', 
+		                headers: { 'Content-Type': 'application/json' }, 
+		                body: JSON.stringify({ latitude: lat, longitude: lon }) 
+		            });
+		            const locData = await locResponse.json();
+		            if (locData.locationName) locationNameElement.textContent = `현재 위치: '${locData.locationName}'`;
+		            
+		            await Promise.all([ fetchWeatherData(lat, lon), fetchAirPollution(lat, lon) ]);
+		            weatherContainer.style.display = 'block'; // ⭐ 추가
+		            statusMessage.style.display = 'none'; // ⭐ 추가: 상태 메시지 숨기기
+		        } catch (error) { 
+		            statusMessage.textContent = "위치/날씨 처리 중 오류 발생"; 
+		            weatherContainer.style.display = 'none';
+		        }
+		    };
+		    
+		    const fetchIpLocation = async () => {
+		        try {
+		            statusMessage.textContent = 'GPS 사용 불가. IP 기반 위치 추정 중...';
+		            
+		            const response = await fetch('/locationapi/ipLocation');
+		            const data = await response.json();
+		
+		            if (data.locationName) {
+		                locationNameElement.textContent = `현재 위치(대략): '${data.locationName}'`;
+		            }
+		            
+		            if (data.latitude && data.longitude) {
+		                await Promise.all([ fetchWeatherData(data.latitude, data.longitude), fetchAirPollution(data.latitude, data.longitude) ]);
+		                weatherContainer.style.display = 'block'; // ⭐ 추가
+		                statusMessage.style.display = 'none'; // ⭐ 추가: 상태 메시지 숨기기
+		            } else {
+		                document.getElementById('status-message').textContent = '날씨 정보 불러오기 실패: 위치 정보가 불완전합니다.';
+		                weatherContainer.style.display = 'none';
+		            }
+		
+		        } catch (error) { 
+		            statusMessage.textContent = `오류: ${error.message}`;
+		            weatherContainer.style.display = 'none';
+		        }
+		    };
+		    
+		    try {
+		        if (!navigator.geolocation) { 
+		            await fetchIpLocation(); 
+		            return; 
+		        }
+		        
+		        statusMessage.textContent = '위치 정보 가져오는 중...';
+		        locationNameElement.textContent = '위치 정보를 분석 중입니다...';
+		        
+		        const position = await new Promise((resolve, reject) => { 
+		            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 }); 
+		        });
+		        
+		        await processCoordinates(position.coords.latitude, position.coords.longitude);
+		    } catch (error) { 
+		        await fetchIpLocation(); 
+		    }
+		}
+        
+     // --- 3-1. 날씨 및 미세먼지 데이터 로드 기능 ---
         async function fetchWeatherData(lat, lon) {
             try {
                 const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
-                if (!response.ok) throw new Error('날씨 서버 통신 오류');
+                if (!response.ok) throw new Error('날씨 데이터 호출 실패');
                 const data = await response.json();
-                if (!data.current || !data.hourly || !data.daily) throw new Error('수신된 날씨 데이터 형식이 올바르지 않습니다.');
                 displayWeatherData(data);
-                document.getElementById('weather-cards-container').style.display = 'block';
-                document.getElementById('status-message').textContent = '';
-            } catch (error) { document.getElementById('status-message').textContent = `오류: ${error.message}`; }
-        }
-        async function fetchAirPollution(lat, lon) {
-            try {
-                const response = await fetch(`/api/weather/air-pollution?lat=${lat}&lon=${lon}`);
-                if (!response.ok) throw new Error('대기질 서버 통신 오류');
-                const data = await response.json();
-                displayAirPollution(data);
-            } catch (error) { 
-                document.getElementById('info-pm10').innerHTML = `<span class="bad">오류</span>`;
-                document.getElementById('info-pm25').innerHTML = `<span class="bad">오류</span>`;
+            } catch (error) {
+                console.error("날씨 정보 호출 중 오류:", error);
+                document.getElementById('status-message').textContent = '날씨 정보 불러오기 실패';
+                throw error; // Promise.all이 실패하도록 에러를 다시 throw
             }
         }
 
+        async function fetchAirPollution(lat, lon) {
+            try {
+                const response = await fetch(`/api/weather/air-pollution?lat=${lat}&lon=${lon}`);
+                if (!response.ok) throw new Error('미세먼지 데이터 호출 실패');
+                const data = await response.json();
+                displayAirPollution(data);
+            } catch (error) {
+                console.error("미세먼지 정보 호출 중 오류:", error);
+                document.getElementById('info-pm10').textContent = '---';
+                document.getElementById('info-pm25').textContent = '---';
+                throw error; // Promise.all이 실패하도록 에러를 다시 throw
+            }
+        }
+        
         // --- 4. 데이터 표시 기능 ---
         function displayWeatherData(data) {
             const current = data.current;
