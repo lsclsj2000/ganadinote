@@ -150,15 +150,14 @@
         const getUviText = (uvi) => { let level = '낮음'; if (uvi >= 11) level = '위험'; else if (uvi >= 8) level = '매우 높음'; else if (uvi >= 6) level = '높음'; else if (uvi >= 3) level = '보통'; return level; };
 
         // --- 2. 반려동물 정보 로드 기능 (원형 프로필로 생성) ---
-        const mbrCd = '1';
-        async function fetchAndRenderPets(memberCode) {
+        async function fetchAndRenderPets() {
             const container = document.getElementById('pet-cards-container');
             const loadingMessage = document.getElementById('loading-message');
             if (!container || !loadingMessage) return;
             loadingMessage.style.display = 'block';
             container.innerHTML = '';
             try {
-                const response = await fetch(`/mainapi/pets/${memberCode}`);
+                const response = await fetch(`/mainapi/pets`);
                 if (!response.ok) throw new Error('서버 응답 오류');
                 const pets = await response.json();
                 loadingMessage.style.display = 'none';
@@ -338,7 +337,7 @@
         
         // --- 5. 페이지가 로드되면 모든 기능을 실행 ---
         document.addEventListener('DOMContentLoaded', () => {
-            fetchAndRenderPets(mbrCd);
+        	fetchAndRenderPets();
             getLocationName(); 
         });
     </script>

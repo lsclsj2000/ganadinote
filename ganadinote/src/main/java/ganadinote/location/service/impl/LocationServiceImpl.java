@@ -3,6 +3,8 @@ package ganadinote.location.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ganadinote.location.domain.LocationDTO;
+import ganadinote.location.mapper.LocationMapper;
 import ganadinote.location.service.LocationService;
 import ganadinote.location.service.ReverseGeocodingService;
 import ganadinote.notification.domain.LocationUpdateDTO;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class LocationServiceImpl implements LocationService {
 	
 	private final PushMapper pushMapper;
+	private final LocationMapper locationMapper;
 	
 	@Autowired
 	private ReverseGeocodingService reverseGeocodingService;
@@ -44,4 +47,10 @@ public class LocationServiceImpl implements LocationService {
 	        dto.setLongitude(longitude);
 	        pushMapper.updateLocation(dto);
 	    }
+	
+	// 회원 코드로 위치 정보 조회
+	@Override
+	public LocationDTO getMemberLocation(Integer mbrCd) {
+		return locationMapper.getMemberLocation(mbrCd);
+	}
 }

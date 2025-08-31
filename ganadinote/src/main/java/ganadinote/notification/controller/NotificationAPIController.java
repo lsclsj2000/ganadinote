@@ -14,6 +14,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import ganadinote.common.util.TokenUtils;
+import ganadinote.location.service.LocationService;
 import ganadinote.notification.domain.PushSubDTO;
 import ganadinote.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class NotificationAPIController {
 	
 	private final NotificationService notificationService;
 	private final ObjectMapper objectMapper;
+	private final LocationService locationService;
 	
 	/**
 	 * 푸시 알림 구독 정보를 저장하거나 업데이트하는 API.
@@ -34,8 +37,13 @@ public class NotificationAPIController {
 	 */
 	@PostMapping("/subscribe")
 	public String addSubscribe(@RequestBody PushSubDTO dto) {
-		Integer mbrCd = 1; // 실제로는 로그인된 사용자의 mbrCd로 대체
+		String mbrCdStr = TokenUtils.getMbrCd();
+		if (mbrCdStr == null || mbrCdStr.trim().isEmpty()) {
+	        log.error("토큰에 유효한 회원 코드(mbrCd)가 없습니다.");
+	        return "fail";
+	    }
 		try {
+			Integer mbrCd = Integer.parseInt(mbrCdStr);
 			notificationService.saveOrUpdateSubscription(mbrCd, dto);
 			log.info("구독 정보가 성공적으로 저장/업데이트되었습니다.");
 			return "success";
@@ -52,8 +60,12 @@ public class NotificationAPIController {
 	 */
 	@GetMapping("/status")
 	public Map<String, Boolean> getSubscriptionStatus() {
-		Integer mbrCd = 1; // 실제로는 로그인된 사용자의 mbrCd로 대체
+		String mbrCdStr = TokenUtils.getMbrCd();
+		if (mbrCdStr == null || mbrCdStr.trim().isEmpty()) {
+			return Map.of("isActive", false);
+		}
 		try {
+			Integer mbrCd = Integer.parseInt(mbrCdStr);
 			boolean isActive = notificationService.isSubscriptionActive(mbrCd); 
 			log.info("회원 코드 {}의 알림 상태: {}", mbrCd, isActive);
 			return Map.of("isActive", isActive);
@@ -67,8 +79,14 @@ public class NotificationAPIController {
 	 * 알림을 비활성화하는 API. DB의 is_active 컬럼을 0으로 업데이트합니다.
 	 */
 	@PostMapping("/unsubscribe")
-	public String unsubscribe(@RequestBody Integer mbrCd) {
+	public String unsubscribe() {
+		String mbrCdStr = TokenUtils.getMbrCd();
+		if (mbrCdStr == null || mbrCdStr.trim().isEmpty()) {
+			log.error("토큰에 유효한 회원 코드가 없습니다.");
+			return "fail";
+		}
 		try {
+			Integer mbrCd = Integer.parseInt(mbrCdStr);
 			notificationService.deactivateSubscription(mbrCd);
 			log.info("알림 구독이 비활성화되었습니다.");
 			return "success";
@@ -83,8 +101,13 @@ public class NotificationAPIController {
 	 */
 	@PostMapping("/reactivate")
 	public String reactivate() {
-		Integer mbrCd = 1; // 실제로는 로그인된 사용자의 mbrCd로 대체
+		String mbrCdStr = TokenUtils.getMbrCd();
+		if (mbrCdStr == null || mbrCdStr.trim().isEmpty()) {
+			log.error("토큰에 유효한 회원 코드가 없습니다.");
+			return "fail";
+		}
 		try {
+			Integer mbrCd = Integer.parseInt(mbrCdStr);
 			notificationService.reactivateSubscription(mbrCd);
 			log.info("알림 구독이 다시 활성화되었습니다.");
 			return "success";
@@ -113,9 +136,14 @@ public class NotificationAPIController {
 	 */
 	@PostMapping("/set-time")
 	public String setNotificationTime(@RequestBody JsonNode payload) {
+		String mbrCdStr = TokenUtils.getMbrCd();
+		if (mbrCdStr == null || mbrCdStr.trim().isEmpty()) {
+			log.error("토큰에 유효한 회원 코드가 없습니다.");
+			return "fail";
+		}
 		try {
+			Integer mbrCd = Integer.parseInt(mbrCdStr);
 			// 페이로드에서 mbrCd와 notificationSchedule 값을 가져옴
-			Integer mbrCd = payload.get("mbrCd").asInt();
 			String notificationScheduleJson = payload.get("notificationSchedule").asText();
 			
 			// 서비스 계층을 호출하여 DB에 알림 스케줄 업데이트
@@ -133,8 +161,13 @@ public class NotificationAPIController {
 	 * 설정된 알림 시간을 조회하는 메서드
 	 */
 	@GetMapping("/schedule")
-	public Map<String, Object> getNotificationSchedule(@RequestParam("mbrCd") Integer mbrCd){
+	public Map<String, Object> getNotificationSchedule(){
+		String mbrCdStr = TokenUtils.getMbrCd();
+		if (mbrCdStr == null || mbrCdStr.trim().isEmpty()) {
+			return Map.of("notificationSchedule", Collections.emptyMap());
+		}
 		try {
+			Integer mbrCd = Integer.parseInt(mbrCdStr);
 			String scheduleJson = notificationService.getNotificationSchedule(mbrCd);
 			
 			if(scheduleJson != null && !scheduleJson.isEmpty()) {

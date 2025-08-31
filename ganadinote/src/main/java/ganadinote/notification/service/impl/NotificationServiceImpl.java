@@ -1,5 +1,10 @@
 package ganadinote.notification.service.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import ganadinote.location.service.LocationService;
 import ganadinote.main.service.MainService;
 import ganadinote.notification.domain.PetWithBreedDTO;
@@ -11,10 +16,6 @@ import ganadinote.weather.domain.WeatherInfo;
 import ganadinote.weather.service.WeatherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-
-import java.util.List;
-
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -31,18 +32,19 @@ public class NotificationServiceImpl implements NotificationService {
      * 기존 구독 정보가 있으면 is_active를 1로 업데이트하고, 없으면 새로 삽입합니다.
      */
     @Override
+    @Transactional
     public void saveOrUpdateSubscription(int mbrCd, PushSubDTO dto) {
-        dto.setMbrCd(mbrCd); // DTO에 회원 코드 설정
-        int existingSubscriptionCount = pushMapper.getSubscriptionByEndpoint(dto.getEndpoint());
-
-        if (existingSubscriptionCount > 0) {
-            log.info("기존 구독 정보가 발견되어 업데이트합니다.");
-            pushMapper.updateSubscription(dto);
-        } else {
-            log.info("새로운 구독 정보입니다. 삽입합니다.");
+    		dto.setMbrCd(mbrCd); 
+		/*
+		 * pushMapper.getSubscriptionByEndpoint(dto.getEndpoint());
+		 * 
+		 * if (existingSubscriptionCount > 0) { log.info("기존 구독 정보가 발견되어 업데이트합니다.");
+		 * pushMapper.updateSubscription(dto); } else {
+		 * log.info("새로운 구독 정보입니다. 삽입합니다.");
+		 */
             pushMapper.addSubscription(dto);
+            log.info("회원 코드 {}의 구독 정보가 성공적으로 저장/업데이트되었습니다.", mbrCd);
         }
-    }
 
     /**
      * 현재 사용자의 활성화된 알림 구독 상태를 확인합니다.
@@ -95,6 +97,7 @@ public class NotificationServiceImpl implements NotificationService {
      * 알림 시간 설정
      */
     @Override
+    @Transactional
     public void updateNotificationSchedule(Integer mbrCd, String notificationScheduleJson) {
     	pushMapper.updateNotificationSchedule(mbrCd, notificationScheduleJson);
     	log.info("회원 코드 {}의 알림 시간이 {}로 업데이트되었습니다.", mbrCd, notificationScheduleJson);
