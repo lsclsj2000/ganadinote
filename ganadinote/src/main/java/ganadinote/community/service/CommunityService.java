@@ -28,4 +28,17 @@ public interface CommunityService {
 	 Long createPost(PostRequestDTO req, String mbrCd);
 	 
 	 String uploadEditorImage(MultipartFile image);
+	 
+	 /** 본인 글만 수정 */
+    void updatePost(PostDetailDTO dto, Integer mbrCdFromToken);
+
+    /** 본인 글만 삭제(소프트 삭제) */
+    void deletePost(int postId, Integer mbrCdFromToken);
+
+    /** (선택) 소유자 확인만 필요할 때 */
+    boolean isOwner(int postId, Integer mbrCdFromToken);
+    
+    boolean toggleLike(int postId, int mbrCd);
+    boolean hasLiked(int postId, int mbrCd);
+    int getLikeCount(int postId);
 }

@@ -65,23 +65,27 @@
 
 
 	<select id="selectPostDetail" resultType="ganadinote.community.dto.PostDetailDTO">
-		SELECT
-			p.post_id AS postId,
-			p.category_id AS categoryId,
-			c.category_nm AS categoryNm,
-			p.post_ttl AS postTtl,
-			p.post_ctnt AS postCtnt,
-			m.mbr_nknm AS mbrNknm,
-			p.post_reg_date AS postRegDate,
-			p.post_view_count AS postViewCount,
-			p.post_like_count AS postLikeCount,
-			p.post_status as postStatus,
-			(SELECT COUNT(*) FROM comment cm WHERE cm.post_id = p.post_id AND cm.comment_status = 'ACTIVE') AS cmtCount
-		FROM post p
-		JOIN category c ON c.category_id = p.category_id
-		JOIN member m ON m.mbr_cd = p.mbr_cd
-		WHERE p.post_id = #{postId} and  p.post_status = 'ACTIVE'
-	</select>
+  SELECT
+    p.post_id           AS postId,
+    p.category_id       AS categoryId,
+    c.category_nm       AS categoryNm,
+    p.post_ttl          AS postTtl,
+    p.post_ctnt         AS postCtnt,
+    m.mbr_nknm          AS mbrNknm,
+    m.mbr_cd            AS mbrCd,           <!-- 🔥 이 줄 추가 -->
+    p.post_reg_date     AS postRegDate,
+    p.post_view_count   AS postViewCount,
+    p.post_like_count   AS postLikeCount,
+    p.post_status       AS postStatus,
+    (SELECT COUNT(*) FROM comment cm
+      WHERE cm.post_id = p.post_id AND cm.comment_status = 'ACTIVE') AS cmtCount
+  FROM post p
+  JOIN category c ON c.category_id = p.category_id
+  JOIN member   m ON m.mbr_cd = p.mbr_cd
+  WHERE p.post_id = #{postId}
+    AND p.post_status = 'ACTIVE'
+</select>
+
 	
 	<!-- 게시글 등록 -->
 	<insert id="insertPost" parameterType="ganadinote.community.dto.PostDetailDTO">
@@ -184,6 +188,70 @@
 	      'ACTIVE'
 	  )
 	</insert>
+	
+	
+	<!-- 본인 글만 수정 -->
+	<update id="updatePostByOwner" parameterType="ganadinote.community.dto.PostDetailDTO">
+	  UPDATE post
+	  SET post_ttl = #{postTtl},
+	      post_ctnt = #{postCtnt},
+	      post_mdfcn_date = NOW()
+	  WHERE post_id = #{postId}
+	    AND mbr_cd = #{mbrCd}
+	    AND post_status = 'ACTIVE'   <!-- 컬럼명 맞춤 -->
+	</update>
+	
+	<!-- 본인 글만 삭제 (소프트 삭제) -->
+	<update id="softDeletePostByOwner">
+	  UPDATE post
+	  SET post_status = 'DELETED',
+	      post_mdfcn_date = NOW()
+	  WHERE post_id = #{postId}
+	    AND mbr_cd = #{mbrCd}
+	    AND post_status = 'ACTIVE'
+	</update>
+	  
+  <select id="selectAuthorMbrCd" parameterType="int" resultType="int">
+	  SELECT mbr_cd
+	  FROM post
+	  WHERE post_id = #{postId}
+	</select>
+	
+	<select id="hasLiked" resultType="boolean">
+	  SELECT EXISTS(
+	    SELECT 1
+	    FROM `like` l
+	    WHERE l.post_id = #{postId}
+	      AND l.mbr_cd  = #{mbrCd}
+	      AND l.post_type = 'post'
+	  ) AS value
+	</select>
+
+	<!-- ❤️ 좋아요 추가 -->
+	<insert id="insertLike">
+	  INSERT INTO `like` (post_id, mbr_cd, like_date, post_type)
+	  VALUES (#{postId}, #{mbrCd}, NOW(), 'post')
+	</insert>
+	
+	<!-- 💔 좋아요 삭제 -->
+	<delete id="deleteLike">
+	  DELETE FROM `like`
+	  WHERE post_id = #{postId}
+	    AND mbr_cd  = #{mbrCd}
+	    AND post_type = 'post'
+	</delete>
+	
+	<!-- 👍 카운트 증감 (음수 방지) -->
+	<update id="bumpLikeCount">
+	  UPDATE post
+	  SET post_like_count = GREATEST(0, post_like_count + #{delta})
+	  WHERE post_id = #{postId}
+	</update>
+	
+	<!-- 현재 카운트 -->
+	<select id="getLikeCount" resultType="int">
+	  SELECT post_like_count FROM post WHERE post_id = #{postId}
+	</select>
 
 </mapper>
 
