@@ -7,7 +7,7 @@ import ganadinote.notification.domain.PetWithBreedDTO;
 
 public interface MainService {
 	
-	List<Pet> getPetInfoByMbrCd(String mbrCd);
+	List<Pet> getPetInfoByMbrCd(Integer mbrCd);
 	
-	List<PetWithBreedDTO> getPetInfoWithBreedByMbrCd(String mbrCd);
+	List<PetWithBreedDTO> getPetInfoWithBreedByMbrCd(Integer mbrCd);
 }

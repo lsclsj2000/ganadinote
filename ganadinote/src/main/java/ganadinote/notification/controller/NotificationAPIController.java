@@ -94,6 +94,9 @@ public class NotificationAPIController {
 		}
 	}
 
+	/**
+	 * 알림을 보내는 메서드
+	 */
 	@GetMapping("/send")
 	public String sendPushNotification(@RequestParam Integer mbrCd, @RequestParam String message) {
 		try {
@@ -105,6 +108,9 @@ public class NotificationAPIController {
 		}
 	}
 	
+	/**
+	 * 알림 시간을 설정하는 메서드
+	 */
 	@PostMapping("/set-time")
 	public String setNotificationTime(@RequestBody JsonNode payload) {
 		try {
@@ -123,6 +129,9 @@ public class NotificationAPIController {
 		}
 	}
 	
+	/**
+	 * 설정된 알림 시간을 조회하는 메서드
+	 */
 	@GetMapping("/schedule")
 	public Map<String, Object> getNotificationSchedule(@RequestParam("mbrCd") Integer mbrCd){
 		try {
@@ -142,4 +151,15 @@ public class NotificationAPIController {
 			return Map.of("notificationSchedule", Collections.emptyMap());
 		}
 	}
+		// 수동 테스트를 위한 임시 엔드포인트
+	 @GetMapping("/testAlert")
+	    public String testAlert(@RequestParam Integer mbrCd) {
+	        try {
+	            notificationService.processWalkAlert(mbrCd);
+	            return "Test alert triggered successfully for mbrCd: " + mbrCd;
+	        } catch (Exception e) {
+	            log.error("Test alert failed", e);
+	            return "Failed to trigger test alert: " + e.getMessage();
+	        }
+	    }
 }

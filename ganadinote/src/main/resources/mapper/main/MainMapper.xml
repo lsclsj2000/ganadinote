@@ -15,8 +15,32 @@
         <result property="petMdfcnDate" 		column="pet_mdfcn_date" />		<!-- 수정 날짜 -->
     </resultMap>
     
+    <resultMap id="petWithBreedMainResultMap" 		type="ganadinote.notification.domain.PetWithBreedDTO">
+	    <result column="pet_cd" 				property="petCd"/>
+	    <result column="mbr_cd" 				property="mbrCd"/>
+	    <result column="pet_name" 				property="petName"/>
+	    <result column="pet_breed" 				property="petBreed"/>
+	    <result column="pet_gender" 			property="petGender"/>
+	    <result column="pet_birth_date" 		property="petBirthDate"/>
+	    <result column="pet_weight" 			property="petWeight"/>
+	    <result column="pet_profile_img_url" 	property="petProfileImgUrl"/>
+	    <result column="pet_introduction" 		property="petIntroduction"/>
+	    <result column="pet_reg_date" 			property="petRegDate"/>
+	    <result column="pet_mdfcn_date" 		property="petMdfcnDate"/>
+	
+	
+	    <result column="breed_cd" 				property="breedCd"/>
+	    <result column="breed_name" 			property="breedName"/>
+	    <result column="min_temp" 				property="minTemp"/>
+	    <result column="max_temp" 				property="maxTemp"/>
+	    <result column="cold_sensitive" 		property="coldSensitive"/>
+	    <result column="heat_sensitive" 		property="heatSensitive"/>
+	    <result column="dog_size" 				property="dogSize"/>
+	    <result column="activity_level" 		property="activityLevel"/>
+	</resultMap>
+    
     <select id="getPetInfoByMbrCd" resultMap="petResultMap">
-    	 /* 회원 코드를 기준으로 TBL_PET 테이블의 모든 정보를 가져옵니다. */
+    	 /* 회원 코드를 기준으로 PET 테이블의 모든 정보를 가져옵니다. */
     	SELECT 
 			pet_cd, 
 			mbr_cd, 
@@ -35,23 +59,29 @@
 			mbr_cd = #{mbrCd};
     </select>
     
-    <select id="getPetInfoWithBreedByMbrCd" resultType="ganadinote.notification.domain.PetWithBreedDTO">
+    <select id="getPetInfoWithBreedByMbrCd" resultMap="petWithBreedMainResultMap">
     	/* 회원 코드로 반려동물 정보와 품종별 온도 민감도(min_temp, max_temp)를 함께 조회합니다. */
         SELECT
-            p.pet_cd,
-            p.pet_name,
-            p.pet_profile_img_url,
-            p.pet_gender,
-            p.pet_birth,
-            p.pet_breed_id,
-            b.max_temp,
-            b.min_temp
-        FROM
-            TBL_PET p
-        INNER JOIN
-            TBL_BREED b ON p.pet_breed_id = b.breed_cd
-        WHERE
-            p.mbr_cd = #{mbrCd}
+		    p.pet_cd,
+		    p.pet_name,
+		    p.pet_profile_img_url,
+		    p.pet_gender,
+		    p.pet_birth_date,
+		    p.pet_weight,
+		    b.breed_cd,
+		    b.breed_name,
+		    b.min_temp,
+		    b.max_temp,
+		    b.cold_sensitive,
+		    b.heat_sensitive
+		FROM
+		    pet p
+		INNER JOIN
+		    dog_breed b
+		ON
+		    p.pet_breed = b.breed_cd
+		WHERE
+            p.mbr_cd = #{mbrCd};
     </select>
     
 </mapper>

@@ -1,9 +1,14 @@
 package ganadinote.notification.service.impl;
 
+import ganadinote.location.service.LocationService;
+import ganadinote.main.service.MainService;
 import ganadinote.notification.domain.PetWithBreedDTO;
 import ganadinote.notification.domain.PushSubDTO;
 import ganadinote.notification.mapper.PushMapper;
 import ganadinote.notification.service.NotificationService;
+import ganadinote.weather.domain.AirPollutionDTO;
+import ganadinote.weather.domain.WeatherInfo;
+import ganadinote.weather.service.WeatherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
@@ -17,6 +22,9 @@ import org.springframework.stereotype.Service;
 public class NotificationServiceImpl implements NotificationService {
 
     private final PushMapper pushMapper;
+    private final LocationService locationService; 
+    private final WeatherService weatherService;
+    private final MainService mainService;
 
     /**
      * 알림 구독 정보를 저장하거나 업데이트합니다.
@@ -62,17 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
         pushMapper.reactivateSubscription(mbrCd);
         log.info("회원 코드 {}의 알림이 다시 활성화되었습니다.", mbrCd);
     }
-
-    /**
-     * 푸시 알림을 실제로 전송하는 메소드입니다.
-     */
-    @Override
-    public void sendNotification(Integer mbrCd, String message) {
-        // 이 부분에 실제 푸시 알림 전송 로직이 구현되어야 합니다.
-        log.info("회원 {}에게 푸시 알림 전송: {}", mbrCd, message);
-    }
-    
-    
+ 
     /**
      * 멤버 코드로 펫 정보를 받아오는 메소드.
      */
@@ -108,5 +106,70 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public String getNotificationSchedule(Integer mbrCd) {
     	return pushMapper.getNotificationSchedule(mbrCd);    	
+    }
+
+    /**
+     * 푸시 알림을 실제로 전송하는 메소드입니다.
+     */
+    @Override
+    public void sendNotification(Integer mbrCd, String message) {
+        // 이 부분에 실제 푸시 알림 전송 로직이 구현되어야 합니다.
+        log.info("회원 {}에게 푸시 알림 전송: {}", mbrCd, message);
+    }
+    
+
+    /**
+     * 푸시 알림 process.
+     */
+    /**
+     * 회원 코드(mbrCd)를 기반으로 산책 알림을 처리하고 전송합니다.
+     */
+    public void processWalkAlert(Integer mbrCd) {
+        log.info("회원 {}의 산책 알림 처리 시작", mbrCd);
+
+        // 1. 회원 위치 정보 가져오기 (실제 로직에 맞게 수정 필요)
+        // 이 부분은 사용자의 실제 위치 데이터를 가져오는 로직으로 대체되어야 합니다.
+        double latitude = 37.5665; // 예시: 서울 위도
+        double longitude = 126.9780; // 예시: 서울 경도
+
+        // 2. 위치 정보를 기반으로 날씨와 미세먼지 정보 가져오기
+        WeatherInfo weather = weatherService.getWeather(latitude, longitude);
+        AirPollutionDTO air = weatherService.getAirPollution(latitude, longitude);
+
+        // 3. 해당 사용자의 펫 정보와 품종 민감도 데이터 가져오기
+        List<PetWithBreedDTO> pets = mainService.getPetInfoWithBreedByMbrCd(mbrCd);
+
+        log.info("--- pets 리스트 디버깅 시작 ---");
+        if (pets != null) {
+            log.info("pets 리스트 크기: {}", pets.size());
+            for (int i = 0; i < pets.size(); i++) {
+                log.info("pets[{}] = {}", i, pets.get(i));
+            }
+        } else {
+            log.info("pets 리스트는 null입니다.");
+        }
+        log.info("--- pets 리스트 디버깅 종료 ---");
+
+        if (pets == null || pets.isEmpty()) {
+            log.warn("회원 {}의 등록된 반려동물 정보가 없습니다.", mbrCd);
+            return;
+        }
+
+        // 4. 알림 조건 체크 및 메시지 생성
+        for (PetWithBreedDTO pet : pets) {
+            String alertMessage = null;
+            if (weather != null && (weather.getTemp() > pet.getMaxTemp() || weather.getTemp() < pet.getMinTemp())) {
+                alertMessage = String.format("%s의 산책하기엔 온도가 적합하지 않아요. 🌡️ (현재 %.1f°C)", pet.getPetName(), weather.getTemp());
+            } else if (weather != null && weather.isRaining()) {
+                alertMessage = String.format("%s의 산책하기엔 비가 오고 있어요. ☂️", pet.getPetName());
+            } else if (air != null && (air.getPm25() > 75 || air.getPm10() > 150)) {
+                alertMessage = String.format("%s의 산책하기엔 미세먼지 농도가 높아요. 😷", pet.getPetName());
+            }
+
+            // 5. 조건에 맞으면 알림 전송
+            if (alertMessage != null) {
+                sendNotification(mbrCd, alertMessage);
+            }
+        }
     }
 }

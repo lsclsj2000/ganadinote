@@ -19,6 +19,7 @@ public interface NotificationService {
     // 알림 재활성화
     void reactivateSubscription(int mbrCd);
     
+    // 알림 발송
     void sendNotification(Integer mbrCd, String message);
     
     // mbrCd를 통해 pet의 정보를 가져옴
@@ -29,4 +30,7 @@ public interface NotificationService {
     
     // 회원의 알림 스케줄(JSON 형태)을 조회
     String getNotificationSchedule(Integer mbrCd);
+    
+    // 산책에 대한 알림 조건
+    public void processWalkAlert(Integer mbrCd);
 }

@@ -35,7 +35,7 @@ public interface PushMapper {
     void reactivateSubscription(@Param("mbrCd") int mbrCd);
     
     // 스케줄에 맞는 구독 정보 찾기
-    List<PushSubscription> findSubscriptionsBySchedule(@Param("dayOfWeek") String dayOfWeek, @Param("currentTime") String currentTime);
+    List<PushSubscription> findSubscriptionsBySchedule(@Param("dayOfWeek") String dayOfWeek);
     
     // mbrCd를 통해 pet 알림 정보 가져오기
     List<PetWithBreedDTO> getPetInfoForNotification(@Param("mbrCd") String mbrCd);
@@ -46,4 +46,6 @@ public interface PushMapper {
     // 회원의 알림 스케줄(JSON 형태)을 조회
     String getNotificationSchedule(@Param("mbrCd") Integer mbrCd);
 
+    // 위치 정보가 포함된 모든 활성화된 구독 정보 가져오기
+    List<PushSubscription> findSubscriptionsWithLocation();
 }

@@ -27,30 +27,36 @@
                 
                 <hr class="my-4">
                 
-                <h4>강아지별 산책 정보</h4>
                 <div th:each="pet : ${pets}" th:if="${pet}" class="border p-3 mb-3">
-                    <h5 th:text="${pet.petName}">강아지 이름</h5>
-                    <p>
-                        <span th:text="${pet.petBreed}">품종</span>, 
-                        <span th:text="${pet.petWeight}">체중</span>kg
-                    </p>
-                    <p>
-                        적정 온도: <span th:text="|${pet.minTemp}~${pet.maxTemp}°C|">정보 없음</span>
-                    </p>
-                    <p>
-                        활동량: <span th:text="${pet.activityLevel}">정보 없음</span>
-                    </p>
-                    <p>
-                        더위 민감도: <span th:text="${pet.heatSensitive == 'Y' ? '민감' : '보통'}"></span>
-                    </p>
-                    <p>
-                        추위 민감도: <span th:text="${pet.coldSensitive == 'Y' ? '민감' : '보통'}"></span>
-                    </p>
-                    <p>
-                        크기: <span th:text="${pet.dogSize}"></span>
-                    </p>
-                </div>
-                
+				    <h5 th:text="${pet.petName}">강아지 이름</h5>
+				    
+				    <div class="row align-items-center">
+				        <div class="col-12 col-lg-4 d-flex justify-content-center">
+				            <img th:src="${pet.petProfileImgUrl != null and !#strings.isEmpty(pet.petProfileImgUrl)} ? ${pet.petProfileImgUrl} : @{/assets/images/samples/dogdefault.png}"
+				                 alt="반려동물 프로필 이미지"
+				                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;" />
+				        </div>
+				        
+				        <div class="col-12 col-lg-8">
+				            <p>
+				                품종 : <span th:text="${pet.breedName}">품종</span>
+				            </p>
+				            <p> 
+				                체중 : <span th:text="${pet.petWeight}">체중</span>kg
+				            </p>
+				            <p>
+				                적정 온도: <span th:text="|${pet.minTemp}~${pet.maxTemp}°C|">정보 없음</span>
+				            </p>
+				            <p>
+				                더위 민감도: <span th:text="${pet.heatSensitive == 'Y' ? '민감' : '보통'}"></span>
+				            </p>
+				            <p>
+				                추위 민감도: <span th:text="${pet.coldSensitive == 'Y' ? '민감' : '보통'}"></span>
+				            </p>
+				        </div>
+				    </div>
+				</div>
+				                
                 <hr class="my-4">
                 
                 <h4>알림 시간 설정</h4>

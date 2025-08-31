@@ -21,7 +21,7 @@ public class MainServiceImpl implements MainService{
 	private static final String DEFAULT_IMAGE = "/assets/images/samples/dogdefault.png";
 	
 	@Override
-	public List<Pet> getPetInfoByMbrCd(String mbrCd) {
+	public List<Pet> getPetInfoByMbrCd(Integer mbrCd) {
 		log.info("MainServiceImpl: 펫정보 조회 시작");
 		
 		List<Pet> petList = mainMapper.getPetInfoByMbrCd(mbrCd);
@@ -37,7 +37,7 @@ public class MainServiceImpl implements MainService{
 	}
 	
 @Override
-	public List<PetWithBreedDTO> getPetInfoWithBreedByMbrCd(String mbrCd) {
+	public List<PetWithBreedDTO> getPetInfoWithBreedByMbrCd(Integer mbrCd) {
 		log.info("MainServiceImpl: 펫과 품종 정보 조회 시작");
 		
 		List<PetWithBreedDTO> petWithBreed = mainMapper.getPetInfoWithBreedByMbrCd(mbrCd);

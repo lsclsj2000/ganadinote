@@ -11,8 +11,8 @@ import ganadinote.notification.domain.PetWithBreedDTO;
 @Mapper
 public interface MainMapper {
 	
-	List<Pet> getPetInfoByMbrCd(String mbrCd);
+	List<Pet> getPetInfoByMbrCd(Integer mbrCd);
 	
-    List<PetWithBreedDTO> getPetInfoWithBreedByMbrCd(@Param("mbrCd") String mbrCd);
+    List<PetWithBreedDTO> getPetInfoWithBreedByMbrCd(@Param("mbrCd") Integer mbrCd);
 	
 }

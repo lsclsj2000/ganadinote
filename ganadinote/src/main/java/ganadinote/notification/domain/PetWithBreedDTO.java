@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class PetWithBreedDTO extends Pet {
+	private Integer breedCd;
     private String 	breedName;
     private Float 	minTemp;
     private Float 	maxTemp;
