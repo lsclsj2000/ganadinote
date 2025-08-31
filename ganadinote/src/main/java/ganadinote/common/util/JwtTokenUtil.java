@@ -16,10 +16,16 @@ import io.jsonwebtoken.security.Keys;
 public class JwtTokenUtil {
 
     private final Key key;
+    private static JwtTokenUtil instance;
 
     public JwtTokenUtil(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
+        JwtTokenUtil.instance = this;
+    }
+    
+    public static JwtTokenUtil getInstance() {
+        return instance;
     }
 
     // JWT 토큰 생성
@@ -43,9 +49,9 @@ public class JwtTokenUtil {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            return claims.getSubject(); // 회원 코드(mbrCd) 반환
+            return claims.getSubject();
         } catch (Exception e) {
-            // 토큰 파싱 실패 또는 유효하지 않은 토큰 처리
+            
             return null;
         }
     }
