@@ -8,7 +8,6 @@
   <resultMap id="CommentMap" type="ganadinote.community.dto.CommentDTO">
     <id     column="comment_id"         property="commentId"/>
     <result column="post_id"            property="postId"/>
-    <!-- parentId가 DTO에서 Long이면 아래처럼 CAST -->
     <result column="parentId"           property="parentId"/>
     <result column="mbr_cd"             property="mbrCd"/>
     <result column="mbr_nicknm"         property="mbrNknm"/>
@@ -36,6 +35,24 @@
     ORDER BY COALESCE(NULLIF(c.comment_parent_id,''), c.comment_id+0), c.comment_id
     LIMIT #{limit} OFFSET #{offset}
   </select>
+  
+  <select id="selectComments" resultType="ganadinote.community.dto.CommentDTO">
+  SELECT
+    c.comment_id                                           AS commentId,
+    CAST(NULLIF(c.comment_parent_id, '') AS SIGNED)        AS commentParentId,  
+    c.post_id                                              AS postId,
+    c.mbr_cd                                               AS mbrCd,
+    c.comment_ctnt                                         AS commentCtnt,
+    m.mbr_nknm                                             AS authorNickname,  
+    c.comment_reg_date                                     AS commentRegDate
+  FROM comment c
+  JOIN member m ON m.mbr_cd = c.mbr_cd
+  WHERE c.post_id = #{postId}
+    AND c.comment_status = 'ACTIVE'
+  ORDER BY
+    CASE WHEN c.comment_parent_id IS NULL OR c.comment_parent_id = '' THEN 0 ELSE 1 END,
+    c.comment_id
+</select>
 
   <!-- 생성 -->
   <insert id="insertComment" parameterType="ganadinote.community.dto.CommentDTO"
@@ -44,21 +61,19 @@
       (post_id, comment_parent_id, mbr_cd, comment_ctnt, comment_reg_date, comment_status)
     VALUES
       (#{postId},
-       /* DTO parentId가 Long이더라도 컬럼은 VARCHAR 이므로 VARCHAR로 넣음 */
        #{parentId, jdbcType=VARCHAR},
-       /* DTO mbrCd가 String이라면 정수형 힌트 */
        #{mbrCd, jdbcType=INTEGER},
        #{commentCtnt},
        NOW(),
        'ACTIVE')
   </insert>
 
-  <!-- 소프트 삭제 -->
-  <update id="markCommentDeleted">
-    UPDATE comment
-       SET comment_status='DELETE', comment_mdfcn_date=NOW()
-     WHERE comment_id=#{commentId}
-       AND mbr_cd=#{mbrCd, jdbcType=INTEGER}
-  </update>
+	<update id="markCommentDeleted">
+	  UPDATE comment
+	     SET comment_status='DELETED', comment_mdfcn_date=NOW()
+	   WHERE comment_id=#{commentId}
+	     AND mbr_cd=#{mbrCd, jdbcType=INTEGER}
+	     AND comment_status != 'DELETED'
+	</update>
 
 </mapper>

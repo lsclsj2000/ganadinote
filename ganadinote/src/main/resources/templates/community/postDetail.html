@@ -8,37 +8,63 @@
   <meta charset="UTF-8" />
   <title>게시글 상세</title>
   <th:block layout:fragment="pageStyles">
-    <style>
-      .post-title{word-break:keep-all}
-      .post-content{white-space:pre-line;line-height:1.8}
-      .author-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover}
-      .comment-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
-      .comment-item{border-bottom:1px solid #f5f5f5}
+	<style>
+	  .post-title{word-break:keep-all}
+	  .post-content{white-space:pre-line;line-height:1.8}
+	  .author-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover}
+	  .comment-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
+	  .comment-item{border-bottom:1px solid #f5f5f5; position:relative}
+	  .reply-form{display:none}
+	  .reply-form.show{display:block}
 
-      /* 폼 토글 */
-      .reply-form{display:none}
-      .reply-form.show{display:block}
+	  /* 대댓글 들여쓰기 & ㄴ자 라인 */
+	  .child-reply{ position:relative; margin-left:28px; padding-left:16px }
+	  .child-reply::before{
+	    content:""; position:absolute; left:6px; top:14px;
+	    width:16px; height:16px;
+	    border-left:2px solid #e5e7eb; border-bottom:2px solid #e5e7eb;
+	    border-bottom-left-radius:6px;
+	  }
 
-      /* 부모/자식 공통: 기준점만 */
-      .comment-item{ position: relative; }
+	  /* 좋아요 버튼: 칩 형태(테두리 + 채움 토글) */
+	  .btn-like{
+	    display:inline-flex; align-items:center; gap:.4rem;
+	    padding:.375rem .6rem;
+	    border:1px solid #dee2e6; border-radius:9999px;
+	    background:#fff; color:#0d6efd;
+	    line-height:1; cursor:pointer;
+	  }
+	  .btn-like:hover{ background:#f8f9fa }
+	  .btn-like .count{ font-weight:600 }
+	  .btn-like.liked{ background:#0d6efd; color:#fff; border-color:#0d6efd }
+	  .btn-like:disabled{
+	    color:#6c757d; background:#f8f9fa; border-color:#e9ecef;
+	    opacity:.75; cursor:not-allowed;
+	  }
 
-      /* 대댓글 전용(부모엔 적용 X) */
-      .child-reply{
-        position: relative;
-        margin-left: 28px;   /* 들여쓰기 */
-        padding-left: 16px;  /* 본문과 ㄴ자 간격 */
-      }
-      /* ㄴ자 커넥터: 대댓글에만 출력 */
-      .child-reply::before{
-        content: "";
-        position: absolute;
-        left: 6px; top: 14px;
-        width: 16px; height: 16px;
-        border-left: 2px solid #e5e7eb;
-        border-bottom: 2px solid #e5e7eb;
-        border-bottom-left-radius: 6px;
-      }
-    </style>
+	  /* 댓글 작성 줄: 버튼 세로깨짐 방지 */
+	  #commentForm{ display:flex; gap:.5rem }
+	  #commentForm .form-control{ flex:1 1 auto; min-width:0 }
+	  #commentForm .comment-submit{
+	    flex:0 0 auto; white-space:nowrap;
+	    writing-mode:horizontal-tb !important;
+	    display:inline-flex; align-items:center; justify-content:center;
+	  }
+	  
+	  /* 대댓글 입력줄: 버튼 세로깨짐/눌림 방지 */
+	  .reply-form .d-flex { align-items: stretch; }
+	  .reply-form .form-control { flex: 1 1 auto; min-width: 0; }
+
+	  /* 대댓글 등록 버튼(HTML 변경 없이 적용) */
+	  .reply-form button[type="submit"]{
+	    flex: 0 0 auto;              /* 버튼이 줄어들지 않게 */
+	    white-space: nowrap;         /* 줄바꿈 방지 */
+	    writing-mode: horizontal-tb !important; /* 혹시 전역설정 방지 */
+	    display: inline-flex; align-items: center; justify-content: center;
+	    padding: .375rem .75rem;     /* 인풋 높이와 비슷하게 */
+	    line-height: 1.25;
+	  }
+	</style>
   </th:block>
 </head>
 
@@ -48,13 +74,16 @@
     <!-- 상단 바 -->
     <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom">
       <div class="d-flex align-items-center gap-2">
-        <a class="btn btn-outline-secondary btn-sm" th:href="@{/community}">
-          ← 목록
-        </a>
+        <a class="btn btn-outline-secondary btn-sm" th:href="@{/community}">← 목록</a>
         <h6 class="mb-0" th:text="${post.categoryNm}">카테고리</h6>
       </div>
       <div class="d-flex align-items-center gap-2">
-        <button type="button" class="btn btn-outline-secondary btn-sm">공유</button>
+        <button id="btnShare"
+                type="button"
+                class="btn btn-outline-secondary btn-sm"
+                th:attr="data-url=@{'/community/postDetail'(postId=${post.postId})}">
+          공유
+        </button>
       </div>
     </div>
 
@@ -78,19 +107,36 @@
         <!-- 본문 -->
         <article class="bg-white border rounded-3 p-3 p-md-4">
           <h3 class="post-title mb-3" th:text="${post.postTtl}">제목</h3>
-          <div class="post-content" th:utext="${post.postCtnt}">
-            본문 내용
-          </div>
+          <div class="post-content" th:utext="${post.postCtnt}">본문 내용</div>
 
           <!-- 툴바 -->
           <div class="d-flex align-items-center justify-content-between mt-4 pt-3 pb-3 border-top border-bottom">
             <div class="d-flex align-items-center gap-2">
-              <!-- 좋아요는 추후 fetch로 교체 -->
-              <button type="button" class="btn btn-outline-primary btn-sm">
-                👍 <span class="badge text-bg-light ms-1" th:text="${post.postLikeCount}">0</span>
+				<button id="btnLike"
+				        type="button"
+				        class="btn btn-sm btn-like"
+				        data-liked="false"
+				        aria-pressed="false"
+				        title="좋아요">
+				  <span class="icon">👍</span>
+				  <span id="likeCount" class="count" th:text="${post.postLikeCount}?:0">0</span>
+				</button>
+            </div>
+            <div class="d-flex gap-2">
+              <!-- ✅ 버튼은 기본 숨김(d-none). JS가 오너일 때만 표시 -->
+              <button id="btnEdit"
+                      type="button"
+                      class="btn btn-warning btn-sm d-none"
+                      th:attr="data-author=${post.mbrCd}">
+                수정
+              </button>
+              <button id="btnDelete"
+                      type="button"
+                      class="btn btn-danger btn-sm d-none"
+                      th:attr="data-author=${post.mbrCd}">
+                삭제
               </button>
             </div>
-            <a class="btn btn-dark btn-sm" th:href="@{/community}">목록으로</a>
           </div>
         </article>
 
@@ -100,31 +146,25 @@
           <form id="commentForm" class="d-flex gap-2">
             <input type="hidden" name="postId" th:value="${post.postId}" />
             <input type="text" name="commentCtnt" class="form-control" placeholder="댓글을 입력하세요" required />
-            <button type="submit" class="btn btn-primary">등록</button>
+            <button type="submit" class="btn btn-primary comment-submit">등록</button>
           </form>
         </section>
 
         <!-- 댓글 리스트 -->
         <section class="bg-white border rounded-3 mt-3">
           <ul class="list-unstyled m-0">
-            <li th:if="${#lists.isEmpty(comments)}" class="p-4 text-center text-muted">
-              아직 댓글이 없습니다.
-            </li>
+            <li th:if="${#lists.isEmpty(comments)}" class="p-4 text-center text-muted">아직 댓글이 없습니다.</li>
 
-            <li th:each="c : ${comments}"
-                class="comment-item p-3"
-                th:classappend="${c.commentParentId > 0} ? ' child-reply' : ''">
+            <li th:each="c : ${comments}" class="comment-item p-3" th:classappend="${c.commentParentId > 0} ? ' child-reply' : ''">
               <div class="d-flex align-items-start gap-2">
                 <img class="comment-avatar" src="https://placehold.co/72x72" alt="아바타" />
                 <div class="flex-grow-1">
                   <div class="d-flex align-items-center justify-content-between">
                     <div>
                       <strong th:text="${c.authorNickname}">작성자</strong>
-                      <small class="text-muted ms-2"
-                             th:text="${#temporals.format(c.commentRegDate, 'yyyy.MM.dd HH:mm')}">2025.08.26 12:34</small>
+                      <small class="text-muted ms-2" th:text="${#temporals.format(c.commentRegDate, 'yyyy.MM.dd HH:mm')}">2025.08.26 12:34</small>
                     </div>
                   </div>
-
                   <p class="mb-2" th:text="${c.commentCtnt}">댓글 내용</p>
 
                   <div class="d-flex gap-2">
@@ -132,11 +172,17 @@
                             type="button"
                             th:attr="data-target=${'replyForm-' + c.commentId}"
                             onclick="toggleReplyForm(this)">대댓글 달기</button>
+
+                    <!-- ✅ 항상 렌더하되 기본 숨김: JS가 '내 댓글'이면 보이게 -->
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger d-none cmt-del-btn"
+                            th:attr="data-cmt-id=${c.commentId}, data-author=${c.mbrCd}">
+                      삭제
+                    </button>
                   </div>
 
                   <!-- 대댓글 폼 -->
-                  <form class="reply-form mt-2 reply-form-item"
-                        th:id="${'replyForm-' + c.commentId}">
+                  <form class="reply-form mt-2 reply-form-item" th:id="${'replyForm-' + c.commentId}">
                     <input type="hidden" name="postId" th:value="${post.postId}" />
                     <input type="hidden" name="commentParentId" th:value="${c.commentId}" />
                     <div class="d-flex gap-2">
@@ -151,17 +197,25 @@
         </section>
       </section>
 
-      <!-- 사이드(필요 시) -->
-      <aside class="col-12 col-lg-4">
-        <!-- 빈 영역 or 추천글 등 -->
-      </aside>
+      <aside class="col-12 col-lg-4"></aside>
     </div>
   </main>
 
   <th:block layout:fragment="pageScripts">
     <script src="/assets/js/loginInfo.js"></script>
+
+    <!-- 서버 값 1회 주입 -->
+    <script th:inline="javascript">
+      window.__POST__ = {
+        id: [[${post.postId}]],
+        categoryId: [[${post.categoryId}]],
+        authorMbrCd: [[${post.mbrCd}]],
+        loginMbrCd: [[${loginMbrCd}]]
+      };
+    </script>
+
     <script>
-      const LOGIN_PAGE = '/login'; // 필요에 맞게 변경
+      const LOGIN_PAGE = '/login';
 
       function toggleReplyForm(btn){
         var id = btn.getAttribute('data-target');
@@ -170,57 +224,223 @@
         el.classList.toggle('show');
       }
 
-      // 공통: x-www-form-urlencoded 요청 유틸
+      // x-www-form-urlencoded 요청 유틸 (403 메시지 그대로 표시)
       async function postFormUrlencoded(url, data){
         const body = new URLSearchParams();
-        Object.entries(data).forEach(([k,v]) => body.append(k, v));
+        Object.entries(data || {}).forEach(([k,v]) => body.append(k, v));
         const res = await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' }
-          // Authorization 헤더는 loginInfo.js가 자동으로 붙임
-          , body
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+          credentials: 'same-origin',
+          body
         });
-        if (res.status === 401) {
-          alert('로그인이 필요합니다.');
-          location.href = LOGIN_PAGE;
-          return null;
-        }
+        if (res.status === 401) { alert('로그인이 필요합니다.'); location.href = LOGIN_PAGE; return null; }
         if (!res.ok) {
-          const t = await res.text().catch(()=> '');
-          console.error('요청 실패', t);
-          alert('처리 중 오류가 발생했습니다.');
-          return null;
+          let msg = '처리 중 오류가 발생했습니다.';
+          try { const d = await res.json(); msg = d?.msg || d?.error || msg; }
+          catch { try { msg = await res.text(); } catch {} }
+          alert(msg); return null;
         }
-        return await res.json().catch(()=> ({}));
+        try { return await res.json(); } catch { return {}; }
       }
 
-      // 원댓글 등록
-      document.getElementById('commentForm')?.addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        const postId = fd.get('postId');
-        const commentCtnt = fd.get('commentCtnt')?.trim();
-        if (!commentCtnt) return;
+      // 토큰 → sub(mbrCd) 꺼내기 (쿠키 없이도 동작)
+      function getRawToken() {
+        const keys = ['token','accessToken','jwt','Authorization','authToken'];
+        for (const k of keys) {
+          const v = localStorage.getItem(k) || sessionStorage.getItem(k);
+          if (v) return v.replace(/^Bearer\s+/i, '');
+        }
+        return null;
+      }
+      function decodeJwtSub(token) {
+        try {
+          const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+          const json = JSON.parse(atob(b64));
+          return json.sub ? parseInt(json.sub) : null;
+        } catch { return null; }
+      }
 
-        const res = await postFormUrlencoded('/community/api/comment', { postId, commentCtnt });
-        if (res) location.reload();
-      });
+      document.addEventListener('DOMContentLoaded', () => {
+        const postId   = window.__POST__?.id;
+        const authorCd = Number(window.__POST__?.authorMbrCd);
 
-      // 대댓글 등록 (동적 다수 폼)
-      document.querySelectorAll('.reply-form-item').forEach(form => {
-        form.addEventListener('submit', async (e)=>{
-          e.preventDefault();
-          const fd = new FormData(e.currentTarget);
-          const postId = fd.get('postId');
-          const commentParentId = fd.get('commentParentId');
-          const commentCtnt = fd.get('commentCtnt')?.trim();
-          if (!commentCtnt) return;
+        /* ===== 공유 버튼 ===== */
+        (function bindShare(){
+          const btn = document.getElementById('btnShare');
+          if (!btn) return;
+          btn.addEventListener('click', async () => {
+            const url = new URL(btn.dataset.url || location.href.split('#')[0], location.origin).href;
+            if (navigator.share) {
+              try { await navigator.share({ title: document.title, url }); return; }
+              catch (e) { if (String(e).includes('AbortError')) return; }
+            }
+            try { await navigator.clipboard.writeText(url); toastCopied(btn); return; }
+            catch (_) {
+              try {
+                const ta = document.createElement('textarea');
+                ta.value = url; ta.style.position = 'fixed'; ta.style.top = '-1000px';
+                document.body.appendChild(ta); ta.focus(); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta); toastCopied(btn); return;
+              } catch (e2) { alert('복사에 실패했습니다. 주소를 직접 복사해 주세요:\n' + url); }
+            }
+          });
+          function toastCopied(button){
+            const prev = button.textContent;
+            button.textContent = '복사됨!'; setTimeout(() => (button.textContent = prev), 1200);
+          }
+        })();
 
-          const res = await postFormUrlencoded('/community/api/comment', { postId, commentParentId, commentCtnt });
-          if (res) location.reload();
-        });
+        /* ===== 원댓글 등록 ===== */
+        (function bindRootComment(){
+          const form = document.getElementById('commentForm');
+          if (!form) return;
+          form.addEventListener('submit', async (e)=>{
+            e.preventDefault();
+            const fd = new FormData(form);
+            const postIdV = fd.get('postId');
+            const commentCtnt = (fd.get('commentCtnt') || '').toString().trim();
+            if (!commentCtnt) return;
+            const res = await postFormUrlencoded('/community/api/comment', { postId: postIdV, commentCtnt });
+            if (res) location.reload();
+          });
+        })();
+
+        /* ===== 대댓글 등록 ===== */
+        (function bindReplies(){
+          document.querySelectorAll('.reply-form-item').forEach(form => {
+            form.addEventListener('submit', async (e)=>{
+              e.preventDefault();
+              const fd = new FormData(form);
+              const postIdV = fd.get('postId');
+              const parentIdV = fd.get('commentParentId');
+              const commentCtnt = (fd.get('commentCtnt') || '').toString().trim();
+              if (!commentCtnt) return;
+              const res = await postFormUrlencoded('/community/api/comment', {
+                postId: postIdV,
+                commentParentId: parentIdV,
+                commentCtnt
+              });
+              if (res) location.reload();
+            });
+          });
+        })();
+
+        /* ===== 댓글 삭제: 내 댓글만 버튼 보이기 + 삭제 처리 ===== */
+        (function bindCommentDelete(){
+          const raw = getRawToken();
+          const myMbrCd = raw ? decodeJwtSub(raw) : null;
+          if (myMbrCd != null) {
+            document.querySelectorAll('.cmt-del-btn').forEach(btn => {
+              const author = parseInt(btn.getAttribute('data-author'), 10);
+              if (author === myMbrCd) btn.classList.remove('d-none');
+            });
+          }
+          document.body.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.cmt-del-btn');
+            if (!btn) return;
+            const commentId = btn.getAttribute('data-cmt-id');
+            if (!commentId) return;
+            if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+            const res = await postFormUrlencoded(`/community/api/comment/${commentId}/delete`, {});
+            if (res?.ok) location.reload();
+          });
+        })();
+
+        /* ===== 게시글 수정/삭제: 오너일 때만 버튼 노출 + 이벤트 바인딩 ===== */
+        (function bindPostActions(){
+          const raw = getRawToken();
+          const myMbrCd = raw ? decodeJwtSub(raw) : null;
+          const isOwner = myMbrCd != null && Number(myMbrCd) === authorCd;
+
+          const btnEdit = document.getElementById('btnEdit');
+          const btnDelete = document.getElementById('btnDelete');
+
+          if (isOwner) {
+            // 버튼 표시
+            btnEdit && btnEdit.classList.remove('d-none');
+            btnDelete && btnDelete.classList.remove('d-none');
+
+            // 이벤트 바인딩
+            if (btnEdit && postId != null) {
+              btnEdit.addEventListener('click', () => {
+                location.href = `/community/updatePost?postId=${postId}`;
+              });
+            }
+            if (btnDelete && postId != null) {
+              btnDelete.addEventListener('click', async () => {
+                if (!confirm('정말 삭제하시겠습니까?')) return;
+                const res = await postFormUrlencoded(`/community/api/post/${postId}/delete`, {});
+                if (res?.ok) { alert('삭제되었습니다.'); location.href = '/community'; }
+              });
+            }
+          } else {
+            // 비소유자: 혹시 렌더되어 있더라도 숨김 유지(보안은 서버가 최종 검증)
+            btnEdit && btnEdit.classList.add('d-none');
+            btnDelete && btnDelete.classList.add('d-none');
+          }
+        })();
       });
     </script>
+	<script th:inline="javascript">
+	  document.addEventListener('DOMContentLoaded', () => {
+	    const postId      = [[${post.postId}]];
+	    const loginMbrCd  = [[${loginMbrCd}]];
+	    const authorMbrCd = [[${post.mbrCd}]];
+	    const btnLike     = document.getElementById('btnLike');
+	    const likeCountEl = document.getElementById('likeCount');
+	    if (!btnLike || !likeCountEl) return;
+
+	    // 🔒 본인 글이면 비활성 처리
+	    if (loginMbrCd != null && authorMbrCd != null && loginMbrCd === authorMbrCd) {
+	      btnLike.disabled = true;
+	      btnLike.title = '본인 글은 좋아요를 누를 수 없습니다.';
+	      btnLike.classList.remove('btn-outline-primary','btn-primary');
+	      btnLike.classList.add('btn-outline-secondary');
+	      return;
+	    }
+
+	    // 초기 상태 불러오기
+	    fetch(`/community/api/post/${postId}/like/state`, { credentials: 'same-origin' })
+	      .then(r => r.ok ? r.json() : null)
+	      .then(d => {
+	        if (!d) return;
+	        likeCountEl.textContent = d.count ?? likeCountEl.textContent;
+	        if (d.liked) {
+	          btnLike.classList.remove('btn-outline-primary');
+	          btnLike.dataset.liked = 'true';
+	          btnLike.setAttribute('aria-pressed','true');
+	        }
+	      })
+	      .catch(()=>{});
+
+	    // 토글
+	    btnLike.addEventListener('click', async () => {
+	      const res = await fetch(`/community/api/post/${postId}/like`, {
+	        method: 'POST',
+	        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+	        credentials: 'same-origin',
+	        body: ''
+	      });
+
+	      if (res.status === 401) { alert('로그인이 필요합니다.'); location.href='/login'; return; }
+	      if (res.status === 403) { // 자기 글 등
+	        try { const d = await res.json(); alert(d.msg || '권한이 없습니다.'); } catch { alert('권한이 없습니다.'); }
+	        return;
+	      }
+	      if (!res.ok) { alert('처리 중 오류가 발생했습니다.'); return; }
+
+	      const data  = await res.json().catch(()=> ({}));
+	      const liked = !!data.liked;
+	      const cnt   = data.count ?? likeCountEl.textContent;
+
+	      likeCountEl.textContent = cnt;
+	      btnLike.dataset.liked = liked ? 'true' : 'false';
+	      btnLike.setAttribute('aria-pressed', liked ? 'true' : 'false');
+	      btnLike.classList.toggle('liked', liked);
+	    });
+	  });
+	</script>
   </th:block>
 </th:block>
 </html>
