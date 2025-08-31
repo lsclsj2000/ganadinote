@@ -2,6 +2,10 @@
 /*            [최종 완성] todo-list-page 전용 스타일                    */
 /* =================================================================== */
 
+.todo-list-page {
+	margin-bottom: 20px;
+}
+
 .todo-list-page h2 {
     margin: 0;
     font-size: 24px;
@@ -17,12 +21,25 @@
 .todo-list-page .menu-icon { cursor: pointer; }
 .todo-list-page .pet-profiles-wrapper { overflow-x: scroll; -webkit-overflow-scrolling: touch; white-space: nowrap; padding: 10px 0; }
 .todo-list-page .pet-profiles-wrapper::-webkit-scrollbar { display: none; }
-.todo-list-page .pet-profiles { display: flex; gap: 15px; padding: 0 5px; }
+.todo-list-page .pet-profiles { margin-top: 20px; display: flex; gap: 15px; padding: 0 5px; }
 .todo-list-page .pet-profile { display: inline-block; text-align: center; font-size: 14px; color: #555; cursor: pointer; flex-shrink: 0; }
-.todo-list-page .profile-pic { width: 60px; height: 60px; border-radius: 50%; border: 2px solid transparent; transition: border-color 0.2s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-.todo-list-page .pet-profile.active .profile-pic { border-color: #ffb74d; }
+.todo-list-page .profile-pic {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    
+    /* [추가!] 배경 이미지 스타일 */
+    background-size: cover; /* 이미지가 div를 꽉 채우도록 설정 */
+    background-position: center; /* 이미지가 중앙에 오도록 설정 */
+    background-repeat: no-repeat; /* 이미지가 반복되지 않도록 설정 */
+    background-color: #eee; /* 이미지가 없을 때 보일 기본 배경색 */
+}
+.todo-list-page .pet-profile.active .profile-pic { border-color: #435ebe; }
 .todo-list-page .date-navigation { display: none; }
-.todo-list-page .add-todo-btn { width: 100%; padding: 15px; margin-top: 20px; border: none; background-color: #ffb74d; color: #fff; font-size: 16px; cursor: pointer; border-radius: 5px; }
+.todo-list-page .add-todo-btn { width: 100%; padding: 15px; margin-top: 20px; border: none; background-color: #435ebe; color: #fff; font-size: 16px; cursor: pointer; border-radius: 5px; }
 .todo-list-page .ad-section { text-align: center; padding: 20px 0; font-size: 12px; color: #aaa; }
 .todo-list-page .calendar-wrapper { margin-top: 20px; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
 .todo-list-page .calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 10px; background-color: #f7f7f7; border-bottom: 1px solid #ddd; }
