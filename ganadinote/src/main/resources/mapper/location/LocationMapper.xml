@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ganadinote.location.mapper.LocationMapper">
+
+    <select id="getMemberLocation" parameterType="Integer" resultType="ganadinote.location.domain.LocationDTO">
+        SELECT 
+            latitude,
+            longitude
+        FROM 
+            TB_MEMBER_LOCATION
+        WHERE 
+            mbrCd = #{mbrCd}
+    </select>
+
+</mapper>

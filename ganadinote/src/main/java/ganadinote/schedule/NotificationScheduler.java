@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ganadinote.common.domain.PushSubscription;
+import ganadinote.location.domain.LocationDTO;
 import ganadinote.location.service.LocationService;
 import ganadinote.main.service.MainService;
 import ganadinote.notification.domain.PetWithBreedDTO;
@@ -66,11 +67,19 @@ public class NotificationScheduler {
                 if (currentTime.equals(scheduledTime)) {
                     log.info("회원 {}의 알림 스케줄 시간이 되어 알림을 확인합니다.", mbrCd);
                     
-                    double latitude = 37.5665; // 예시: 서울시청
-                    double longitude = 126.9780; // 예시: 서울시청
+                    LocationDTO location = locationService.getMemberLocation(mbrCd);
+                    
+                    if (location == null || location.getLatitude() == 0 || location.getLongitude() == 0) {
+                        log.warn("회원 {}의 위치 정보가 없어 알림을 처리할 수 없습니다. 기본값 사용.", mbrCd);
+                        // 기본 위치 정보 (예: 서울)를 사용하거나, 해당 알림을 건너뛸 수 있습니다.
+                        // 여기서는 서울로 기본값 설정
+                        location = new LocationDTO();
+                        location.setLatitude(37.5665);
+                        location.setLongitude(126.9780);
+                    }
 
-                    WeatherInfo weather = weatherService.getWeather(latitude, longitude);
-                    AirPollutionDTO air = weatherService.getAirPollution(latitude, longitude);
+                    WeatherInfo weather = weatherService.getWeather(location.getLatitude(), location.getLongitude());
+                    AirPollutionDTO air = weatherService.getAirPollution(location.getLatitude(), location.getLongitude());
 
                     List<PetWithBreedDTO> pets = mainService.getPetInfoWithBreedByMbrCd(mbrCd);
                     

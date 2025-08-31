@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import ganadinote.common.util.TokenUtils;
 import ganadinote.notification.domain.PetWithBreedDTO;
 import ganadinote.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class NotificationController {
 	public String getNotificationSettings(Model model) {
 		log.info("VAPID Public Key: {}", vapidPublicKey);
 
-		String mbrCd = "1";		
+		String mbrCd = TokenUtils.getMbrCd();		
 		
 		List<PetWithBreedDTO> pets = notificationService.getPetInfoForNotification(mbrCd);
 	    model.addAttribute("pets", pets);

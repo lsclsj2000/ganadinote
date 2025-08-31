@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import ganadinote.common.util.TokenUtils;
 import ganadinote.main.service.MainService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,7 +18,7 @@ public class MainController {
 	
 	@GetMapping("/ganadiMain")
 	public String getPetInfoByMbrCd(Model model) {		
-		String mbrCd = "1";
+		String mbrCd = TokenUtils.getMbrCd();
 		
 		return "mainView";
 	}
