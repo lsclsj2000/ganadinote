@@ -19,7 +19,7 @@ public class MainAPIController {
 	
 	private final MainService mainService;
 	@GetMapping("pets/{mbrCd}")
-	public ResponseEntity<List<Pet>> getPetInfoByMbrCd(@PathVariable String mbrCd){
+	public ResponseEntity<List<Pet>> getPetInfoByMbrCd(@PathVariable Integer mbrCd){
 			List<Pet> petList = mainService.getPetInfoByMbrCd(mbrCd);
 		return ResponseEntity.ok(petList);
 	}

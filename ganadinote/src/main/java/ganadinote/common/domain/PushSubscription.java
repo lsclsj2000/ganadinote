@@ -14,5 +14,7 @@ public class PushSubscription {
 	    private String 			p256dh;
 	    private String 			auth;
 	    private LocalDateTime 	createdAt;
+	    private String 			notificationSchedule;
+	    private boolean 		isActive;
 	}
 

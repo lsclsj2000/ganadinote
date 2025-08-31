@@ -5,9 +5,15 @@ import org.springframework.stereotype.Service;
 
 import ganadinote.location.service.LocationService;
 import ganadinote.location.service.ReverseGeocodingService;
+import ganadinote.notification.domain.LocationUpdateDTO;
+import ganadinote.notification.mapper.PushMapper;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class LocationServiceImpl implements LocationService {
+	
+	private final PushMapper pushMapper;
 	
 	@Autowired
 	private ReverseGeocodingService reverseGeocodingService;
@@ -29,4 +35,13 @@ public class LocationServiceImpl implements LocationService {
 		
 		return LocationName;		
 	}
+	
+	@Override
+	public void updateMemberLocation(Integer mbrCd, Double latitude, Double longitude) {
+		 LocationUpdateDTO dto = new LocationUpdateDTO();
+	        dto.setMbrCd(mbrCd);
+	        dto.setLatitude(latitude);
+	        dto.setLongitude(longitude);
+	        pushMapper.updateLocation(dto);
+	    }
 }
