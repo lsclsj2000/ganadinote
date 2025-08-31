@@ -35,7 +35,7 @@ public interface PushMapper {
     void reactivateSubscription(@Param("mbrCd") int mbrCd);
     
     // 스케줄에 맞는 구독 정보 찾기
-    List<PushSubscription> findSubscriptionsBySchedule(@Param("dayOfWeek") String dayOfWeek);
+    List<PushSubscription> findSubscriptionsBySchedule(@Param("dayOfWeek") String dayOfWeek, @Param("time") String time);
     
     // mbrCd를 통해 pet 알림 정보 가져오기
     List<PetWithBreedDTO> getPetInfoForNotification(@Param("mbrCd") String mbrCd);

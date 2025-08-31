@@ -47,10 +47,12 @@ public class NotificationScheduler {
         
         DayOfWeek currentDay = LocalDate.now().getDayOfWeek();
         LocalTime currentTime = LocalTime.now().withSecond(0).withNano(0);
-        String dayOfWeekString = getDayOfWeekInKorean(currentDay);
+        
+        String dayOfWeekString = currentDay.toString();
+        String timeString = currentTime.format(DateTimeFormatter.ofPattern("HH:mm"));
         
         try {
-            List<PushSubscription> subscriptions = pushMapper.findSubscriptionsBySchedule(dayOfWeekString);
+        	List<PushSubscription> subscriptions = pushMapper.findSubscriptionsBySchedule(dayOfWeekString, timeString);
             
             log.info("총 {}개의 알림 스케줄이 조회되었습니다.", subscriptions.size());
 
@@ -104,20 +106,6 @@ public class NotificationScheduler {
             }
         } catch (Exception e) {
             log.error("알림 스케줄러 실행 중 오류 발생", e);
-        }
-    }
-    
-    // 요일 한글 변환
-    private String getDayOfWeekInKorean(DayOfWeek day) {
-        switch (day) {
-            case MONDAY: return "월";
-            case TUESDAY: return "화";
-            case WEDNESDAY: return "수";
-            case THURSDAY: return "목";
-            case FRIDAY: return "금";
-            case SATURDAY: return "토";
-            case SUNDAY: return "일";
-            default: return "";
         }
     }
 }

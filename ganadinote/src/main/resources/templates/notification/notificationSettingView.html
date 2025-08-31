@@ -310,6 +310,16 @@
         // 폼 제출 이벤트 리스너
         notificationTimeForm.addEventListener('submit', async function(event) {
             event.preventDefault();
+            
+            const dayMap = {
+            		'sun': 'SUNDAY',
+                    'mon': 'MONDAY',
+                    'tue': 'TUESDAY',
+                    'wed': 'WEDNESDAY',
+                    'thu': 'THURSDAY',
+                    'fri': 'FRIDAY',
+                    'sat': 'SATURDAY'
+                };
 
             const notificationSchedule = {};
             const timeSelects = document.querySelectorAll('.time-select');
@@ -318,9 +328,12 @@
                 const day = select.getAttribute('data-day');
                 const time = select.value;
                 if (time) {
-                    notificationSchedule[day] = time;
-                }
-            });
+                	const fullDay = dayMap[day];
+                if(fullDay){
+                    notificationSchedule[fullDay] = time;
+                	}
+				}
+			});
 
             hiddenScheduleInput.value = JSON.stringify(notificationSchedule);
 
