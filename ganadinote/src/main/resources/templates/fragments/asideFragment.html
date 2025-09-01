@@ -14,13 +14,6 @@
         </div>
         <div class="sidebar-menu">
             <ul class="menu">
-                <li class="sidebar-item">
-                    <a href="index.html" class='sidebar-link'>
-                        <i class="bi bi-grid-fill"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                
                 <li class="sidebar-item active has-sub">
                     <a href="#" class='sidebar-link'>
                         <i class="bi bi-stack"></i>
@@ -28,77 +21,57 @@
                     </a>
                     <ul class="submenu">
                         <li class="submenu-item">
-                            <a href="component-alert.html">me</a>
+                            <a th:href="@{/sns/myfeed}">My Page</a>
                         </li>
                         <li class="submenu-item">
-                            <a href="component-badge.html">pet</a>
+                            <a href="component-badge.html">Pet</a>
                         </li>
+                        <li class="submenu-item">
+                            <a th:href="@{/petCard}">Pet Card</a>
+                        </li>
+	                    <li class="submenu-item">
+	                        <a th:href="@{/notification/settings}">Alarm</a>
+	                    </li>
                     </ul>
                 </li>
                 
                 <li class="sidebar-item has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>Calendar</span>
-                    </a>
-                    <ul class="submenu">
-                        <li class="submenu-item">
-                            <a href="component-alert.html">To-do List</a>
-                        </li>
-                        <li class="submenu-item">
-                            <a href="component-badge.html">+</a>
-                        </li>
-                    </ul>
-                </li>
+                	<a href="#" class='sidebar-link'>
+                		<i class="bi bi-calendar2-check-fill"></i>
+						<span>Todo-List</span>
+					</a>
+					<ul class="submenu">
+						<li class="submenu-item">
+							<a th:href="@{/todo/list}">Calendar</a>
+						</li>
+						<li class="submenu-item">
+							<a th:href="@{/routine/list}">Routine</a>
+						</li>
+					</ul>
+				</li>
 
-                <li class="sidebar-item has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>community</span>
-                    </a>
-                    <ul class="submenu">
-                        <li class="submenu-item">
-                            <a th:href="@{/community}">발자국 산책코스</a>
-                        </li>
-                        <li class="submenu-item">
-                            <a th:href="@{/community}">멍멍 쇼핑리뷰</a>
-                        </li>
-                        <li class="submenu-item">
-                            <a th:href="@{/community}">멍멍 수다방</a>
-                        </li>
-                    </ul>
+                <li class="sidebar-item">
+                    <a th:href="@{/community}" class='sidebar-link'>
+			            <svg class="bi" width="24" height="24" fill="currentColor">
+			                <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#chat-dots"></use>
+			            </svg>
+			            <span>community</span>
+			        </a>
                 </li>
                 
-                <li class="sidebar-item has-sub">
-                    <a href="#" class='sidebar-link'>
-                        <i class="bi bi-stack"></i>
-                        <span>SNS</span>
-                    </a>
-                    <ul class="submenu">
-                        <li class="submenu-item">
-                            <a th:href="@{/sns/home}">Home</a>
-                        </li>
-                        <li class="submenu-item">
-                            <a th:href="@{/sns/walking}">Walking</a>
-                        </li>
-                        <li class="submenu-item">
-                            <a th:href="@{/sns/myfeed}">My Feed</a>
-                        </li>
-                    </ul>
+                <li class="sidebar-item">
+                    <a th:href="@{/sns}" class='sidebar-link'>
+			            <svg class="bi" width="24" height="24" fill="currentColor">
+			                <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#grid"></use>
+			            </svg>
+			            <span>SNS</span>
+			        </a>
                 </li>
-                <li class="sidebar-item has-sub">
-	                <a href="#" class='sidebar-link'>
+                <li class="sidebar-item">
+	                <a th:href="@{/weather}" class='sidebar-link'>
 	                    <i class="bi bi-cloud-rain"></i>
 	                    <span>WEATHER</span>
 	                </a>
-	                <ul class="submenu">
-	                    <li class="submenu-item">
-	                        <a th:href="@{/weather}">weather</a>
-	                    </li>
-	                    <li class="submenu-item">
-	                        <a th:href="@{/notification/settings}">alarm</a>
-	                    </li>
-	                </ul>
 	            </li>
             
                 <li class="sidebar-item" id="login-logout-item">
