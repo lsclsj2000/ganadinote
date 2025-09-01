@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>반려견 등록 - GanadiNote</title>
 
-    <!-- Bootstrap 및 아이콘, 폰트 링크 -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/bootstrap.css">
     <link rel="stylesheet" href="/assets/vendors/bootstrap-icons/bootstrap-icons.css">
@@ -31,133 +30,210 @@
         #auth-left .auth-title {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
-            line-height: 1.2;
+            text-align: center;
+        }
+        
+        .auth-subtitle {
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 2.5rem !important;
+            color: #888;
         }
 
-        #auth-left .auth-subtitle {
-            font-size: 1.2rem;
-            color: #a8aebb;
+        .form-group .form-control-icon {
+            position: absolute;
+            z-index: 10;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 20px;
         }
 
-        /* 프로필 이미지 아이콘 및 스타일 */
-        .profile-img-placeholder {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .form-group.position-relative {
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary {
+            background-color: #435ebe;
+            border-color: #435ebe;
+        }
+
+        .btn-primary:hover {
+            background-color: #394f8e;
+            border-color: #394f8e;
+        }
+
+        .auth-form-pet {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* 프로필 이미지 스타일 */
+        .profile-container {
+            position: relative;
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            cursor: pointer;
             border: 2px solid #ddd;
-            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin: 0 auto 20px;
+            cursor: pointer;
         }
-        .profile-img-placeholder .bi-camera {
-            font-size: 3rem;
-            color: #ccc;
-        }
-        #profilePreview {
+        
+        .profile-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             display: none; /* 초기에는 숨김 */
         }
+        
+        .camera-icon {
+            font-size: 4rem;
+            color: #aaa;
+        }
+        
+        .gender-options {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        
+        .gender-box {
+            width: 45%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
 
-        /* 색상 선택 팔레트 스타일 */
-        .color-palette {
+        .gender-box.selected {
+            border-color: #435ebe;
+            background-color: #e6f0ff;
+        }
+
+        .color-options {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
         }
+
         .color-box {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            border: 2px solid transparent;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px #ccc;
             cursor: pointer;
-            transition: border-color 0.2s, transform 0.2s;
         }
+        
         .color-box.selected {
-            border-color: #555;
-            transform: scale(1.1);
+            border: 3px solid #435ebe;
+            box-shadow: 0 0 0 2px #fff;
         }
-        .color-box:hover {
-            transform: scale(1.1);
+        
+        .color-label {
+            display: block;
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.8rem;
         }
+
+        .gender-label {
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
     </style>
 </head>
-<body id="auth">
-    <div id="auth-left">
-        <div class="auth-logo text-center">
-            <a href="/main">
-                <img src="/assets/images/logo/ganadinote-logo.png" alt="Logo">
-            </a>
-        </div>
-        <h1 class="auth-title">반려견 등록</h1>
-        <p class="auth-subtitle mb-5">반려견 정보를 등록하고 간편하게 관리하세요.</p>
-
-        <form id="petRegistrationForm">
-            <div class="mb-4 text-center">
-                <label for="petProfileImg" class="d-inline-block">
-                    <div class="profile-img-placeholder" id="cameraIcon">
-                        <i class="bi bi-camera"></i>
+<body>
+    <div id="auth">
+        <div class="row h-100">
+            <div class="col-lg-12 col-12">
+                <div id="auth-left" class="auth-form-pet">
+                    <div class="auth-logo text-center">
+                        <a href="index.html"><img src="/assets/images/logo/logo.png" alt="Logo"></a>
                     </div>
-                    <img id="profilePreview" src="" alt="반려견 프로필 사진"
-                         style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%; cursor: pointer; border: 2px solid #ddd;">
-                </label>
-                <input type="file" class="form-control d-none" id="petProfileImg" accept="image/*">
-            </div>
+                    <h1 class="auth-title">반려견 등록</h1>
+                    <p class="auth-subtitle">소중한 가족의 정보를 등록해주세요.</p>
 
-            <div class="form-group position-relative has-icon-left mb-4">
-                <input type="text" class="form-control form-control-xl" id="petName" placeholder="반려견 이름" required>
-                <div class="form-control-icon">
-                    <i class="bi bi-dog"></i>
+                    <form id="petRegistrationForm" enctype="multipart/form-data">
+                        <div class="profile-container mb-4" onclick="document.getElementById('petProfileImg').click();">
+                            <i class="bi bi-camera-fill camera-icon" id="cameraIcon"></i>
+                            <img id="profilePreview" class="profile-preview">
+                            <input type="file" id="petProfileImg" name="petProfileImg" accept="image/*" style="display:none;">
+                        </div>
+
+                        <div class="form-group position-relative has-icon-left mb-4">
+                            <input type="text" class="form-control form-control-xl" placeholder="반려견 이름" id="petName" name="petName">
+                            <div class="form-control-icon">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group position-relative has-icon-left mb-4">
+                            <input type="text" class="form-control form-control-xl" placeholder="견종 (예: 푸들, 시츄)" list="petBreedList" id="petBreed" name="petBreed">
+                            <div class="form-control-icon">
+                                <i class="bi bi-search"></i>
+                            </div>
+                            <datalist id="petBreedList"></datalist>
+                        </div>
+                        
+                        <div class="form-group">
+                            <p class="text-center">성별</p>
+                            <div class="gender-options">
+                                <div class="gender-box" data-gender="M">
+                                    <i class="bi bi-gender-male"></i>
+                                    <span class="gender-label">수컷</span>
+                                </div>
+                                <div class="gender-box" data-gender="F">
+                                    <i class="bi bi-gender-female"></i>
+                                    <span class="gender-label">암컷</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="petGender" name="petGender">
+                        </div>
+
+                        <div class="form-group position-relative has-icon-left mb-4">
+                            <input type="date" class="form-control form-control-xl" placeholder="생일" id="petBirthDate" name="petBirthDate">
+                            <div class="form-control-icon">
+                                <i class="bi bi-calendar"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group position-relative has-icon-left mb-4">
+                            <input type="number" class="form-control form-control-xl" placeholder="몸무게 (kg)" step="0.1" id="petWeight" name="petWeight">
+                            <div class="form-control-icon">
+                                <i class="bi bi-rulers"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <p class="text-center">털 색상</p>
+                            <div class="color-options">
+                                <div class="color-box" style="background-color: #FFFFFF;" data-color="#FFFFFF"></div>
+                                <div class="color-box" style="background-color: #000000;" data-color="#000000"></div>
+                                <div class="color-box" style="background-color: #A52A2A;" data-color="#A52A2A"></div>
+                                <div class="color-box" style="background-color: #8B4513;" data-color="#8B4513"></div>
+                                <div class="color-box" style="background-color: #D2B48C;" data-color="#D2B48C"></div>
+                                <div class="color-box" style="background-color: #F5F5DC;" data-color="#F5F5DC"></div>
+                            </div>
+                            <input type="hidden" id="petColor" name="petColor">
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block btn-lg shadow-lg mt-5">반려견 등록하기</button>
+                    </form>
                 </div>
             </div>
-
-            <!-- 견종 검색 필드 -->
-            <div class="form-group position-relative has-icon-left mb-4">
-                <input type="text" class="form-control form-control-xl" id="petBreed" placeholder="견종을 검색 또는 선택하세요." list="petBreedList" required>
-                <datalist id="petBreedList"></datalist>
-                <div class="form-control-icon">
-                    <i class="bi bi-search"></i>
-                </div>
-            </div>
-
-            <div class="form-group position-relative has-icon-left mb-4">
-                <input type="date" class="form-control form-control-xl" id="petBirthDate" required>
-                <div class="form-control-icon">
-                    <i class="bi bi-calendar-date"></i>
-                </div>
-            </div>
-
-            <div class="form-group position-relative has-icon-left mb-4">
-                <input type="number" step="0.01" class="form-control form-control-xl" id="petWeight" placeholder="몸무게 (kg)" required>
-                <div class="form-control-icon">
-                    <i class="bi bi-speedometer2"></i>
-                </div>
-            </div>
-
-            <!-- 반려견 색상 선택 기능 -->
-            <div class="form-group mb-4">
-                <label for="petColor" class="form-label">반려견 색상</label>
-                <div class="color-palette mb-3">
-                    <div class="color-box" data-color="#FFFFFF" style="background-color: #FFFFFF; border-color: #ddd;"></div>
-                    <div class="color-box" data-color="#000000" style="background-color: #000000;"></div>
-                    <div class="color-box" data-color="#FFDAB9" style="background-color: #FFDAB9;"></div>
-                    <div class="color-box" data-color="#964B00" style="background-color: #964B00;"></div>
-                    <div class="color-box" data-color="#8B4513" style="background-color: #8B4513;"></div>
-                    <div class="color-box" data-color="#C0C0C0" style="background-color: #C0C0C0;"></div>
-                    <div class="color-box" data-color="#F5F5DC" style="background-color: #F5F5DC;"></div>
-                    <div class="color-box" data-color="#A9A9A9" style="background-color: #A9A9A9;"></div>
-                </div>
-                <input type="color" class="form-control form-control-xl" id="petColor" value="#5a5a5a">
-            </div>
-            
-            <button type="submit" class="btn btn-primary btn-block btn-lg shadow-lg mt-5">등록하기</button>
-            <a href="#" onclick="history.back(); return false;" class="btn btn-secondary btn-block btn-lg shadow-lg mt-3">취소</a>
-        </form>
+        </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        // 견종 데이터 - 고객님께서 제공해주신 데이터를 기반으로 작성되었습니다.
+        // 견종 데이터
         const dogBreeds = [
             { id: 1, name: '말티즈' },
             { id: 2, name: '푸들 (토이)' },
@@ -241,24 +317,21 @@
             { id: 80, name: '코숏' },
             { id: 81, name: '진도믹스' }
         ];
-        
-        // datalist에 견종 데이터 동적으로 추가
+
+        // 페이지 로드 시 datalist에 옵션 동적으로 추가
         document.addEventListener('DOMContentLoaded', () => {
             const petBreedList = document.getElementById('petBreedList');
-            // 기존 견종 데이터를 삭제하고 새로운 데이터로 채웁니다.
-            petBreedList.innerHTML = '';
-            
             dogBreeds.forEach(breed => {
                 const option = document.createElement('option');
-                option.value = breed.name; // 사용자에게 보여줄 값
-                option.dataset.id = breed.id; // data-id에 고유 ID 저장
+                option.value = breed.name;
+                option.dataset.id = breed.id;
                 petBreedList.appendChild(option);
             });
         });
 
-        // 프로필 이미지 미리보기 기능
-        document.getElementById('petProfileImg').addEventListener('change', function(event) {
-            const [file] = event.target.files;
+        // 프로필 이미지 미리보기
+        document.getElementById('petProfileImg').addEventListener('change', function() {
+            const file = this.files[0];
             const profilePreview = document.getElementById('profilePreview');
             const cameraIcon = document.getElementById('cameraIcon');
             
@@ -273,49 +346,103 @@
             }
         });
 
-        // 색상 팔레트 기능
-        const colorPalette = document.querySelector('.color-palette');
-        const petColorInput = document.getElementById('petColor');
+        // 성별 선택 기능
+        const genderBoxes = document.querySelectorAll('.gender-box');
+        const petGenderInput = document.getElementById('petGender');
+        genderBoxes.forEach(box => {
+            box.addEventListener('click', () => {
+                genderBoxes.forEach(b => b.classList.remove('selected'));
+                box.classList.add('selected');
+                petGenderInput.value = box.dataset.gender;
+            });
+        });
 
-        colorPalette.addEventListener('click', (event) => {
-            const selectedBox = event.target.closest('.color-box');
-            if (selectedBox) {
-                // 이전에 선택된 색상 박스의 selected 클래스 제거
-                const currentSelected = document.querySelector('.color-box.selected');
-                if (currentSelected) {
-                    currentSelected.classList.remove('selected');
-                }
-                // 새로 선택된 색상 박스에 selected 클래스 추가
-                selectedBox.classList.add('selected');
-                
-                // 선택된 색상으로 input[type="color"] 값 변경
-                petColorInput.value = selectedBox.dataset.color;
-            }
+        // 색상 선택 기능
+        const colorBoxes = document.querySelectorAll('.color-box');
+        const petColorInput = document.getElementById('petColor');
+        colorBoxes.forEach(box => {
+            box.addEventListener('click', () => {
+                colorBoxes.forEach(b => b.classList.remove('selected'));
+                box.classList.add('selected');
+                petColorInput.value = box.dataset.color;
+            });
         });
         
-        // 폼 제출 이벤트 (기능 구현 전 테스트용)
+        // 폼 제출 이벤트
         document.getElementById('petRegistrationForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            console.log('Form submitted!');
             
+            // 폼 데이터 가져오기
             const petName = document.getElementById('petName').value;
             const petBreedInput = document.getElementById('petBreed');
             const petBreedName = petBreedInput.value;
-            
-            // datalist의 option에서 고유 ID를 찾아서 가져옵니다.
             const selectedOption = document.querySelector(`#petBreedList option[value='${petBreedName}']`);
-            const petBreedId = selectedOption ? selectedOption.dataset.id : null;
-            
+            const petBreedId = selectedOption ? parseInt(selectedOption.dataset.id) : null;
+            const petGender = document.getElementById('petGender').value;
             const petBirthDate = document.getElementById('petBirthDate').value;
-            const petWeight = document.getElementById('petWeight').value;
+            const petWeight = parseFloat(document.getElementById('petWeight').value);
             const petColor = document.getElementById('petColor').value;
+            const petProfileImgFile = document.getElementById('petProfileImg').files[0];
 
-            console.log('Pet Name:', petName);
-            console.log('Pet Breed Name:', petBreedName);
-            console.log('Pet Breed ID:', petBreedId); // 고유 ID 출력
-            console.log('Pet Birth Date:', petBirthDate);
-            console.log('Pet Weight:', petWeight);
-            console.log('Pet Color:', petColor); // 펫 색상 출력
+            // 유효성 검사 (필요에 따라 추가)
+            if (!petName || !petBreedId || !petGender || !petBirthDate || isNaN(petWeight)) {
+                alert('모든 필수 정보를 입력해주세요.');
+                return;
+            }
+
+            // DTO 객체 생성
+            const petData = {
+                petName: petName,
+                petBreedId: petBreedId,
+                petGender: petGender,
+                petBirthDate: petBirthDate,
+                petWeight: petWeight,
+                petColor: petColor,
+                petProfileImgUrl: '임시_URL', // TODO: 실제 이미지 업로드 후 URL로 대체
+            };
+            
+            // 토큰 가져오기 (쿠키에서 'Authorization' 값을 찾음)
+            const getCookie = (name) => {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        return cookie.substring(name.length + 1);
+                    }
+                }
+                return null;
+            };
+
+            const token = getCookie('Authorization');
+            if (!token) {
+                alert('로그인이 필요합니다.');
+                window.location.href = '/login'; // 로그인 페이지로 리디렉션
+                return;
+            }
+
+            // 서버로 데이터 전송
+            fetch('/pet/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(petData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('서버 응답 오류: ' + response.statusText);
+                }
+                return response.text(); // 응답 본문을 텍스트로 읽음
+            })
+            .then(message => {
+                alert(message); // "반려견 등록이 완료되었습니다."
+                window.location.href = '/my-pet'; // 예시: 마이페이지로 이동
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                alert('반려견 등록에 실패했습니다.');
+            });
         });
     </script>
 </body>
