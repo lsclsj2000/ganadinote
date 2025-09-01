@@ -22,6 +22,16 @@
 	      /* 초기 진입 시 내용이 헤더에 안 가리도록 아래로 내림 */
 	      padding-top: calc(var(--app-header-h) + var(--top-gap));
 	    }
+		.fab{
+		  position: fixed;
+		  right: 16px;   /* 화면 오른쪽에서 16px 띄움 */
+		  bottom: 80px;  /* 화면 아래에서 80px 띄움 (푸터 위로 올림) */
+		  z-index: 1; /* 푸터보다 위로 */
+		}
+		.fab .btn{
+		  border-radius: 9999px;
+		  box-shadow: 0 6px 16px rgba(0,0,0,.15);
+		}
 
 	    /* 검색바+카테고리 칩 바. z-index 안 씀 */
 	    .sticky-topbar{

@@ -19,5 +19,6 @@ public class CommentDTO {
     // (선택) 기존에 쓰던 이름을 유지해야 하면, 추가로 갖고 있어도 무방
     private Integer parentId;          // ← 다른 쿼리 호환용
     private String  mbrNknm;           // ← 기존 XML 호환용
+    private String  mbrProfile;           // ← 기존 XML 호환용
 
 }
