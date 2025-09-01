@@ -48,6 +48,9 @@ public class MainController {
 					mbrNknm = foundNknm;
 				}
 				
+				// ⭐ 추가: 닉네임 정보를 모델에 담아 뷰로 전달합니다.
+				model.addAttribute("mbrNknm", mbrNknm);
+				
 				// ✅ 수정: 펫 정보는 서비스로 별도 조회
 				petList = mainService.getPetInfoByMbrCd(mbrCd);
 				

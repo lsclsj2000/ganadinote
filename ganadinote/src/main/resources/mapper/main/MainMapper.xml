@@ -46,7 +46,7 @@
     	 SELECT 
             p.pet_cd,
             p.pet_name,
-            p.pet_profile_img_url,
+            p.pet_profile_img_url
         FROM 
             pet p
         WHERE 
