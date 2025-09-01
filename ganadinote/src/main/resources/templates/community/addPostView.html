@@ -1,104 +1,281 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout/addPostLayoutView}">
-
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/addPostLayoutView}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>게시글 작성</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>게시글 작성</title>
 
-	<th:block layout:fragment="pageStyles">
-    	<link rel="stylesheet" href="/assets/vendors/summernote/summernote-lite.min.css" />
-		<style>
-		    /* 카드 헤더 내부 폼을 '세로 방향'으로 강제 */
-		    .card-header .form-stack .mb-3 {
-		      display: flex !important;
-		      flex-direction: column !important;
-		      gap: .35rem;
-		      width: 100%;
-		    }
-
-		    /* 라벨은 무조건 줄바꿈 */
-		    .card-header .form-stack .form-label {
-		      display: block !important;
-		      margin-bottom: 0; /* 위의 gap으로 간격 관리 */
-		      font-size: .95rem;
-		      font-weight: 600;
-		    }
-
-		    /* 입력 컨트롤은 꽉 채우기 */
-		    .card-header .form-stack .form-select,
-		    .card-header .form-stack .form-control {
-		      width: 100%;
-		      font-size: .95rem;
-			  margin : 10px 0px;
-		    }
-		  </style>
-	</th:block>
-	
+  <th:block layout:fragment="pageStyles">
+    <link rel="stylesheet" href="/assets/vendors/summernote/summernote-lite.min.css" />
+    <style>
+      .card-header .form-stack .mb-3 {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: .35rem;
+        width: 100%;
+      }
+      .card-header .form-stack .form-label {
+        display: block !important;
+        margin-bottom: 0;
+        font-size: .95rem;
+        font-weight: 600;
+      }
+      .card-header .form-stack .form-select,
+      .card-header .form-stack .form-control {
+        width: 100%;
+        font-size: .95rem;
+        margin: 10px 0;
+      }
+    </style>
+  </th:block>
 </head>
 
 <body>
-	<th:block layout:fragment="contents">
-	    <div class="page-heading">
-	      <div class="page-title">
-	        <div class="row">
-	          <div class="col-12 col-md-6 order-md-1 order-last">
-	            <h3>게시글 작성</h3>
-	          </div>
-	        </div>
-	      </div>
+<th:block layout:fragment="contents">
+  <div class="page-heading">
+    <div class="page-title">
+      <div class="row">
+        <div class="col-12 col-md-6 order-md-1 order-last">
+          <h3>게시글 작성</h3>
+        </div>
+      </div>
+    </div>
 
-	      <section class="section">
-	        <div class="row">
-	          <div class="col-12">
-	            <div class="card">
-					<div class="card-header">
-					  <div class="form-stack">
-					    <!-- 카테고리 -->
-					    <div class="mb-3">
-					      <label for="filterCategory" class="form-label fw-semibold d-block">카테고리</label>
-					      <select id="filterCategory" class="form-select form-select-sm w-100">
-					        <option value="" selected>카테고리를 선택해주세요</option>
-					        <option value="WALK_COURSE">발자국 산책코스</option>
-					        <option value="SHOP_REVIEW">멍멍 쇼핑리뷰</option>
-					        <option value="FREE_TALK">멍멍 수다방</option>
-					        <option value="CREW_RECRUIT">산책크루 모집해요!</option>
-					        <option value="GO_SPOT">같이가요 스팟</option>
-					      </select>
-					    </div>
+    <section class="section">
+      <div class="row">
+        <div class="col-12">
+          <form id="postForm" class="card" method="post">
+            <!-- 카드 헤더: 카테고리/제목 -->
+            <div class="card-header">
+              <div class="form-stack">
+                <!-- ✅ DTO: int categoryId -->
+                <div class="mb-3">
+                  <label for="categoryId" class="form-label fw-semibold d-block">카테고리</label>
+                  <select id="categoryId" name="categoryId" class="form-select form-select-sm w-100" required>
+                    <option value="">카테고리를 선택해주세요</option>
+                    <!-- 프로젝트의 실제 카테고리 ID에 맞게 value 유지 (숫자) -->
+                    <option value="1">발자국 산책코스</option>
+                    <option value="2">멍멍 쇼핑리뷰</option>
+                    <option value="3">멍멍 수다방</option>
+                    <option value="4">산책크루 모집해요!</option>
+                    <option value="5">같이가요 스팟</option>
+                  </select>
+                </div>
 
-					    <!-- 제목 -->
-					    <div class="mb-3">
-					      <label for="postTitle" class="form-label fw-semibold d-block">제목</label>
-					      <input type="text" class="form-control form-control-sm w-100"
-					             id="postTitle" name="postTitle" placeholder="제목을 입력하세요">
-					    </div>
-					  </div>
-					</div>
-	              <div class="card-body">
-	                <div id="summernote"></div>
-	              </div>
-	            </div>
-	          </div>
-	        </div>
-	      </section>
-	    </div>
-	</th:block>
-	<th:block layout:fragment="pageScripts">
-		<script src="/assets/vendors/jquery/jquery.min.js"></script>
-		 <!-- 2) Summernote JS -->
-		 <script src="/assets/vendors/summernote/summernote-lite.min.js"></script>
-	    <script>
-			$(function () {
-		        $('#summernote').summernote({
-		          tabsize: 2,
-		          height: 300
-		        });
-		      });
-	    </script>
-	</th:block>
+                <!-- ✅ DTO: String postTtl -->
+                <div class="mb-3">
+                  <label for="postTtl" class="form-label fw-semibold d-block">제목</label>
+                  <input type="text"
+                         class="form-control form-control-sm w-100"
+                         id="postTtl"
+                         name="postTtl"
+                         placeholder="제목을 입력하세요"
+                         maxlength="200"
+                         required />
+                </div>
+              </div>
+            </div>
+
+            <!-- 카드 바디: 에디터 -->
+            <div class="card-body">
+              <!-- 에디터 표시 -->
+              <div id="summernote"></div>
+              <!-- ✅ 서버로 보낼 실제 값 (DTO: postCtnt) -->
+              <textarea id="postCtnt" name="postCtnt" hidden></textarea>
+            </div>
+
+            <div class="card-footer text-end">
+              <button class="btn btn-primary" type="submit">등록</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+</th:block>
+
+<th:block layout:fragment="pageScripts">
+  <!-- 동료 스크립트: fetch에 Authorization 헤더 자동 부착 -->
+
+  <script src="/assets/vendors/jquery/jquery.min.js"></script>
+  <script src="/assets/vendors/summernote/summernote-lite.min.js"></script>
+  <script src="/assets/vendors/summernote/lang/summernote-ko-KR.js"></script>
+
+  <script>
+    // 로그인 페이지 경로 (프로젝트 경로에 맞게 수정)
+    const LOGIN_PAGE = '/login';
+
+
+	$(function () {
+	  // --------- 공통 유틸: 토큰/헤더 확보 ----------
+	  function readTokenFromStorage() {
+	    try {
+	      // 팀 규칙을 몰라서 "가능성 높은 키" 전부 시도
+	      const keys = [
+	        'accessToken', 'token', 'jwt', 'Authorization', 'authToken'
+	      ];
+	      for (const k of keys) {
+	        const v = localStorage.getItem(k) || sessionStorage.getItem(k);
+	        if (v) return v;
+	      }
+	    } catch (e) {}
+	    return null;
+	  }
+
+	  function readTokenFromCookie() {
+	    try {
+	      const m = document.cookie.match(/\b(Authorization|accessToken|token|jwt)\s*=\s*([^;]+)/i);
+	      if (m) return decodeURIComponent(m[2]);
+	    } catch (e) {}
+	    return null;
+	  }
+
+	  function getAuthHeaderValue() {
+	    // 1) storage 우선, 2) cookie 보조
+	    let raw = readTokenFromStorage() || readTokenFromCookie();
+	    if (!raw) return null;
+	    // 값에 Bearer 가 없으면 붙여준다
+	    if (!/^Bearer\s/i.test(raw)) raw = 'Bearer ' + raw;
+	    return raw;
+	  }
+
+	  async function safeFetch(url, opts = {}) {
+	    const headers = new Headers(opts.headers || {});
+	    headers.set('Accept', 'application/json');
+	    headers.set('X-Requested-With', 'XMLHttpRequest');
+
+	    // 토큰 있으면 Authorization 헤더 부착
+	    const auth = getAuthHeaderValue();
+	    if (auth) headers.set('Authorization', auth);
+
+	    const res = await fetch(url, {
+	      credentials: 'same-origin', // 쿠키도 함께 보냄
+	      redirect: 'follow',
+	      ...opts,
+	      headers
+	    });
+
+	    // 로그인 리다이렉트(HTML) 탐지: 200이어도 text/html이면 로그인 페이지일 가능성 높음
+	    const ct = res.headers.get('content-type') || '';
+	    if (ct.includes('text/html')) {
+	      // 서버가 302 -> /login 으로 돌렸거나, 템플릿이 리턴됨
+	      const text = await res.text();
+	      console.warn('HTML 응답 감지 (로그인 필요 가능성):', res.status, text.slice(0, 200));
+	      const loginUrl = '/login'; // 실제 로그인 URL로 바꿔도 됨
+	      alert('로그인이 필요합니다.');
+	      location.href = loginUrl;
+	      // 이후 코드가 진행되지 않게 던짐
+	      throw new Error('HTML response (likely redirected to login)');
+	    }
+
+	    return res;
+	  }
+
+	  // --------- 에디터 초기화 ----------
+	  $('#summernote').summernote({
+	    placeholder: '여기에 글을 작성하세요...',
+	    lang: 'ko-KR',
+	    minHeight: 300,
+	    maxHeight: 600,
+	    focus: true,
+	    toolbar: [
+	      ['style', ['bold', 'italic', 'underline', 'clear']],
+	      ['font', ['fontsize', 'color']],
+	      ['para', ['ul', 'ol', 'paragraph']],
+	      ['insert', ['link', 'picture']],
+	      ['view', ['fullscreen', 'codeview']]
+	    ],
+	    callbacks: {
+	      onImageUpload: function (files) {
+	        for (const f of files) uploadSummernoteImage(f);
+	      }
+	    }
+	  });
+
+	  // --------- 이미지 업로드 ----------
+	  async function uploadSummernoteImage(file) {
+	    const form = new FormData();
+	    form.append('image', file);
+
+	    try {
+			const res = await safeFetch('/api/community/upload/summernote', {
+			  method: 'POST',
+			  body: form
+			});
+	      if (res.status === 401) {
+	        alert('로그인이 필요합니다.');
+	        location.href = '/login';
+	        return;
+	      }
+	      if (!res.ok) {
+	        const t = await res.text();
+	        console.error('upload error:', res.status, t);
+	        alert('이미지 업로드 중 오류가 발생했습니다.');
+	        return;
+	      }
+
+	      const data = await res.json();
+	      if (data && data.url) {
+	        $('#summernote').summernote('insertImage', data.url);
+	      } else {
+	        console.error('invalid upload response:', data);
+	        alert('이미지 업로드 응답이 올바르지 않습니다.');
+	      }
+	    } catch (e) {
+	      console.error('upload exception:', e);
+	      // safeFetch에서 로그인 리다이렉트 처리되면 여기로 넘어옴
+	      if (!/HTML response/.test(String(e))) {
+	        alert('이미지 업로드 중 오류가 발생했습니다.');
+	      }
+	    }
+	  }
+
+	  // --------- 글 제출 ----------
+	  $('#postForm').on('submit', async function (e) {
+	    e.preventDefault();
+
+	    // 에디터 HTML → hidden textarea 복사
+	    $('#postCtnt').val($('#summernote').summernote('code'));
+
+	    const fd = new FormData(this);
+
+	    try {
+	      // 서버에 /community/api/post 엔드포인트가 있어야 합니다.
+		  const res = await safeFetch('/api/community/post', {
+		    method: 'POST',
+		    body: fd
+		  });
+
+	      if (res.status === 401) {
+	        alert('로그인이 필요합니다.');
+	        location.href = '/login';
+	        return;
+	      }
+	      if (!res.ok) {
+	        const t = await res.text();
+	        console.error('post error:', res.status, t);
+	        alert('네트워크 오류가 발생했습니다.');
+	        return;
+	      }
+
+	      const data = await res.json();
+	      if (data && data.postId) {
+	        location.href = '/community/postDetail?postId=' + data.postId;
+	      } else {
+	        console.error('invalid post response:', data);
+	        alert('응답이 올바르지 않습니다.');
+	      }
+	    } catch (e2) {
+	      console.error('post exception:', e2);
+	      if (!/HTML response/.test(String(e2))) {
+	        alert('네트워크 오류가 발생했습니다.');
+	      }
+	    }
+	  });
+	});
+  </script>
+</th:block>
 </body>
-
 </html>

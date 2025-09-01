@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import ganadinote.common.domain.FileMetaData;
-import org.springframework.beans.factory.annotation.Value;
 
 @Component
 public class FileUtils {
@@ -96,5 +96,30 @@ public class FileUtils {
     private String getExt(String name) {
         int i = name.lastIndexOf('.');
         return (i >= 0 && i < name.length() - 1) ? name.substring(i) : "";
+    }
+    
+    public void deleteQuietly(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) return;
+        try {
+            Path root = Paths.get(getUploadRootPath()).toAbsolutePath().normalize();
+            Path target = root.resolve(relativePath.replaceFirst("^/+", ""))
+                              .normalize();
+
+            // root 바깥 경로로 벗어나면 삭제 금지
+            if (!target.startsWith(root)) return;
+
+            Files.deleteIfExists(target);
+        } catch (Exception ignore) {}
+    }
+    
+    private String getUploadRootPath() {
+        // application.properties/yaml 의 file.path 값 사용.
+        // 비어있으면 현재 작업 디렉토리를 기본값으로.
+        String root = (fileRoot != null && !fileRoot.isBlank())
+                ? fileRoot
+                : Paths.get("").toAbsolutePath().toString();
+
+        // 정규화해서 문자열로 반환 (윈도/리눅스 모두 OK)
+        return Paths.get(root).toAbsolutePath().normalize().toString();
     }
 }

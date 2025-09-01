@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ganadinote.todolist.mapper.TodoMemberMapper">
+
+    <resultMap id="todoMemberResultMap" type="ganadinote.common.domain.Member">
+        <id property="mbrCd" column="mbr_cd"/>
+        <result property="mbrEmail" column="mbr_email"/>
+        <result property="mbrPw" column="mbr_pw"/>
+        <result property="mbrNknm" column="mbr_nknm"/>
+        <result property="mbrStatus" column="mbr_status"/>
+        <result property="mbrProfileImg" column="mbr_profile"/> 
+        <result property="mbrRegDate" column="mbr_reg_date"/>
+        <result property="mbrMdfcnDate" column="mbr_mdfcn_date"/>
+        <!-- [추가!] 새로운 컬럼 매핑 추가 -->
+        <result property="mbrLastLoginDate" column="mbr_last_login_date"/>
+        <result property="mbrStatusMdfcnDate" column="mbr_status_mdfcn_date"/>
+    </resultMap>
+
+    <select id="getMemberByCd" parameterType="int" resultMap="todoMemberResultMap">
+        SELECT
+            mbr_cd, mbr_email, mbr_pw, mbr_nknm, mbr_status, 
+            mbr_profile, 
+            mbr_reg_date, 
+            mbr_mdfcn_date,
+            <!-- [추가!] 새로운 컬럼 조회 추가 -->
+            mbr_last_login_date,
+            mbr_status_mdfcn_date
+        FROM
+            member
+        WHERE
+            mbr_cd = #{mbrCd}
+    </select>
+
+</mapper>

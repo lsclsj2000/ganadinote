@@ -1,17 +1,32 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <header id="snsHeader" th:fragment="headerFragment">
-	<!-- 햄버거바와 로고를 포함하는 상단 고정 헤더 -->
-    <div style="width: 100%; display: flex; justify-content: space-between; margin-top: 3px;">
+	<div style="width: 100%; display: flex; justify-content: space-between; margin-top: 3px;">
         <a href="#" class="burger-btn d-flex d-xl-none">
 	        <i class="bi-justify bi-sub fs-3" style="display: flex; align-items: center;"></i>
 	    </a>
-	    <a href="/main">
+	    <a href="/todo/list">
 	    	<img src="/assets/images/logo/ganadinote-logo.png" alt="Logo" srcset="" style="width:100px;">
 	    </a>
-		<a href="#" class="burger-btn d-block d-xl-none" style="padding-top: 3px;">
+		<a id="login-state-icon" href="#" class="burger-btn d-block d-xl-none" style="padding-top: 3px;">
 			<i class="bi bi-bell bi-sub fs-4"></i>
 		</a>
     </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', () => {
+            const mbrCd = getMbrCdFromToken();
+            const loginIconArea = document.getElementById('login-state-icon');
+
+            if (mbrCd) {
+                // 로그인 상태: 알림 벨 아이콘 유지
+                loginIconArea.href = '/todo/notification'; // 알림 페이지로 링크 변경
+            } else {
+                // 로그아웃 상태: "로그인하기" 링크로 변경
+                loginIconArea.href = '/login'; // 로그인 페이지로 링크
+                loginIconArea.innerHTML = '로그인하기';
+            }
+        });
+    </script>
 </header>
 </html>

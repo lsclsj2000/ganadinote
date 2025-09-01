@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ganadinote.auth.pet.mapper.PetMapper">
+
+    <insert id="insertPet" parameterType="ganadinote.auth.pet.dto.PetDTO">
+        INSERT INTO pet (
+            mbr_cd,
+            pet_name,
+            pet_breed,
+            pet_gender,
+            pet_birth_date,
+            pet_weight,
+            pet_color
+        ) VALUES (
+            #{userId},
+            #{petName},
+            #{petBreedId},
+            #{petGender},
+            #{petBirthDate},
+            #{petWeight},
+            #{petColor}
+        )
+    </insert>
+
+</mapper>

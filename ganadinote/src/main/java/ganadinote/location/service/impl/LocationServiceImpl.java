@@ -3,11 +3,20 @@ package ganadinote.location.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ganadinote.location.domain.LocationDTO;
+import ganadinote.location.mapper.LocationMapper;
 import ganadinote.location.service.LocationService;
 import ganadinote.location.service.ReverseGeocodingService;
+import ganadinote.notification.domain.LocationUpdateDTO;
+import ganadinote.notification.mapper.PushMapper;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class LocationServiceImpl implements LocationService {
+	
+	private final PushMapper pushMapper;
+	private final LocationMapper locationMapper;
 	
 	@Autowired
 	private ReverseGeocodingService reverseGeocodingService;
@@ -16,7 +25,7 @@ public class LocationServiceImpl implements LocationService {
 	public String processLocation(double latitude, double longitude) {
 		System.out.println("LocationServiceImpl : 위치정보처리 시작");
 		
-		// '동' 정보 가져오기
+		// 위치 정보 가져오기
 		String LocationName = reverseGeocodingService.getLocationName(longitude, latitude);
 		
 	if(LocationName == null || LocationName.isEmpty()) {
@@ -28,5 +37,20 @@ public class LocationServiceImpl implements LocationService {
 		System.out.println("LocationServiceImpl: 위치 정보 처리 완료");
 		
 		return LocationName;		
+	}
+	
+	@Override
+	public void updateMemberLocation(Integer mbrCd, Double latitude, Double longitude) {
+		 LocationUpdateDTO dto = new LocationUpdateDTO();
+	        dto.setMbrCd(mbrCd);
+	        dto.setLatitude(latitude);
+	        dto.setLongitude(longitude);
+	        pushMapper.updateLocation(dto);
+	    }
+	
+	// 회원 코드로 위치 정보 조회
+	@Override
+	public LocationDTO getMemberLocation(Integer mbrCd) {
+		return locationMapper.getMemberLocation(mbrCd);
 	}
 }

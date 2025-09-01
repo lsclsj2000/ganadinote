@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ganadinote.auth.register.mapper.RegisterMapper">
+
+    <insert id="insertMember">
+        INSERT INTO member (
+            mbr_email,
+            mbr_pw,
+            mbr_nknm,
+            mbr_status,
+            mbr_reg_date
+        ) VALUES (
+            #{mbrEmail},
+            #{mbrPw},
+            #{mbrNknm},
+            #{mbrStatus},
+            NOW()
+        )
+    </insert>
+
+    <select id="existsByMbrEmail" resultType="boolean">
+        SELECT
+            COUNT(*)
+        FROM
+            member
+        WHERE
+            mbr_email = #{mbrEmail}
+    </select>
+
+    <select id="existsByMbrNknm" resultType="boolean">
+        SELECT
+            COUNT(*)
+        FROM
+            member
+        WHERE
+            mbr_nknm = #{mbrNknm}
+    </select>
+</mapper>

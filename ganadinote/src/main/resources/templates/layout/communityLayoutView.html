@@ -38,15 +38,15 @@
 
 <body>
 	<div id="app">
-		<header th:replace="fragments/headerFragment :: headerFragment"></header>
-	    <aside  th:replace="fragments/asideFragment  :: asideFragment"></aside>
+		<header th:replace="~{fragments/headerFragment :: headerFragment}"></header>
+	    <aside  th:replace="~{fragments/asideFragment :: asideFragment}"></aside>
 
 	    <!-- ★ 자식이 주입될 슬롯 -->
 		<div id="main">
 			<th:block layout:fragment="contents"></th:block>
-		</main>
+		</div>
 
-	    <footer th:replace="fragments/communityFooterFragment :: communityFooterFragment"></footer>
+	    <footer th:replace="~{fragments/communityFooterFragment :: communityFooterFragment}"></footer>
 	</div>
 	
 
@@ -55,6 +55,7 @@
     <script src="/assets/js/bootstrap.bundle.min.js"></script>
 
     <script src="/assets/js/main.js"></script>
-    
+	<th:block layout:fragment="pageScripts"></th:block>
+
 </body>
 </html>

@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="/assets/vendors/bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="/assets/css/app.css">
     <link rel="shortcut icon" href="/assets/images/favicon.svg" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 	<style>
 	  /* 페이지 공통: 헤더/푸터 높이 정의 (필요시 값 조절) */
 	  :root { --header-h: 56px; --footer-h: 56px; }
@@ -38,15 +39,14 @@
 
 <body>
 	<div id="app">
-		<header th:replace="fragments/headerFragment :: headerFragment"></header>
-	    <aside  th:replace="fragments/asideFragment  :: asideFragment"></aside>
-
+		<header th:replace="~{fragments/headerFragment :: headerFragment}"></header>
+	    <aside  th:replace="~{fragments/asideFragment :: asideFragment}"></aside>
 	    <!-- ★ 자식이 주입될 슬롯 -->
 		<div id="main">
 			<th:block layout:fragment="contents"></th:block>
 		</div>
 
-	    <footer th:replace="fragments/footerFragment :: footerFragment"></footer>
+	    <footer th:replace="~{fragments/footerFragment :: footerFragment}"></footer>
 	</div>
 	
 
@@ -56,8 +56,9 @@
 
     <script src="/assets/js/main.js"></script>
     
+    
     <!--/* 개발시 추가할 스크립트 영역 정의 */-->
 	<th:block layout:fragment="jsScripts"></th:block>
-    
+    <script src="/assets/js/loginInfo.js"></script>
 </body>
 </html>
