@@ -242,7 +242,6 @@
 	    // 구독 취소 로직
 	    async function unsubscribeUser() {
 	        try {
-	            // 🚨 수정: body에서 mbrCd 제거
 	            const response = await fetch('/api/push/unsubscribe', {
 	                method: 'POST'
 	            });

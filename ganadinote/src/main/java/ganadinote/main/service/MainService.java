@@ -10,4 +10,6 @@ public interface MainService {
 	List<Pet> getPetInfoByMbrCd(Integer mbrCd);
 	
 	List<PetWithBreedDTO> getPetInfoWithBreedByMbrCd(Integer mbrCd);
+	
+	String getNknmByMbrCd(Integer mbrCd);
 }
