@@ -2,72 +2,72 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="ganadinote.notification.mapper.PushMapper">
 
-<resultMap id="petWithBreedResultMap" 		type="ganadinote.notification.domain.PetWithBreedDTO">
-    <result column="pet_cd" 				property="petCd"/>
-    <result column="mbr_cd" 				property="mbrCd"/>
-    <result column="pet_name" 				property="petName"/>
-    <result column="pet_breed" 				property="petBreed"/>
-    <result column="pet_gender" 			property="petGender"/>
-    <result column="pet_birth_date" 		property="petBirthDate"/>
-    <result column="pet_weight" 			property="petWeight"/>
-    <result column="pet_profile_img_url" 	property="petProfileImgUrl"/>
-    <result column="pet_introduction" 		property="petIntroduction"/>
-    <result column="pet_reg_date" 			property="petRegDate"/>
-    <result column="pet_mdfcn_date" 		property="petMdfcnDate"/>
-
-
-    <result column="breed_cd" 				property="breedCd"/>
-    <result column="breed_name" 			property="breedName"/>
-    <result column="min_temp" 				property="minTemp"/>
-    <result column="max_temp" 				property="maxTemp"/>
-    <result column="cold_sensitive" 		property="coldSensitive"/>
-    <result column="heat_sensitive" 		property="heatSensitive"/>
-    <result column="dog_size" 				property="dogSize"/>
-    <result column="activity_level" 		property="activityLevel"/>
-</resultMap>
+    <resultMap id="petWithBreedResultMap" 		type="ganadinote.notification.domain.PetWithBreedDTO">
+        <result column="pet_cd" 				property="petCd"/>
+        <result column="mbr_cd" 				property="mbrCd"/>
+        <result column="pet_name" 				property="petName"/>
+        <result column="pet_breed" 				property="petBreed"/>
+        <result column="pet_gender" 			property="petGender"/>
+        <result column="pet_birth_date" 		property="petBirthDate"/>
+        <result column="pet_weight" 			property="petWeight"/>
+        <result column="pet_profile_img_url" 	property="petProfileImgUrl"/>
+        <result column="pet_introduction" 		property="petIntroduction"/>
+        <result column="pet_reg_date" 			property="petRegDate"/>
+        <result column="pet_mdfcn_date" 		property="petMdfcnDate"/>
+    
+    
+        <result column="breed_cd" 				property="breedCd"/>
+        <result column="breed_name" 			property="breedName"/>
+        <result column="min_temp" 				property="minTemp"/>
+        <result column="max_temp" 				property="maxTemp"/>
+        <result column="cold_sensitive" 		property="coldSensitive"/>
+        <result column="heat_sensitive" 		property="heatSensitive"/>
+        <result column="dog_size" 				property="dogSize"/>
+        <result column="activity_level" 		property="activityLevel"/>
+    </resultMap>
     
     <select id="getPetInfoForNotification" resultMap="petWithBreedResultMap">
-    	/*  mbrCd를 통해 받아오는 알림을 위한 pet 정보*/
-       SELECT
-		    p.pet_cd,
-		    p.pet_name,
-		    p.pet_profile_img_url,
-		    p.pet_gender,
-		    p.pet_birth_date,
-		    p.pet_weight,
-		    b.breed_cd,
-		    b.breed_name,
-		    b.min_temp,
-		    b.max_temp,
-		    b.cold_sensitive,
-		    b.heat_sensitive
-		FROM
-		    pet p
-		INNER JOIN
-		    dog_breed b
-		ON
-		    p.pet_breed = b.breed_cd
-		WHERE
+    	/* mbrCd를 통해 받아오는 알림을 위한 pet 정보*/
+        SELECT
+            p.pet_cd,
+            p.pet_name,
+            p.pet_profile_img_url,
+            p.pet_gender,
+            p.pet_birth_date,
+            p.pet_weight,
+            b.breed_cd,
+            b.breed_name,
+            b.min_temp,
+            b.max_temp,
+            b.cold_sensitive,
+            b.heat_sensitive
+        FROM
+            pet p
+        INNER JOIN
+            dog_breed b
+        ON
+            p.pet_breed = b.breed_cd
+        WHERE
             p.mbr_cd = #{mbrCd};
     </select>
     
     <select id="getSubInfoByMbrCd" resultType="ganadinote.common.domain.PushSubscription">
-    	/* 알림 구독 정보 멤버 코드로 받아오기 */
-		SELECT
-		    id,
-		    mbr_cd,
-		    endpoint,
-		    p256dh,
-		    auth,
-		    created_at
-		FROM 
-		    push_subscription
-		WHERE
-		    mbr_cd = #{mbrCd}
+        /* 알림 구독 정보 멤버 코드로 받아오기 */
+        SELECT
+            id,
+            mbr_cd,
+            endpoint,
+            p256dh,
+            auth,
+            created_at
+        FROM 
+            push_subscription
+        WHERE
+            mbr_cd = #{mbrCd}
     </select>
     
     <select id="isSubscriptionActive" parameterType="int" resultType="boolean">
-    	/* mbr_cd와 is_active=1 조건을 만족하는 레코드를 찾습니다. */
+        /* mbr_cd와 is_active=1 조건을 만족하는 레코드를 찾습니다. */
         SELECT
             COUNT(*) > 0
         FROM
@@ -79,34 +79,39 @@
     <select id="getSubscriptionByEndpoint" parameterType="String" resultType="int">
     
         SELECT 
-        	COUNT(*) 
+            COUNT(*) 
         FROM 
-        	push_subscription
+            push_subscription
         WHERE 
-        	endpoint = #{endpoint}
+            endpoint = #{endpoint}
     </select>
     
     <insert id="addSubscription" parameterType="ganadinote.notification.domain.PushSubDTO">
-    	/* 구독 추가 */
+        /* 구독 추가 및 재활성화 */
         INSERT INTO 
-        	push_subscription 
-        		(mbr_cd, endpoint, p256dh, auth, is_active)
+            push_subscription 
+                (mbr_cd, endpoint, p256dh, auth, is_active)
         VALUES 
         (#{mbrCd}, #{endpoint}, #{p256dh}, #{auth}, 1)
+        ON DUPLICATE KEY UPDATE
+            mbr_cd = VALUES(mbr_cd),
+            is_active = 1,
+            p256dh = VALUES(p256dh),
+            auth = VALUES(auth);
     </insert>
 
     <update id="updateSubscription" parameterType="ganadinote.notification.domain.PushSubDTO">
-    	/* 구독 업데이트(재구독) */
+        /* 구독 업데이트(재구독) */
         UPDATE 
-        	push_subscription
+            push_subscription
         SET 
-        	is_active = 1, p256dh = #{p256dh}, auth = #{auth}
+            is_active = 1, p256dh = #{p256dh}, auth = #{auth}
         WHERE 
-        	endpoint = #{endpoint} AND mbr_cd = #{mbrCd}
+            endpoint = #{endpoint} AND mbr_cd = #{mbrCd}
     </update>
     
-      <update id="deactivateSubscription" parameterType="int">
-    	/* 회원 코드로 알림 구독 비활성화 */
+    <update id="deactivateSubscription" parameterType="int">
+        /* 회원 코드로 알림 구독 비활성화 */
         UPDATE
             push_subscription
         SET
@@ -115,34 +120,58 @@
             mbr_cd = #{mbrCd}
     </update>
     
-     <update id="updateNotificationSchedule">
-    	/* 회원 코드로 알림 스케줄(JSON) 업데이트 */
-        UPDATE
-            push_subscription
-        SET
-            notification_schedule = #{notificationScheduleJson}
-        WHERE
-            mbr_cd = #{mbrCd}
+    <update id="updateNotificationSchedule">
+        /* 회원 코드로 알림 스케줄(JSON) 업데이트 */
+        INSERT INTO member_notification_settings (mbr_cd, notification_schedule)
+        VALUES (#{mbrCd}, #{notificationScheduleJson})
+        ON DUPLICATE KEY UPDATE
+            notification_schedule = VALUES(notification_schedule);
     </update>
     
     <select id="getNotificationSchedule" resultType="String">
-    	/* 회원 코드로 알림 스케줄 조회 */
-    	SELECT 
-    		notification_schedule
-    	FROM 
-    		push_subscription
-    	WHERE 
-    		mbr_cd = #{mbrCd}
+        /* 회원 코드로 알림 스케줄 조회 */
+        SELECT 
+            notification_schedule
+        FROM 
+            member_notification_settings
+        WHERE 
+            mbr_cd = #{mbrCd}
     </select>
     
     <select id="findSubscriptionsBySchedule" resultType="ganadinote.common.domain.PushSubscription">
         /* 스케줄에 맞는 구독 정보 찾기 */
         SELECT
-            mbr_cd, endpoint, p256dh, auth
+            ps.mbr_cd,
+            ps.endpoint,
+            ps.p256dh,
+            ps.auth,
+            mns.notification_schedule AS notificationSchedule
         FROM
-            push_subscription
+            push_subscription ps
+        JOIN
+            member_notification_settings mns ON ps.mbr_cd = mns.mbr_cd
         WHERE
-            is_active = 1 AND JSON_EXTRACT(notification_schedule, CONCAT('$.', #{dayOfWeek})) = #{time}
+            ps.is_active = 1
+            AND JSON_EXTRACT(mns.notification_schedule, CONCAT('$.', #{dayOfWeek})) = #{time}
+    </select>
+    
+    <update id="updateLocation" parameterType="ganadinote.notification.domain.LocationUpdateDTO">
+         /* 회원의 위치 정보(위도, 경도)를 업데이트합니다. */
+        INSERT INTO member_location (mbr_cd, latitude, longitude)
+        VALUES (#{mbrCd}, #{latitude}, #{longitude})
+        ON DUPLICATE KEY UPDATE
+            latitude = VALUES(latitude),
+            longitude = VALUES(longitude);
+    </update>
+
+    <select id="getMemberLocation" parameterType="int" resultType="ganadinote.location.domain.LocationDTO">
+        SELECT
+            latitude,
+            longitude
+        FROM
+            member_location
+        WHERE
+            mbr_cd = #{mbrCd}
     </select>
     
     <select id="findSubscriptionsWithLocation" resultType="ganadinote.common.domain.PushSubscription">
@@ -152,26 +181,15 @@
             ps.endpoint,
             ps.p256dh,
             ps.auth,
-            m.latitude,
-            m.longitude
+            ml.latitude,
+            ml.longitude
         FROM
             push_subscription ps
         JOIN
-            mbr m ON ps.mbr_cd = m.mbr_cd
+            member_location ml ON ps.mbr_cd = ml.mbr_cd
         WHERE
             ps.is_active = 1
-            AND m.latitude IS NOT NULL
-            AND m.longitude IS NOT NULL
+            AND ml.latitude IS NOT NULL
+            AND ml.longitude IS NOT NULL
     </select>
-    
-    <update id="updateLocation" parameterType="ganadinote.notification.domain.LocationUpdateDTO">
-    	 /* 회원의 위치 정보(위도, 경도)를 업데이트합니다. */
-	    UPDATE 
-	    	push_subscription
-	    SET
-	        latitude = #{latitude},
-	        longitude = #{longitude}
-	    WHERE
-	        mbr_cd = #{mbrCd}
-</update>
 </mapper>
