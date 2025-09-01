@@ -5,50 +5,236 @@
 /* 페이지 전체에 일관된 여백 제공 */
 .routine-list-page,
 .routine-add-page {
-    padding: 10px;
+	margin-top: 20px;
+    padding: 15px; /* 양쪽 패딩을 조금 더 주어 여백 확보 */
 }
 
-/* 테이블이 화면을 넘어가지 않도록 설정 */
+.page-heading h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* 새 루틴 추가하기 버튼 */
+.routine-list-page .btn-primary {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #5b7fdb; /* 기존 색상에서 좀 더 어둡게 변경 */
+    border-color: #5b7fdb;
+    border-radius: 8px; /* 버튼 모서리를 둥글게 */
+    margin-bottom: 25px; /* 버튼 아래 여백 추가 */
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    display: block; /* a 태그를 블록 요소로 만들어 width 100% 적용 */
+    text-align: center;
+}
+.routine-list-page .btn-primary:hover {
+    background-color: #4a6fc4;
+    border-color: #4a6fc4;
+}
+
+/* 등록된 루틴이 없을 때 메시지 */
+.no-routines-message {
+    text-align: center;
+    padding: 30px;
+    color: #777;
+    font-size: 16px;
+    border: 1px dashed #ddd;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+
+/* --- 루틴 카드 스타일 --- */
+.routine-cards-container {
+    display: flex;
+    flex-direction: column; /* 카드를 세로로 쌓음 */
+    gap: 15px; /* 카드 사이 간격 */
+}
+
+.routine-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.routine-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.routine-card .card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.routine-card .pet-name {
+    background-color: #e6f7ff; /* 연한 파란색 배경 */
+    color: #1890ff; /* 진한 파란색 글씨 */
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-right: 10px;
+    flex-shrink: 0; /* 내용이 길어져도 줄어들지 않게 함 */
+}
+
+.routine-card .routine-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap; /* 제목이 너무 길면 줄바꿈 방지 */
+    overflow: hidden;
+    text-overflow: ellipsis; /* 넘치는 부분은 ...으로 표시 */
+}
+
+.routine-card .card-body {
+    margin-bottom: 15px;
+}
+
+.routine-card .detail-item {
+    display: flex;
+    justify-content: space-between; /* 라벨과 값 좌우 정렬 */
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #555;
+}
+
+.routine-card .detail-item .label {
+    font-weight: bold;
+    color: #777;
+    width: 60px; /* 라벨 너비를 고정하여 정렬을 맞춤 */
+    flex-shrink: 0;
+}
+
+.routine-card .detail-item .value {
+    flex-grow: 1; /* 값이 남은 공간을 채우도록 */
+    text-align: right; /* 값을 오른쪽 정렬 */
+}
+
+
+.routine-card .card-actions {
+    display: flex;
+    justify-content: flex-end; /* 삭제 버튼을 오른쪽으로 */
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.routine-card .btn-danger {
+    background-color: #ff4d4f; /* 삭제 버튼 색상 */
+    border-color: #ff4d4f;
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+}
+.routine-card .btn-danger:hover {
+    background-color: #cf1322;
+    border-color: #cf1322;
+}
+
+/* --- 수정 폼 스타일 (인라인 대신 전체 카드 교체) --- */
+.edit-form-full {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.edit-form-full .form-row {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-form-full label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #555;
+    font-size: 14px;
+}
+
+.edit-form-full input[type="text"],
+.edit-form-full input[type="date"],
+.edit-form-full input[type="time"],
+.edit-form-full select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; /* 패딩이 width에 포함되도록 */
+    font-size: 14px;
+    color: #333;
+}
+
+.edit-form-full input[type="date"],
+.edit-form-full input[type="time"] {
+    /* 날짜/시간 입력 필드의 기본 크롬 스타일 제거 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+/* 날짜/시간 필드 아이콘을 위한 추가 스타일 (선택 사항) */
+/* input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0; }
+input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; } */
+
+
+.edit-form-full .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.edit-form-full .btn-success,
+.edit-form-full .btn-secondary {
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+}
+
+.edit-form-full .btn-success {
+    background-color: #52c41a;
+    color: white;
+}
+.edit-form-full .btn-success:hover {
+    background-color: #389e0d;
+}
+
+.edit-form-full .btn-secondary {
+    background-color: #f0f0f0;
+    color: #555;
+}
+.edit-form-full .btn-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+
+/* 기존 테이블 관련 스타일은 더 이상 필요 없으므로 삭제하거나 주석 처리 */
+/*
 .table-responsive {
     overflow-x: auto;
 }
-
-/* 테이블 셀 내용이 너무 길 경우 줄바꿈 처리 */
 .table th, .table td {
-    white-space: nowrap; /* 기본적으로 줄바꿈 안함 */
+    white-space: nowrap;
 }
-
-/* 모바일 화면에서는 테이블 레이아웃이 깨질 수 있으므로,
-   필요하다면 더 작은 폰트나 다른 레이아웃을 고려할 수 있습니다.
-   지금은 기본 bootstrap 스타일을 최대한 활용합니다. */
-
-
-/* 폼 그룹 사이의 간격 */
-.routine-add-page .form-group {
-    margin-bottom: 1rem; /* 16px */
-}
-
-/* 버튼 스타일 */
-.btn-primary {
-    /* Bootstrap 기본 스타일을 사용하지만, 원한다면 여기서 색상 등을 바꿀 수 있습니다. */
-    /* background-color: #ffb74d; */
-    /* border-color: #ffb74d; */
-    width: 100%; /* 버튼 너비를 100%로 설정하여 모바일에서 누르기 쉽게 함 */
-    padding: 10px;
-    font-size: 16px;
-}
-
-/* 인라인 수정 폼 스타일 */
 .edit-form-inline {
     display: flex;
     align-items: center;
-    gap: 5px; /* 각 입력 필드 사이의 간격 */
+    gap: 5px;
     width: 100%;
 }
-
 .edit-form-inline input,
 .edit-form-inline select,
 .edit-form-inline button {
     padding: 5px;
     font-size: 12px;
 }
+*/
