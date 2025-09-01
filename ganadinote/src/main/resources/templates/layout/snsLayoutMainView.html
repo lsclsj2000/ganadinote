@@ -40,6 +40,11 @@
     <script src="/assets/js/main.js"></script>
     <script src="/assets/js/loginInfo.js"></script>
     
+    <script th:inline="javascript">
+		window.LOGIN_MBR_CD = /*[[${loginMbrCd}]]*/ null;
+		// #main 노드에도 남겨두면 프래그먼트 교체(fetch) 후에도 참조 가능
+		document.getElementById('main')?.setAttribute('data-login', window.LOGIN_MBR_CD);
+	</script>
     
     <script>
 		(function(){
@@ -57,46 +62,51 @@
 	</script>
     
     <script>
-		(function(){
-			const root = document.getElementById('main');
-		
-			// [추가] 첫 로드 시 현재 경로를 히스토리 상태로 기록
-			if (!history.state || !history.state.route) {
-				history.replaceState({route: location.pathname}, '', location.pathname);
-			}
-		
-			document.addEventListener('click', async (e) => {
-				const a = e.target.closest('#snsFooter .tab-item');
-				if (!a) return;
-				e.preventDefault();
-				const route = a.getAttribute('data-route') || a.getAttribute('href');
-				try {
-					const res = await fetch(route, { headers: {'X-Requested-With':'fetch'} });
-					const html = await res.text();
-					root.innerHTML = html;
-					history.pushState({route}, '', route);
-					document.querySelectorAll('#snsFooter .tab-item')
-						.forEach(x => x.classList.toggle('active', x === a));
-				} catch(err){
-					root.innerHTML = '<div class="p-3 text-danger">불러오기 실패</div>';
-				}
-			});
-		
-			window.addEventListener('popstate', (e)=>{
-				const route = e.state?.route;
-				if (!route) return; // [변경] 초기 로드 등 state 없으면 아무것도 안 함
-				fetch(route, { headers: {'X-Requested-With':'fetch'} })
-					.then(r=>r.text())
-					.then(h=>{
-						root.innerHTML=h;
-						document.querySelectorAll('#snsFooter .tab-item')
-							.forEach(x => {
-								const r = x.getAttribute('data-route')||x.getAttribute('href');
-								x.classList.toggle('active', r === route);
-							});
-					});
-			});
-		})();
+    (function(){
+    	  const root = document.getElementById('main');
+
+    	  if (!history.state || !history.state.route) {
+    	    history.replaceState({route: location.pathname}, '', location.pathname);
+    	  }
+
+    	  document.addEventListener('click', async (e) => {
+    	    const a = e.target.closest('#snsFooter .tab-item');
+    	    if (!a) return;
+
+    	    const route = a.getAttribute('data-route');
+
+    	    // ✅ data-route가 없으면(= Main) 기본 링크로 전체 페이지 이동
+    	    if (!route) return; 
+
+    	    // ✅ SPA 처리: data-route가 있는 탭만 가로챔
+    	    e.preventDefault();
+    	    try {
+    	      const res = await fetch(route, { headers: {'X-Requested-With':'fetch'} });
+    	      const html = await res.text();
+    	      root.innerHTML = html;
+    	      history.pushState({route}, '', route);
+    	      document.querySelectorAll('#snsFooter .tab-item')
+    	        .forEach(x => x.classList.toggle('active', x === a));
+    	    } catch(err){
+    	      root.innerHTML = '<div class="p-3 text-danger">불러오기 실패</div>';
+    	    }
+    	  });
+
+    	  window.addEventListener('popstate', (e)=>{
+    	    const route = e.state?.route;
+    	    if (!route) return;
+    	    fetch(route, { headers: {'X-Requested-With':'fetch'} })
+    	      .then(r=>r.text())
+    	      .then(h=>{
+    	        root.innerHTML=h;
+    	        document.querySelectorAll('#snsFooter .tab-item')
+    	          .forEach(x => {
+    	            const r = x.getAttribute('data-route')||x.getAttribute('href');
+    	            x.classList.toggle('active', r === route);
+    	          });
+    	      });
+    	  });
+    	})();
 	</script>
 
 	
@@ -209,6 +219,20 @@
 		        <img src="${imgs[0]}" class="d-block w-100" alt="게시물 이미지">
 		      </div>
 		    ` : '';
+		    
+		    const likeHTML = `
+		      <div class="sr_feed-actions d-flex align-items-center mb-2">
+		        <button class="btn btn-link p-0 sr-like-btn"
+		                type="button"
+		                data-post-id="${p.spCd}"
+		                data-liked="${p.liked ? 'true' : 'false'}">
+		          <span class="text-danger">
+		            <i class="${p.liked ? 'bi bi-heart-fill icon-mid' : 'bi bi-heart icon-mid'}"></i>
+		          </span>
+		        </button>
+		        <span class="sr-like-count" style="font-size:small; margin-left:5px;">${p.likeCount ?? 0}</span>
+		      </div>
+		    `;
 
 		    // === snsHomeFragment 카드 마크업과 동일 ===
 		    return `
@@ -245,9 +269,7 @@
 		          ${hasOne ? singleImageHTML : ''}
 
 		          <!-- 좋아요 버튼 (UI만) -->
-		          <div class="sr_feed-actions d-flex align-items-center mb-2">
-		            <i class="bi bi-heart text-danger"></i>
-		          </div>
+		          ${likeHTML}
 
 		          <!-- 태그 -->
 		          <div class="sr_feed-content">
@@ -274,7 +296,10 @@
 		      const json = await res.json();
 		      if (!json?.ok) throw new Error(json?.message || '불러오기 실패');
 
-		      const html = buildPostCardHTML(json.post, window.LOGIN_MBR_CD);
+		      const loginFromMain = document.getElementById('main')?.getAttribute('data-login')
+		    		  				?? window.LOGIN_MBR_CD
+		    				  		?? '';
+		      const html = buildPostCardHTML(json.post, loginFromMain);
 		      body.innerHTML = html;
 		      // Bootstrap 캐러셀은 data-bs-*로 자동 동작
 
@@ -361,8 +386,11 @@
 		      e.preventDefault();
 		      const postId      = menuBtn.getAttribute('data-post-id');
 		      const authorId    = menuBtn.getAttribute('data-author-id');
-		      const isOwner = String(authorId) === String(window.LOGIN_MBR_CD);
 		      const isFollowing = (menuBtn.getAttribute('data-is-following') === 'true');
+		      const ownerAttr = menuBtn.getAttribute('data-is-owner');
+		      const isOwner = ownerAttr != null
+		      					? ownerAttr === 'true'
+		    	  				: String(authorId) === String(window.LOGIN_MBR_CD);
 	
 		      renderSheetMenu({ postId, authorId, isOwner, isFollowing });
 		      openCustomSheet();
@@ -463,6 +491,55 @@
 	      alert('네트워크 오류가 발생했습니다.');
 	    }
 	  }
+	</script>
+	
+	<script>
+	document.addEventListener('click', async (e) => {
+		  const btn = e.target.closest('.sr-like-btn');
+		  if (!btn) return;
+
+		  const postId = btn.getAttribute('data-post-id');
+		  if (!postId) return;
+
+		  try {
+		    const res = await fetch('/sns/api/like/toggle', {
+		      method: 'POST',
+		      headers: { 'Content-Type': 'application/json' },
+		      body: JSON.stringify({ spCd: Number(postId) })
+		    });
+
+		    // 미로그인 시 서버가 리다이렉트하므로 처리
+		    if (res.redirected) { location.href = res.url; return; }
+
+		    const json = await res.json();
+		    if (!json.ok) { alert(json.message || '처리 중 오류'); return; }
+
+		    // ✅ 홈/모달 동시 갱신
+		    updateLikeUIAll(postId, !!json.liked, json.likeCount);
+
+		  } catch (err) {
+		    console.error(err);
+		    alert('네트워크 오류가 발생했습니다.');
+		  }
+		});
+	</script>
+	
+	<script>
+		function renderLikeBtn(btn, liked) {
+		  btn.setAttribute('data-liked', liked ? 'true' : 'false');
+		  btn.innerHTML = liked
+		    ? '<span class="text-danger"><i class="bi bi-heart-fill icon-mid"></i></span>'
+		    : '<span class="text-danger"><i class="bi bi-heart icon-mid"></i></span>';
+		}
+		
+		function updateLikeUIAll(postId, liked, count) {
+		  // 같은 postId를 가진 모든 버튼/카운트를 갱신 (홈 + 모달)
+		  document.querySelectorAll(`.sr-like-btn[data-post-id="${postId}"]`).forEach(btn => {
+		    renderLikeBtn(btn, liked);
+		    const countEl = btn.parentElement?.querySelector('.sr-like-count');
+		    if (countEl) countEl.textContent = String(count ?? 0);
+		  });
+		}
 	</script>
 
 </body>

@@ -122,9 +122,22 @@
 									<img th:src="@{${p.imagePaths[0]}}" class="d-block w-100" alt="게시물 이미지">
 								</div>
 					
-								<!-- 좋아요 버튼 (UI만) -->
+								<!-- 좋아요 영역 -->
 								<div class="sr_feed-actions d-flex align-items-center mb-2">
-					  				<i class="bi bi-heart text-danger"></i>
+									<button class="btn btn-link p-0 sr-like-btn"
+									        type="button"
+									        th:attr="data-post-id=${p.spCd},data-liked=${p.liked}">
+										<!-- 빈 하트(미좋아요) -->
+										<span class="text-danger" th:if="${!p.liked}">
+											<i class="bi bi-heart icon-mid"></i>
+										</span>
+										<!-- 채운 하트(좋아요) -->
+										<span class="text-danger" th:if="${p.liked}">
+											<i class="bi bi-heart-fill icon-mid"></i>
+										</span>
+									</button>
+									<span class="sr-like-count" style="font-size:small; margin-left:5px;"
+									th:text="${p.likeCount}">0</span>
 								</div>
 					
 								<!-- 태그: 공백 제거 후 콤마 기준으로 split, # 붙여 출력 -->

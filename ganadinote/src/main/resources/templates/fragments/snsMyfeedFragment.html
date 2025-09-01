@@ -10,10 +10,12 @@
                             <!-- 1. 원형 프로필사진 -->
                             <div class="sr_profile-container">
                                 <div class="avatar avatar-xl mb-3">
-								  	<img th:src="${profileImg != null and !#strings.isEmpty(profileImg) 
-								                   ? profileImg 
-								                   : '/assets/images/samples/dogdefault.png'}" 
-								         alt="프로필 사진">
+                                	<a th:href="@{/petCard}">
+									  	<img th:src="${profileImg != null and !#strings.isEmpty(profileImg) 
+									                   ? profileImg 
+									                   : '/assets/images/samples/dogdefault.png'}" 
+									         alt="프로필 사진">
+                                	</a>
 								</div>
                                 <h5 th:text="${displayName}">사용자</h5>
                                 <div class="sr_profile-stats">
@@ -51,7 +53,7 @@
 								<!-- 남의 페이지일 때 -->
 								<div class="sr_profile-buttons" th:if="${!isOwner}">
 									<!-- 펫 프로필 카드: 라우트는 원하는 곳으로 연결 -->
-									<a th:href="@{/sns/petcards(m=${viewMbrCd})}" class="sr_btn-profile">펫 프로필 카드</a>
+									<a th:href="@{/petCard(m=${viewMbrCd})}" class="sr_btn-profile">펫 프로필 카드</a>
 								
 								  <!-- 팔로우/취소 -->
 								  <button id="btnFollow"
