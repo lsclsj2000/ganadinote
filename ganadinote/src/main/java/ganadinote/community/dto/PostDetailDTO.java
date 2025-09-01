@@ -19,4 +19,6 @@ public class PostDetailDTO {
 	private int postLikeCount;
 	private int cmtCount;
 	private String postStatus;
+	private String mbrProfile;
+	
 }

@@ -14,6 +14,7 @@
     <result column="comment_ctnt"       property="commentCtnt"/>
     <result column="comment_reg_date"   property="commentRegDate"/>
     <result column="comment_status"     property="commentStatus"/>
+    <result column="mbr_profile"     property="mbrProfile"/>
   </resultMap>
 
   <!-- 목록 조회 -->
@@ -27,7 +28,8 @@
       m.mbr_nicknm,
       c.comment_ctnt,
       c.comment_reg_date,
-      c.comment_status
+      c.comment_status,
+      m.mbr_profile
     FROM comment c
     LEFT JOIN member m ON m.mbr_cd = c.mbr_cd
     WHERE c.post_id = #{postId}
@@ -43,7 +45,8 @@
     c.post_id                                              AS postId,
     c.mbr_cd                                               AS mbrCd,
     c.comment_ctnt                                         AS commentCtnt,
-    m.mbr_nknm                                             AS authorNickname,  
+    m.mbr_nknm                                             AS authorNickname,
+    m.mbr_profile										   AS mbrProfile, 
     c.comment_reg_date                                     AS commentRegDate
   FROM comment c
   JOIN member m ON m.mbr_cd = c.mbr_cd
