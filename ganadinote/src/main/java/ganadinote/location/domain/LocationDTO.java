@@ -6,6 +6,7 @@ import lombok.Data;
 public class LocationDTO {
 	private double latitude;
 	private double longitude;
+	private String locationName;
 	
 	
 	/*

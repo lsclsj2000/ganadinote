@@ -21,6 +21,7 @@
     <th:block layout:fragment="contents">
         <div class="container my-5">
             <h1 class="text-center mb-4">알림 설정</h1>
+             <h3 class="mb-0" th:text="|${mbrNknm ?: '게스트'}|">게스트</h3>
             <div class="card p-4">
                 <p id="subscription-status">알림 상태를 확인 중입니다...</p>
                 <button id="toggle-subscribe-button" class="btn btn-primary mt-3" disabled>로딩 중...</button>
@@ -242,7 +243,6 @@
 	    // 구독 취소 로직
 	    async function unsubscribeUser() {
 	        try {
-	            // 🚨 수정: body에서 mbrCd 제거
 	            const response = await fetch('/api/push/unsubscribe', {
 	                method: 'POST'
 	            });

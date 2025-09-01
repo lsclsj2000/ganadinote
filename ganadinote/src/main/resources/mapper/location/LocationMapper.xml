@@ -7,9 +7,9 @@
             latitude,
             longitude
         FROM 
-            TB_MEMBER_LOCATION
+            member_location
         WHERE 
-            mbrCd = #{mbrCd}
+            mbr_Cd = #{mbrCd}
     </select>
 
 </mapper>
