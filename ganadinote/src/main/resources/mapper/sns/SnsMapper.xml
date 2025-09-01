@@ -25,7 +25,9 @@
 		<result property="nickname"   	column="mbr_nknm"/>
 		<result property="handle"     	column="handle"/>
 		<result property="profilePath"  column="mbr_profile"/>
-		<result property="following"   column="following"/>
+		<result property="following"   	column="following"/>
+		<result property="liked"     	column="liked"/>
+  		<result property="likeCount" 	column="like_count"/>
 	</resultMap>
 	
 	<resultMap id="updateMyfeed" type="ganadinote.common.domain.Member">
@@ -115,7 +117,18 @@
 		        FROM follow f2
 		        WHERE f2.follow_mbr_cd   = #{loginMbrCd}
 		          AND f2.following_mbr_cd = p.mbr_cd
-		      ) AS following
+		      ) AS following,
+		      EXISTS (
+				  SELECT 1 FROM `like` l
+				  WHERE l.post_id = p.sp_cd
+				    AND l.post_type = 'sns'
+				    AND l.mbr_cd = #{loginMbrCd}
+			  ) AS liked,
+			  (
+				  SELECT COUNT(*) FROM `like` l2
+				  WHERE l2.post_id = p.sp_cd
+				    AND l2.post_type = 'sns'
+				) AS like_count
 		    FROM sns_post p
 		    JOIN member m ON m.mbr_cd = p.mbr_cd
 		    WHERE p.mbr_cd = #{loginMbrCd}
@@ -136,7 +149,18 @@
 		        FROM follow f2
 		        WHERE f2.follow_mbr_cd   = #{loginMbrCd}
 		          AND f2.following_mbr_cd = p.mbr_cd
-		      ) AS following
+		      ) AS following,
+		      EXISTS (
+				  SELECT 1 FROM `like` l
+				  WHERE l.post_id = p.sp_cd
+				    AND l.post_type = 'sns'
+				    AND l.mbr_cd = #{loginMbrCd}
+			  ) AS liked,
+			  (
+				  SELECT COUNT(*) FROM `like` l2
+				  WHERE l2.post_id = p.sp_cd
+				    AND l2.post_type = 'sns'
+				) AS like_count
 		    FROM sns_post p
 		    JOIN follow f ON f.following_mbr_cd = p.mbr_cd
 		    JOIN member m ON m.mbr_cd = p.mbr_cd
@@ -227,14 +251,58 @@
 		  m.mbr_nknm,
 		  CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
 		  m.mbr_profile,
+		  /* 팔로잉 여부 */
 		  EXISTS (
 		    SELECT 1 FROM follow f2
 		    WHERE f2.follow_mbr_cd = #{viewerMbrCd}
 		      AND f2.following_mbr_cd = p.mbr_cd
-		  ) AS following
+		  ) AS following,
+		  /* 내가 좋아요 눌렀는지 */
+		  EXISTS (
+		    SELECT 1 FROM `like` l
+		    WHERE l.post_id = p.sp_cd
+		      AND l.post_type = 'sns'
+		      AND l.mbr_cd = #{viewerMbrCd}
+		  ) AS liked,
+		  /* 좋아요 개수 */
+		  (
+		    SELECT COUNT(*) FROM `like` l2
+		    WHERE l2.post_id = p.sp_cd
+		      AND l2.post_type = 'sns'
+		  ) AS like_count
 		FROM sns_post p
 		JOIN member m ON m.mbr_cd = p.mbr_cd
 		WHERE p.sp_cd = #{spCd}
 	</select>
+	
+	<select id="countLikesOfPost" resultType="long">
+		/* home - 게시물 - 좋아요 수 */
+		SELECT COUNT(*) 
+		FROM `like`
+		WHERE post_id = #{spCd} AND post_type = 'sns'
+	</select>
+	
+	<select id="existsLike" resultType="long">
+		/* home - 게시물 - 로그인 회원의 좋아요 여부 */
+		SELECT COUNT(*)
+		FROM `like`
+		WHERE post_id = #{spCd}
+		  AND mbr_cd = #{mbrCd}
+		  AND post_type = 'sns'
+	</select>
+	
+	<insert id="insertLike">
+		/* home - 게시물 - 좋아요 추가 */
+		INSERT INTO `like` (post_id, mbr_cd, post_type, like_date)
+		VALUES (#{spCd}, #{mbrCd}, 'sns', NOW())
+	</insert>
+	
+	<delete id="deleteLike">
+		/* home - 게시물 - 좋아요 취소 */
+		DELETE FROM `like`
+		WHERE post_id = #{spCd}
+		  AND mbr_cd = #{mbrCd}
+		  AND post_type = 'sns'
+	</delete>
 
 </mapper>

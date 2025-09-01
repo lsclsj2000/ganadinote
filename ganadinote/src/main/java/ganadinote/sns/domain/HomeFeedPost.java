@@ -19,4 +19,7 @@ public class HomeFeedPost {
     private List<String> imagePaths;
     
     private Boolean following;
+    
+    private Boolean liked;
+    private Long likeCount; 
 }

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/petCardLayoutView}">
+	
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>펫 카드 수정</title>
+
+	<th:block layout:fragment="pageStyles">
+		<style>
+		</style>
+	</th:block>
+</head>
+
+<body>
+	<th:block layout:fragment="contents">
+		<div class="mt-4">
+			<div class="row no-gutter-x">
+				<section class="sr_pet-cards-container">
+				  <div class="sr_pet-card-navigation sr_nav-left"  onclick="slideCards(-1)"></div>
+				  <div class="sr_pet-card-navigation sr_nav-right" onclick="slideCards(1)"></div>
+				
+				  <div class="sr_pet-cards-wrapper">
+				    <div class="sr_pet-card"
+					     th:each="c, iter : ${petCards}"
+					     th:classappend="${iter.index == 0} ? ' sr_active' : ''"
+					     th:attr="data-card-id=${c.cardId},data-pet-id=${c.petCd}">
+				      
+				      <!-- 중앙 + 버튼: 카드별 파일업로드 input 과 연결 -->
+				      <label class="sr_image-upload-btn sr_photo-box-plus"
+				             th:for="${'file-upload-' + c.petCd}">+</label>
+				      <input th:id="${'file-upload-' + c.petCd}"
+				             type="file" accept="image/*" style="display:none"
+				             class="sr_file-input"/>
+				
+				      <img class="sr_pet-card-image"
+				           th:src="${#strings.isEmpty(c.petImageUrl) ? 'https://placehold.co/600x400?text=No+Image' : c.petImageUrl}"
+				           alt="반려견 사진">
+				
+				      <div class="sr_pet-card-content">
+				        <h2 class="sr_pet-name" th:text="${c.petName}">반려견 이름</h2>
+				        <!-- 한줄 소개(편집용) -->
+				        <div class="sr_pet-bio-container">
+				            <div class="sr_pet-bio-display" th:text="${c.introduction}">한줄 소개입니다.</div>
+				            <textarea class="sr_pet-bio-edit"
+				                      placeholder="한줄 소개를 입력하세요"
+				                      th:text="${c.introduction}">한줄 소개입니다.</textarea>
+				        </div>
+				
+				        <div class="sr_pet-tags"><!-- JS가 칩을 채움 --></div>
+				      </div>
+				    </div>
+				  </div>
+				</section>
+			</div>
+
+			<!-- 태그 선택 섹션 -->
+			<section class="sr_tag-selection-container">
+			  <div id="sr_tag-checkbox-group" class="sr_tag-checkbox-group"><!-- JS가 채움 --></div>
+			</section>
+
+		</div>
+		<!-- 버튼 그룹 -->
+        <div class="sr_profile-buttons mt-3 mb-10">
+			<a th:href="@{/petCard}" class="sr_btn-profile">취소</a>
+			<button id="btn-savePetCard" type="button" class="sr_btn-profile">저장</button>
+		</div>
+	</th:block>
+	
+	
+	<th:block layout:fragment="pageScripts">
+		<script th:inline="javascript">
+			// ======================
+			// 서버 데이터 직렬화
+			// ======================
+			const PET_CARDS = /*[[${petCards}]]*/ [];
+			const ALL_TAGS  = /*[[${allTags}]]*/ [];
+	
+			// ======================
+			// 클라이언트 상태
+			// ======================
+			const petCards = PET_CARDS.map(p => ({
+				cardId:   p.cardId,   // ★ card_id
+				petId:    p.petCd,    // (참고용) pet_cd
+				name:     p.petName,
+				imageUrl: p.petImageUrl || 'https://placehold.co/600x400?text=No+Image',
+				intro:    p.introduction || '',
+				tags:     (p.tags || []).slice() // 태그명 배열
+			}));
+	
+			// 전체 태그 (상/하위 포함) : upTag가 null이면 '카테고리'
+			const allTags = ALL_TAGS.map(t => ({ code: t.tagCd, name: t.tagName, up: t.upTag }));
+	
+			// 유틸: CSS.escape 폴리필(구형 브라우저 대응)
+			const cssEscape = (s) => (window.CSS && CSS.escape ? CSS.escape(s) :
+				String(s).replace(/([ #;?%&,.+*~':"!^$[\]()=>|\/@])/g, '\\$1'));
+	
+			let activeCardIndex = 0;
+			let cards = []; // .sr_pet-card DOM 리스트
+			// 카드별 변경사항 임시 저장소: key=cardId, value={ intro?, file?, tags? }
+			const dirty = new Map();
+	
+			const $tagBox = document.getElementById('sr_tag-checkbox-group');
+	
+			// 카테고리/하위태그 그룹핑 헬퍼
+			const categories = () => allTags.filter(t => t.up == null);
+			const childrenOf = (catId) => allTags.filter(t => t.up === catId);
+	
+			// 변경사항 기록
+			const markDirty = (cardId, patch) => {
+				const prev = dirty.get(cardId) || {};
+				dirty.set(cardId, { ...prev, ...patch });
+			};
+	
+			// ======================
+			// 렌더: 하단 태그 체크박스(카테고리 > 하위태그)
+			// ======================
+			const renderTagCheckboxes = () => {
+				if (petCards.length === 0) {
+					$tagBox.innerHTML = '';
+					return;
+				}
+				const cur = petCards[activeCardIndex];
+				const curTags = new Set(cur.tags); // 태그명 기준
+	
+				const html = categories().map(cat => {
+					const items = childrenOf(cat.code).map(t => {
+						const checked = curTags.has(t.name) ? 'checked' : '';
+						const id = `tag-${t.code}`;
+						return `
+							<div class="sr_tag-checkbox-item">
+								<input type="checkbox" id="${id}" name="tags" value="${t.name}" ${checked}/>
+								<label for="${id}">${t.name}</label>
+							</div>`;
+					}).join('');
+	
+					return `
+						<div class="sr_tag-category">
+							<div class="sr_tag-category-title"><strong>${cat.name}</strong></div>
+							<div class="sr_tag-grid">${items}</div>
+						</div>`;
+				}).join('');
+	
+				$tagBox.innerHTML = html;
+			};
+	
+			// ======================
+			// 렌더: 카드 위 태그칩(+ X 버튼)
+			// ======================
+			const renderCardTags = () => {
+				// FIX: Add a check to prevent errors if petCards is empty.
+				if (petCards.length === 0) return;
+	
+				const card = cards[activeCardIndex];
+				if (!card) return;
+	
+				const cur = petCards[activeCardIndex];
+				const box = card.querySelector('.sr_pet-tags');
+				if (!box) return;
+	
+				box.innerHTML = (cur.tags || []).map(name => `
+					<span class="sr_tag sr_tag-chip" data-tag-name="${name}">
+						${name}
+						<button type="button" class="sr_tag-remove" aria-label="remove">×</button>
+					</span>
+				`).join('');
+			};
+	
+			// 태그칩 X 클릭 → 언체크 + 데이터/체크박스/칩 동기화
+			const bindCardTagRemove = () => {
+				document.addEventListener('click', (e) => {
+					const btn = e.target.closest('.sr_tag-remove');
+					if (!btn) return;
+	
+					// 활성 카드 영역 안에서만 처리
+					const card = cards[activeCardIndex];
+					if (!card || !card.contains(btn)) return;
+	
+					const chip = btn.closest('.sr_tag-chip');
+					if (!chip) return;
+	
+					const name = chip.dataset.tagName;
+					const cur  = petCards[activeCardIndex];
+					const cardId = cur.cardId;
+	
+					// 1) 데이터에서 제외
+					cur.tags = (cur.tags || []).filter(t => t !== name);
+					markDirty(cardId, { tags: cur.tags });
+	
+					// 2) 칩 다시 그림
+					renderCardTags();
+	
+					// 3) 하단 체크박스 언체크 동기화
+					const input = $tagBox.querySelector(`input[name="tags"][value="${cssEscape(name)}"]`);
+					if (input) input.checked = false;
+				});
+			};
+	
+			// ======================
+			// 카드 슬라이드/활성 갱신
+			// ======================
+			const updateCards = () => {
+				cards.forEach((card, index) => {
+					const offset = index - activeCardIndex;
+					card.classList.toggle('sr_active', index === activeCardIndex);
+					card.style.transform = `translateX(${offset * 105}%) scale(${offset === 0 ? 1 : 0.85}) perspective(1000px) rotateY(${offset * -5}deg)`;
+					card.style.zIndex = cards.length - Math.abs(offset);
+	
+					const textarea = card.querySelector('.sr_pet-bio-edit');
+					if (textarea) textarea.disabled = index !== activeCardIndex;
+				});
+				renderTagCheckboxes(); // 하단 체크박스
+				renderCardTags();      // 카드 위 칩
+			};
+	
+			const slideCards = (direction) => {
+				const newIndex = activeCardIndex + direction;
+				if (newIndex >= 0 && newIndex < cards.length) {
+					activeCardIndex = newIndex;
+					updateCards();
+				}
+			};
+			window.slideCards = slideCards; // onclick에서 사용
+	
+			// ======================
+			// 한줄 소개 편집 토글
+			// ======================
+			const toggleBioEdit = (e) => {
+				const container = e.currentTarget.closest('.sr_pet-bio-container');
+				if (!container) return;
+	
+				if (container.classList.contains('sr_editing')) {
+					// 편집 종료 (blur)
+					container.classList.remove('sr_editing');
+					const display  = container.querySelector('.sr_pet-bio-display');
+					const textarea = container.querySelector('.sr_pet-bio-edit');
+					if (display && textarea) display.textContent = textarea.value;
+				} else {
+					// 편집 시작
+					container.classList.add('sr_editing');
+					const textarea = container.querySelector('.sr_pet-bio-edit');
+					if (textarea) textarea.focus();
+				}
+			};
+	
+			// ======================
+			// 저장 (모든 dirty 항목)
+			// ======================
+			async function onSaveAllCards() {
+				if (dirty.size === 0) {                 // ★ 추가
+				  alert('변경된 내용이 없습니다.');
+				  return;
+				}
+			
+				const jobs = Array.from(dirty.entries()).map(async ([cardId, d]) => {
+				  const form = new FormData();
+				  form.append('cardId', cardId);
+				
+				  if (d.intro !== undefined) form.append('introduction', d.intro);
+				
+				  // ★ 태그 변경 플래그: d.tags가 정의되어 있다면, 변경이 있었던 것
+				  if (d.tags !== undefined) {
+				    form.append('tagsChanged', 'true');       // 빈 배열도 변경으로 인식
+				    d.tags.forEach(t => form.append('tags', t));  // 요소가 0개면 tags 파라미터가 안 들어가므로 flag가 중요!
+				  }
+				
+				  if (d.file !== undefined) form.append('image', d.file);
+				
+				  const res = await fetch('/petCard/update', { method: 'POST', body: form });
+				  if (!res.ok) throw new Error('서버 오류');
+				  return cardId;
+				});
+			
+				try {
+				  await Promise.all(jobs);
+				  dirty.clear();
+				  alert('모든 변경 사항이 저장되었습니다.');
+				  window.location.href = '/petCard';
+				} catch (err) {
+				  console.error(err);
+				  alert('저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
+				}
+			}
+	
+			// ======================
+			// 초기화
+			// ======================
+			document.addEventListener('DOMContentLoaded', () => {
+				cards = Array.from(document.querySelectorAll('.sr_pet-card'));
+				updateCards();
+				bindCardTagRemove();
+	
+				// 드래그 슬라이드
+				let isDragging = false, startPos = 0;
+				document.addEventListener('mousedown', e => {
+					isDragging = true;
+					startPos = e.clientX;
+				});
+				document.addEventListener('mouseup', e => {
+					if (!isDragging) return;
+					isDragging = false;
+					const moved = e.clientX - startPos;
+					if (moved < -50) slideCards(1);
+					else if (moved > 50) slideCards(-1);
+				});
+				document.addEventListener('touchstart', e => {
+					isDragging = true;
+					startPos = e.touches[0].clientX;
+				});
+				document.addEventListener('touchend', e => {
+					if (!isDragging) return;
+					isDragging = false;
+					const moved = e.changedTouches[0].clientX - startPos;
+					if (moved < -50) slideCards(1);
+					else if (moved > 50) slideCards(-1);
+				});
+	
+				// 카드별 파일/소개 이벤트 바인딩
+				cards.forEach((cardEl, idx) => {
+					const cardId = Number(cardEl.dataset.cardId); // ★ cardId
+					// 파일 업로드
+					const fileInput = cardEl.querySelector('.sr_file-input');
+					const img = cardEl.querySelector('.sr_pet-card-image');
+					if (fileInput && img) {
+						fileInput.addEventListener('change', () => {
+							const file = fileInput.files && fileInput.files[0];
+							if (!file) return;
+							const url = URL.createObjectURL(file);
+							img.src = url;               // 미리보기
+							markDirty(cardId, { file }); // 변경 기록
+							setTimeout(() => URL.revokeObjectURL(url), 0); 
+						});
+					}
+					// 한줄 소개
+					const bioDisplay = cardEl.querySelector('.sr_pet-bio-display');
+					const bioEdit    = cardEl.querySelector('.sr_pet-bio-edit');
+					if (bioDisplay) bioDisplay.addEventListener('click', toggleBioEdit);
+					if (bioEdit) {
+						bioEdit.addEventListener('blur', toggleBioEdit);
+						bioEdit.addEventListener('input', () => {
+							petCards[idx].intro = bioEdit.value;
+							markDirty(cardId, { intro: bioEdit.value });
+						});
+					}
+				});
+	
+				// 하단 태그박스 변경 → 데이터/칩 동기화
+				$tagBox.addEventListener('change', (e) => {
+					if (e.target && e.target.name === 'tags') {
+						const cur = petCards[activeCardIndex];
+						const checked = Array.from($tagBox.querySelectorAll('input[name="tags"]:checked'))
+							.map(i => i.value);
+						cur.tags = checked;
+						markDirty(cur.cardId, { tags: checked }); // ★ cardId
+						renderCardTags(); // 카드 위 칩도 함께 갱신
+					}
+				});
+	
+				// 저장 버튼
+				const btn = document.getElementById('btn-savePetCard');
+				if (btn) btn.addEventListener('click', onSaveAllCards);
+			});
+		</script>
+	</th:block>
+
+</body>
+</html>

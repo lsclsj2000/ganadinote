@@ -44,19 +44,31 @@ window.fetch = function(url, options = {}) {
 
 // 필요한 경우, 토큰에서 회원 코드를 직접 추출하는 함수
 function getMbrCdFromToken() {
-	const token = getToken();
-	if (!token) return null;
+    const token = getToken();
+    if (!token) {
+        return null;
+    }
 
-	try {
-		const payloadBase64 = token.split('.')[1];
-		const decodedPayload = atob(payloadBase64);
-		const payload = JSON.parse(decodedPayload);
+    try {
+        const payloadBase64 = token.split('.')[1];
+        const decodedPayload = atob(payloadBase64);
+        const payload = JSON.parse(decodedPayload);
+        
+        // ⭐ 추가된 로직: 토큰의 만료 시간을 확인합니다.
+        const now = Date.now();
+        const expirationTimeInMs = payload.exp * 1000;
 
-		return payload.sub;
-	} catch (e) {
-		console.error("토큰 디코딩 중 오류가 발생했습니다:", e);
-		return null;
-	}
+        if (now >= expirationTimeInMs) {
+            console.error("토큰이 만료되었습니다. 로그아웃 처리합니다.");
+            removeToken();
+            return null;
+        }
+        
+        return payload.sub; //
+    } catch (e) {
+        console.error("토큰 디코딩 중 오류가 발생했습니다:", e);
+        return null;
+    }
 }
 
 // 페이지 로드 시 로그인 상태를 확인하고 콘솔에 출력하는 로직
