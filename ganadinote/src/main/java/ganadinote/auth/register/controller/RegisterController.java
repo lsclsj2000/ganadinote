@@ -23,7 +23,7 @@ public class RegisterController {
 
     @GetMapping("/register")
     public String showRegisterForm() {
-        return "ex/auth-register";
+        return "auth/auth-register";
     }
 
     @PostMapping("/register")
