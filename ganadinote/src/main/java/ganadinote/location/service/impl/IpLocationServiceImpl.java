@@ -66,4 +66,5 @@ public class IpLocationServiceImpl implements IpLocationService{
 		}
 		return null;
 	}
+	
 }
