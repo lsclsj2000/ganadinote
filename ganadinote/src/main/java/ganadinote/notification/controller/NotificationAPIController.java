@@ -1,7 +1,7 @@
 package ganadinote.notification.controller;
 
 import java.util.Collections;
-import java.util.Map;import java.util.concurrent.ScheduledExecutorService;
+import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ganadinote.common.util.TokenUtils;
 import ganadinote.location.service.LocationService;

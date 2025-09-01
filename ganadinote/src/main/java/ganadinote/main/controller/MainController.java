@@ -25,6 +25,7 @@ public class MainController {
 		if (mbrCdStr != null && !mbrCdStr.trim().isEmpty()) {
 			try {
 				Integer mbrCd = Integer.parseInt(mbrCdStr);
+				log.info("현재 로그인된 회원코드:{}", mbrCdStr);
 				String foundNknm = mainService.getNknmByMbrCd(mbrCd);
 				if (foundNknm != null) {
 					mbrNknm = foundNknm;

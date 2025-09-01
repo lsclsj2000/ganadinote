@@ -2,6 +2,9 @@ package ganadinote.notification.service;
 
 import java.util.List;
 
+import org.springframework.data.repository.query.Param;
+
+import ganadinote.common.domain.PushSubscription;
 import ganadinote.notification.domain.PetWithBreedDTO;
 import ganadinote.notification.domain.PushSubDTO;
 
@@ -33,4 +36,11 @@ public interface NotificationService {
     
     // 산책에 대한 알림 조건
     public void processWalkAlert(Integer mbrCd);
+    
+    public void processWalkAlertsForScheduledUsers();
+    
+	/*
+	 * // 회원 코드로 알림 스케줄(JSON) 데이터를 조회합니다. String
+	 * getNotificationScheduleByMbrCd(@Param("mbrCd") Integer mbrCd);
+	 */
 }

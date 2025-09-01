@@ -67,4 +67,12 @@ public class WeatherInfo {
         Integer weatherId = current.getWeather().get(0).getId();
         return (weatherId >= 200 && weatherId < 600);
     }
+    public boolean isSnowing() {
+        if (current == null || current.getWeather() == null || current.getWeather().isEmpty()) {
+            return false;
+        }
+        Integer weatherId = current.getWeather().get(0).getId();
+        // 눈 관련 날씨 코드: 600-622
+        return (weatherId >= 600 && weatherId < 700);
+    }
 }
