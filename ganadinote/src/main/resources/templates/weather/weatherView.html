@@ -101,7 +101,7 @@
                          class="pet-avatar-item">
                         <div class="pet-avatar-img-wrapper">
                             <img th:src="${pet.petProfileImgUrl ?: '/assets/images/logo/favicon.svg'}" 
-                                 th:alt="${pet.petName} 프로필" 
+                                 th:alt="|${pet.petName} 프로필|" 
                                  class="pet-avatar-img">
                         </div>
                         <p th:text="${pet.petName}" class="pet-avatar-name"></p>
