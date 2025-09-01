@@ -93,7 +93,11 @@
         <!-- 작성자 영역 -->
         <article class="p-3 bg-white border rounded-3 mb-3">
           <div class="d-flex align-items-start gap-3">
-            <img class="author-avatar" src="https://placehold.co/96x96" alt="작성자" />
+			<a th:href="@{/petCard(m=${viewMbrCd})}">
+			  <img class="author-avatar"
+			       th:src="${post.mbrProfile != null ? post.mbrProfile : 'https://placehold.co/96x96'}"
+			       alt="작성자" />
+			</a>
             <div class="flex-grow-1">
               <strong th:text="${post.mbrNknm}">닉네임</strong>
               <div class="d-flex flex-column small text-muted mt-1">
@@ -157,7 +161,9 @@
 
             <li th:each="c : ${comments}" class="comment-item p-3" th:classappend="${c.commentParentId > 0} ? ' child-reply' : ''">
               <div class="d-flex align-items-start gap-2">
-                <img class="comment-avatar" src="https://placehold.co/72x72" alt="아바타" />
+				<a th:href="@{/petCard(m=${viewMbrCd})}"><img class="comment-avatar"
+				     th:src="${#strings.isEmpty(c.mbrProfile) ? 'https://placehold.co/72x72' : c.mbrProfile}"
+				     alt="아바타" /></a>
                 <div class="flex-grow-1">
                   <div class="d-flex align-items-center justify-content-between">
                     <div>
