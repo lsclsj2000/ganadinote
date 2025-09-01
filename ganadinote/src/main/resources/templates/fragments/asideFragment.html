@@ -1,94 +1,124 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <header id="sidebar" class="active" th:fragment="asideFragment">
-	<div class="sidebar-wrapper active">
-	    <div class="sidebar-header">
-	        <div class="d-flex justify-content-between">
-	            <a th:href="@{/main}">
-	            	<img src="/assets/images/logo/ganadinote-logo.png" alt="Logo" srcset="" style="width: 65%; height: auto;">
-            	</a>
-	            <div class="toggler">
-	                <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
-	            </div>
-	        </div>
-	    </div>
-	    <div class="sidebar-menu">
-	        <ul class="menu">
-	            <li class="sidebar-item">
-	                <a href="index.html" class='sidebar-link'>
-	                    <i class="bi bi-grid-fill"></i>
-	                    <span>Dashboard</span>
-	                </a>
-	            </li>
-	            
-	            <li class="sidebar-item active has-sub">
-	                <a href="#" class='sidebar-link'>
-	                    <i class="bi bi-stack"></i>
-	                    <span>My Page</span>
-	                </a>
-	                <ul class="submenu">
-	                    <li class="submenu-item">
-	                        <a href="component-alert.html">me</a>
-	                    </li>
-	                    <li class="submenu-item">
-	                        <a href="component-badge.html">pet</a>
-	                    </li>
-	                </ul>
-	            </li>
-	            
-	            <li class="sidebar-item has-sub">
-	                <a href="#" class='sidebar-link'>
-	                    <i class="bi bi-stack"></i>
-	                    <span>Calendar</span>
-	                </a>
-	                <ul class="submenu">
-	                    <li class="submenu-item">
-	                        <a href="component-alert.html">To-do List</a>
-	                    </li>
-	                    <li class="submenu-item">
-	                        <a href="component-badge.html">+</a>
-	                    </li>
-	                </ul>
-	            </li>
-	
-	            <li class="sidebar-item has-sub">
-	                <a href="#" class='sidebar-link'>
-	                    <i class="bi bi-stack"></i>
-	                    <span>community</span>
-	                </a>
-	                <ul class="submenu">
-	                    <li class="submenu-item">
-	                        <a th:href="@{/community}">발자국 산책코스</a>
-	                    </li>
-	                    <li class="submenu-item">
-	                        <a th:href="@{/community}">멍멍 쇼핑리뷰</a>
-	                    </li>
-	                    <li class="submenu-item">
-	                        <a th:href="@{/community}">멍멍 수다방</a>
-	                    </li>
-	                </ul>
-	            </li>
-	            
-	            <li class="sidebar-item has-sub">
-	                <a href="#" class='sidebar-link'>
-	                    <i class="bi bi-stack"></i>
-	                    <span>SNS</span>
-	                </a>
-	                <ul class="submenu">
-	                    <li class="submenu-item">
-	                        <a th:href="@{/sns/home}">Home</a>
-	                    </li>
-	                    <li class="submenu-item">
-	                        <a th:href="@{/sns/walking}">Walking</a>
-	                    </li>
-	                    <li class="submenu-item">
-	                        <a th:href="@{/sns/myfeed}">My Feed</a>
-	                    </li>
-	                </ul>
-	            </li>
-	        </ul>
-	    </div>
-	    <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
-	</div>
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between">
+                <a th:href="@{/todo/list}">
+                    <img src="/assets/images/logo/ganadinote-logo.png" alt="Logo" srcset="" style="width: 65%; height: auto;">
+                </a>
+                <div class="toggler">
+                    <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <ul class="menu">
+                <li class="sidebar-item">
+                    <a href="index.html" class='sidebar-link'>
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                
+                <li class="sidebar-item active has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>My Page</span>
+                    </a>
+                    <ul class="submenu">
+                        <li class="submenu-item">
+                            <a href="component-alert.html">me</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a href="component-badge.html">pet</a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="sidebar-item has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>Calendar</span>
+                    </a>
+                    <ul class="submenu">
+                        <li class="submenu-item">
+                            <a href="component-alert.html">To-do List</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a href="component-badge.html">+</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="sidebar-item has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>community</span>
+                    </a>
+                    <ul class="submenu">
+                        <li class="submenu-item">
+                            <a th:href="@{/community}">발자국 산책코스</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a th:href="@{/community}">멍멍 쇼핑리뷰</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a th:href="@{/community}">멍멍 수다방</a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li class="sidebar-item has-sub">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-stack"></i>
+                        <span>SNS</span>
+                    </a>
+                    <ul class="submenu">
+                        <li class="submenu-item">
+                            <a th:href="@{/sns/home}">Home</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a th:href="@{/sns/walking}">Walking</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a th:href="@{/sns/myfeed}">My Feed</a>
+                        </li>
+                    </ul>
+                </li>
+            
+                <li class="sidebar-item" id="login-logout-item">
+                    <a href="#" class="sidebar-link">
+                        <i class="bi bi-door-open-fill"></i>
+                        <span></span>
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+        <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', () => {
+            const mbrCd = getMbrCdFromToken();
+            const loginLogoutItem = document.getElementById('login-logout-item');
+            const link = loginLogoutItem.querySelector('a');
+            const textSpan = loginLogoutItem.querySelector('span');
+
+            if (mbrCd) {
+                // 로그인 상태: 로그아웃 버튼 표시
+                textSpan.textContent = 'Logout';
+                link.addEventListener('click', () => {
+                    removeToken();
+                    window.location.href = '/main'; // 로그인 페이지로 이동
+                });
+            } else {
+                // 로그아웃 상태: 로그인하기 버튼 표시
+                textSpan.textContent = 'Login';
+                link.href = '/login';
+            }
+        });
+    </script>
 </header>
 </html>

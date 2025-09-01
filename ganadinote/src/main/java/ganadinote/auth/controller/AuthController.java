@@ -8,7 +8,7 @@ public class AuthController {
 
     @GetMapping("/login")
     public String login() {
-        return "ex/auth-login";
+        return "auth/auth-login";
     }
 
 }
