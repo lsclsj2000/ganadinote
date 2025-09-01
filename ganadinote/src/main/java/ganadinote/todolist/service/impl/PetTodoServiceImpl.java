@@ -21,4 +21,10 @@ public class PetTodoServiceImpl implements PetTodoService {
     public List<Pet> getPetsByMbrCd(int mbrCd) {
         return petTodoMapper.getPetsByMbrCd(mbrCd); // [호출 대상 변경]
     }
+    
+    // [추가!] getPetByCd 메소드의 실제 구현
+    @Override
+    public Pet getPetByCd(int petCd) {
+        return petTodoMapper.getPetByCd(petCd);
+    }
 }

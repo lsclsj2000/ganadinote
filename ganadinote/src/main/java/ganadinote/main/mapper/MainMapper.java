@@ -14,5 +14,7 @@ public interface MainMapper {
 	List<Pet> getPetInfoByMbrCd(Integer mbrCd);
 	
     List<PetWithBreedDTO> getPetInfoWithBreedByMbrCd(@Param("mbrCd") Integer mbrCd);
+    
+    String getNknmByMbrCd(Integer mbrCd);
 	
 }

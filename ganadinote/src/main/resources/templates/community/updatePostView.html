@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/addPostLayoutView}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>게시글 수정</title>
+
+  <th:block layout:fragment="pageStyles">
+    <link rel="stylesheet" href="/assets/vendors/summernote/summernote-lite.min.css" />
+    <style>
+      .card-header .form-stack .mb-3 { display:flex; flex-direction:column; gap:.35rem; width:100%; }
+      .card-header .form-stack .form-label { margin-bottom:0; font-size:.95rem; font-weight:600; }
+      .card-header .form-stack .form-select,
+      .card-header .form-stack .form-control { width:100%; font-size:.95rem; margin:10px 0; }
+    </style>
+  </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="contents">
+  <div class="page-heading">
+    <div class="page-title">
+      <div class="row">
+        <div class="col-12 col-md-6 order-md-1 order-last">
+          <h3>게시글 수정</h3>
+        </div>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="row">
+        <div class="col-12">
+          <form id="postForm" class="card" method="post">
+            <input type="hidden" id="postId" th:value="${post.postId}" />
+
+            <div class="card-header">
+              <div class="form-stack">
+                <!-- 카테고리 -->
+                <div class="mb-3">
+                  <label for="categoryId" class="form-label fw-semibold d-block">카테고리</label>
+                  <select id="categoryId" name="categoryId" class="form-select form-select-sm w-100" required>
+                    <option value="">카테고리를 선택해주세요</option>
+                    <option value="1" th:selected="${post.categoryId == 1}">발자국 산책코스</option>
+                    <option value="2" th:selected="${post.categoryId == 2}">멍멍 쇼핑리뷰</option>
+                    <option value="3" th:selected="${post.categoryId == 3}">멍멍 수다방</option>
+                    <option value="4" th:selected="${post.categoryId == 4}">산책크루 모집해요!</option>
+                    <option value="5" th:selected="${post.categoryId == 5}">같이가요 스팟</option>
+                  </select>
+                </div>
+
+                <!-- 제목 -->
+                <div class="mb-3">
+                  <label for="postTtl" class="form-label fw-semibold d-block">제목</label>
+                  <input type="text"
+                         class="form-control form-control-sm w-100"
+                         id="postTtl"
+                         name="postTtl"
+                         th:value="${post.postTtl}"
+                         maxlength="200"
+                         required />
+                </div>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <!-- summernote 초기 값은 서버에서 내려준 본문 -->
+              <div id="summernote" th:utext="${post.postCtnt}"></div>
+              <textarea id="postCtnt" name="postCtnt" hidden></textarea>
+            </div>
+
+            <div class="card-footer text-end">
+              <button class="btn btn-primary" type="submit">수정 완료</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+</th:block>
+
+<th:block layout:fragment="pageScripts">
+  <script src="/assets/vendors/jquery/jquery.min.js"></script>
+  <script src="/assets/vendors/summernote/summernote-lite.min.js"></script>
+  <script src="/assets/vendors/summernote/lang/summernote-ko-KR.js"></script>
+
+  <!-- 진입 가드 + 제출 처리 + 이미지 업로드까지 포함 -->
+  <script th:inline="javascript">
+    const postId = Number([[${post.postId}]]);
+    const LOGIN_PAGE = '/login';
+
+    // 토큰 읽기 & Authorization 헤더 구성
+    function buildAuthHeader(){
+      const keys = ['token','accessToken','jwt','Authorization','authToken'];
+      for (const k of keys) {
+        const v = localStorage.getItem(k) || sessionStorage.getItem(k);
+        if (v) return /^Bearer\s/i.test(v) ? v : ('Bearer ' + v);
+      }
+      return null;
+    }
+
+    // 1) 페이지 진입 가드: 서버에게 오너 여부 확인 (JWT 파싱 안 함)
+    (async function guardOnEnter(){
+      const auth = buildAuthHeader();
+      if (!auth) { alert('로그인이 필요합니다.'); location.href = LOGIN_PAGE; return; }
+
+      const res = await fetch(`/community/api/post/${postId}/isOwner`, {
+        headers: { 'Authorization': auth },
+        credentials: 'same-origin'
+      });
+
+      if (res.status === 401) { alert('로그인이 필요합니다.'); location.href = LOGIN_PAGE; return; }
+      if (res.status === 403) { alert('본인 글만 수정할 수 있습니다.'); location.href = `/community/postDetail?postId=${postId}`; return; }
+      // 200 OK면 통과
+    })();
+
+    // 2) Summernote 초기화 (+ 필요 시 이미지 업로드)
+    $('#summernote').summernote({
+      placeholder: '여기에 글을 작성하세요...',
+      lang: 'ko-KR',
+      minHeight: 300,
+      maxHeight: 600,
+      focus: true,
+      toolbar: [
+        ['style', ['bold', 'italic', 'underline', 'clear']],
+        ['font', ['fontsize', 'color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['insert', ['link', 'picture']],
+        ['view', ['fullscreen', 'codeview']]
+      ],
+      callbacks: {
+        onImageUpload: function(files){
+          for (const f of files) uploadSummernoteImage(f);
+        }
+      }
+    });
+
+    async function uploadSummernoteImage(file){
+      const form = new FormData();
+      form.append('image', file);
+      const auth = buildAuthHeader();
+
+      // ⚠️ 컨트롤러 매핑이 클래스 레벨 /community와 합쳐져 최종 경로가
+      //  - 방법1: 메서드가 "/upload/summernote"면 최종 "/community/upload/summernote"
+      //  - 방법2: 메서드가 "/community/upload/summernote"면 최종 "/community/community/upload/summernote"
+      // 너네 컨트롤러와 맞춰서 아래 URL을 확인해!
+      const uploadUrl = '/community/upload/summernote';
+
+      try{
+        const res = await fetch(uploadUrl, {
+          method: 'POST',
+          body: form,
+          credentials: 'same-origin'
+        });
+        if (res.status === 401) { alert('로그인이 필요합니다.'); location.href = LOGIN_PAGE; return; }
+        if (!res.ok) { console.error('upload error', res.status); alert('이미지 업로드 중 오류가 발생했습니다.'); return; }
+
+        const data = await res.json();
+        if (data?.url) $('#summernote').summernote('insertImage', data.url);
+        else { console.error('invalid upload resp', data); alert('이미지 업로드 응답이 올바르지 않습니다.'); }
+      } catch(e){
+        console.error('upload exception:', e);
+        alert('이미지 업로드 중 오류가 발생했습니다.');
+      }
+    }
+
+    // 3) 제출: x-www-form-urlencoded로 전송 (컨트롤러 consumes와 매칭)
+    document.getElementById('postForm')?.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+
+      // summernote -> hidden textarea
+      document.getElementById('postCtnt').value = $('#summernote').summernote('code');
+
+      const auth = buildAuthHeader();
+      if (!auth) { alert('로그인이 필요합니다.'); location.href = LOGIN_PAGE; return; }
+
+      const params = new URLSearchParams();
+      params.set('categoryId', document.getElementById('categoryId').value);
+      params.set('postTtl',    document.getElementById('postTtl').value);
+      params.set('postCtnt',   document.getElementById('postCtnt').value);
+
+      try{
+        const res = await fetch(`/community/api/post/${postId}/edit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body: params.toString(),
+          credentials: 'same-origin'
+        });
+
+        if (res.status === 401) { alert('로그인이 필요합니다.'); location.href = LOGIN_PAGE; return; }
+
+        const data = await res.json().catch(()=> ({}));
+        if (res.ok && data.ok) {
+          alert('수정 완료!');
+          location.href = `/community/postDetail?postId=${postId}`;
+        } else {
+          alert(data.msg || '수정 중 오류가 발생했습니다.');
+        }
+      } catch(err){
+        console.error('update error:', err);
+        alert('네트워크 오류가 발생했습니다.');
+      }
+    });
+  </script>
+
+</th:block>
+</body>
+</html>

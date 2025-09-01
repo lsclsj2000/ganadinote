@@ -9,15 +9,18 @@ import ganadinote.community.dto.CommentDTO;
 
 @Mapper
 public interface CommentMapper {
-    // 댓글 목록 조회 (포스트 기준)
-    List<CommentDTO> findAllByPostId(@Param("postId") long postId,
+	 // 상세뷰용 전체 댓글 (계층 정렬 + 작성자 닉네임 포함)
+    List<CommentDTO> selectComments(@Param("postId") int postId);
+
+    // 페이징 목록 (있으면 사용)
+    List<CommentDTO> findAllByPostId(@Param("postId") int postId,
                                      @Param("limit") int limit,
                                      @Param("offset") int offset);
 
-    // 댓글 생성
+    // 생성
     int insertComment(CommentDTO dto);
 
-    // 댓글 소프트 삭제
-    int markCommentDeleted(@Param("commentId") long commentId,
-                           @Param("mbrCd") String mbrCd);
+    // 본인만 소프트 삭제
+    int markCommentDeleted(@Param("commentId") int commentId,
+                           @Param("mbrCd") int mbrCd);
 }

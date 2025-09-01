@@ -23,4 +23,5 @@ public class Pet {
     private String 			petIntroduction;      // 반려동물 소개
     private LocalDateTime 	petRegDate;    // 등록 날짜 (자동 생성)
     private LocalDateTime 	petMdfcnDate;  // 수정 날짜 (자동 업데이트)
+    private String petColor; // [추가!]
 }

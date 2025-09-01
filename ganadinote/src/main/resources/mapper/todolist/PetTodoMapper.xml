@@ -16,16 +16,28 @@
         <result property="petIntroduction" column="pet_introduction"/>
         <result property="petRegDate" column="pet_reg_date"/>
         <result property="petMdfcnDate" column="pet_mdfcn_date"/>
+        <result property="petColor" column="pet_color"/> <!-- [추가!] -->
     </resultMap>
 
     <select id="getPetsByMbrCd" parameterType="int" resultMap="petResultMap">
         SELECT
             pet_cd, mbr_cd, pet_name, pet_breed, pet_gender, pet_birth_date,
-            pet_weight, pet_profile_img_url, pet_introduction, pet_reg_date, pet_mdfcn_date
+            pet_weight, pet_profile_img_url, pet_introduction, pet_reg_date, pet_mdfcn_date, pet_color
         FROM
             pet
         WHERE
             mbr_cd = #{mbrCd}
+    </select>
+    
+     <select id="getPetByCd" parameterType="int" resultMap="petResultMap">
+        SELECT
+            pet_cd, mbr_cd, pet_name, pet_breed, pet_gender, pet_birth_date,
+            pet_weight, pet_profile_img_url, pet_introduction, 
+            pet_color, pet_reg_date, pet_mdfcn_date
+        FROM
+            pet
+        WHERE
+            pet_cd = #{petCd}
     </select>
 
 </mapper>

@@ -1,6 +1,5 @@
 package ganadinote.main.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -43,6 +42,12 @@ public class MainServiceImpl implements MainService{
 		List<PetWithBreedDTO> petWithBreed = mainMapper.getPetInfoWithBreedByMbrCd(mbrCd);
 		log.info("MainServiceImpl : 펫 및 품종 정보 조회 완료, 총 {}마리", petWithBreed.size());
 		return petWithBreed;
+	}
+
+@Override
+	public String getNknmByMbrCd(Integer mbrCd) {
+		String mbrNknm = mainMapper.getNknmByMbrCd(mbrCd);
+		return mbrNknm;
 	}
 
 }

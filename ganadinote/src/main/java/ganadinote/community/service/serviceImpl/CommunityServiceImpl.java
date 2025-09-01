@@ -118,6 +118,65 @@ public class CommunityServiceImpl implements CommunityService {
 	    // 3) 클라이언트(섬머노트)에 돌려줄 경로
 	    return meta.getFilePath();  // "/attachment/community/20250828/image/uuid.jpg"
 	}
+	
+	@Override
+    @Transactional
+    public void updatePost(PostDetailDTO dto, Integer mbrCdFromToken) {
+        // JWT에서 추출한 사용자 코드를 DTO에 주입 → Mapper의 WHERE mbr_cd = #{mbrCd} 가드 작동
+        dto.setMbrCd(mbrCdFromToken);
+
+        int updated = communityMapper.updatePostByOwner(dto);
+        if (updated != 1) {
+            // post_id가 없거나, 이미 삭제 상태거나, 본인 글이 아닌 경우
+            throw new IllegalStateException("수정 권한이 없거나 존재하지 않는 게시글입니다.");
+        }
+    }
+
+	@Override
+	@Transactional
+	public void deletePost(int postId, Integer mbrCdFromToken) {
+	    int deleted = communityMapper.softDeletePostByOwner(postId, mbrCdFromToken); 
+	    if (deleted != 1) {
+	        throw new IllegalStateException("삭제 권한이 없거나 이미 삭제된 게시글입니다.");
+	    }
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isOwner(int postId, Integer mbrCdFromToken) {
+	    Integer author = communityMapper.selectAuthorMbrCd(postId); 
+	    return author != null && author.equals(mbrCdFromToken);
+	}
 	  
+	
+	@Transactional
+	@Override
+	public boolean toggleLike(int postId, int mbrCd) {
+	    Integer author = communityMapper.selectAuthorMbrCd(postId);
+	    if (author != null && author == mbrCd) {
+	        throw new IllegalStateException("본인 글에는 좋아요를 누를 수 없습니다.");
+	    }
+
+	    boolean already = communityMapper.hasLiked(postId, mbrCd);
+	    if (already) {
+	        communityMapper.deleteLike(postId, mbrCd);
+	        communityMapper.bumpLikeCount(postId, -1);
+	        return false;
+	    } else {
+	        communityMapper.insertLike(postId, mbrCd);
+	        communityMapper.bumpLikeCount(postId, +1);
+	        return true;
+	    }
+	}
+
+	@Override
+	public boolean hasLiked(int postId, int mbrCd) {
+	    return communityMapper.hasLiked(postId, mbrCd);
+	}
+
+	@Override
+	public int getLikeCount(int postId) {
+	    return communityMapper.getLikeCount(postId);
+	}
 
 }
