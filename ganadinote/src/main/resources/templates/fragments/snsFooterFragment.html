@@ -2,24 +2,29 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <footer id="snsFooter" class="fixed-bottom d-xl-none" th:fragment="snsFooterFragment">
 	<nav class="footer-tabs">
-        <a href="" class="tab-item active" data-route="/sns/home">
-            <svg class="bi" width="24" height="24" fill="currentColor">
-                <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#house"></use>
-            </svg>
-            <span class="tab-label">Home</span>
-        </a>
-        <a href="" class="tab-item" data-route="/sns/walking">
-            <svg class="bi" width="24" height="24" fill="currentColor">
-                <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#cursor"></use>
-            </svg>
-            <span class="tab-label">Walking</span>
-        </a>
-        <a href="" class="tab-item" data-route="/sns/myfeed">
-            <svg class="bi" width="24" height="24" fill="currentColor">
-                <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#person-circle"></use>
-            </svg>
-            <span class="tab-label">My Feed</span>
-        </a>
+        <!-- Main: 전체 페이지 이동 -->
+		<a th:href="@{/todo/list}" class="tab-item">
+			<svg class="bi" width="24" height="24" fill="currentColor">
+			  <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#house"></use>
+			</svg>
+			<span class="tab-label">Main</span>
+		</a>
+		
+		<!-- Feed: SPA 이동 -->
+		<a href="" class="tab-item" data-route="/sns/home">
+			<svg class="bi" width="24" height="24" fill="currentColor">
+			  <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#grid"></use>
+			</svg>
+			<span class="tab-label">Feed</span>
+		</a>
+		
+		<!-- My Page: SPA 이동 -->
+		<a href="" class="tab-item" data-route="/sns/myfeed">
+			<svg class="bi" width="24" height="24" fill="currentColor">
+			  <use xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#person-circle"></use>
+			</svg>
+			<span class="tab-label">My Page</span>
+		</a>
     </nav>
 </footer>
 </html>

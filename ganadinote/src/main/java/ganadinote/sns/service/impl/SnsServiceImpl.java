@@ -327,4 +327,39 @@ public class SnsServiceImpl implements SnsService {
 
         return p;
     }
+    
+    // home - 게시물 - 토글 후 최종 liked 반환
+    @Override
+    @Transactional
+    public boolean toggleLike(Integer me, Integer spCd) {
+        // 존재 여부
+        boolean liked = snsMapper.existsLike(spCd, me) > 0;
+        if (liked) {
+            snsMapper.deleteLike(spCd, me);
+            return false;
+        } else {
+            // UNIQUE (post_id, mbr_cd) 방어: 이미 있으면 무시되도록 try-catch (필요시)
+            try {
+                snsMapper.insertLike(spCd, me);
+            } catch (org.springframework.dao.DuplicateKeyException ignore) {
+                // 경쟁상황 방어: 이미 누른 상태였다면 false로 간주
+                return true;
+            }
+            return true;
+        }
+    }
+
+    // home - 게시물 - 좋아요 수
+    @Override
+    @Transactional(readOnly = true)
+    public long getLikeCount(Integer spCd) {
+        return snsMapper.countLikesOfPost(spCd);
+    }
+
+    // home - 게시물 - 좋아요
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isLiked(Integer me, Integer spCd) {
+        return snsMapper.existsLike(spCd, me) > 0;
+    }
 }

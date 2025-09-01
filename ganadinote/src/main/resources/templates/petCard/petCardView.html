@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/petCardLayoutView}">
+	
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>펫 카드</title>
+
+	<th:block layout:fragment="pageStyles">
+		<style>
+		</style>
+	</th:block>
+</head>
+
+<body>
+	<th:block layout:fragment="contents">
+		<div class="mt-10">
+			<div class="row no-gutter-x">
+		        <section class="section sr_user-profile-section">
+					<div class="sr_user-profile-container">
+						<div class="sr_profile-info">
+							<img th:src="${#strings.isEmpty(header?.profile) ? '/assets/images/samples/dogdefault.png' : header.profile}"
+							     alt="회원 프로필 사진" class="sr_profile-image">
+							<h5 class="sr_nickname" th:text="${header?.nickname}">닉네임</h5>
+						</div>
+					
+						<!-- 본인 카드일 때 -->
+						<div class="sr_profile-buttons" th:if="${isOwner}" style="width:auto; height: max-content; margin-top: 0px;">
+							<a th:href="@{/petCard/updatePetCard}" class="sr_btn-profile">펫 카드 수정</a>
+						</div>
+						
+						<!-- 남의 카드일 때 -->
+						<div class="sr_feed-actions d-flex align-items-center" th:if="${!isOwner}">
+							<button class="btn btn-link p-0 sr-like-btn" type="button">
+								<span class="text-danger"><i class="bi bi-heart icon-mid"></i></span>
+							</button>
+							<a class="btn btn-link p-0" th:href="@{/sns/myfeed(m=${viewMbrCd})}" style="margin-left:5px;">
+								<svg class="bi" width="1em" height="1em" fill="currentColor">
+									<use style="color:#3c3c3c;" xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#box-arrow-in-down-right"/>
+								</svg>
+							</a>
+						</div>
+					</div>
+				</section>
+				
+				<!-- 카드: 반복 렌더링 -->
+				<section class="sr_pet-cards-container">
+					<div class="sr_pet-card-navigation sr_nav-left" onclick="slideCards(-1)"></div>
+					<div class="sr_pet-card-navigation sr_nav-right" onclick="slideCards(1)"></div>
+				
+					<div class="sr_pet-cards-wrapper">
+						<div class="sr_pet-card"
+						     th:classappend="${iter.index == 0} ? ' sr_active' : ''"
+						     th:each="c, iter : ${petCards}"
+						     th:attr="data-pet-id=${c.petCd}">
+							<img class="sr_pet-card-image"
+							     th:src="${#strings.isEmpty(c.petImageUrl) ? 'https://placehold.co/600x400?text=No+Image' : c.petImageUrl}"
+							     alt="반려견 사진">
+							<div class="sr_pet-card-content">
+								<h2 class="sr_pet-name" th:text="${c.petName}">반려견 이름</h2>
+								<p class="sr_pet-bio" th:text="${c.introduction}">한줄 소개입니다.</p>
+								<div class="sr_pet-tags">
+									<span class="sr_tag" th:each="t : ${c.tags}" th:text="${t}">Tag</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+			</div>
+		</div>
+	</th:block>
+	
+	
+	<th:block layout:fragment="pageScripts">
+	    <script>
+	        let activeCardIndex = 0;
+	        let cards = [];
+	
+	        const updateCards = () => {
+	            cards.forEach((card, index) => {
+	                const offset = index - activeCardIndex;
+	                card.classList.toggle('sr_active', index === activeCardIndex);
+	                card.style.transform = `translateX(${offset * 105}%) scale(${offset === 0 ? 1 : 0.85}) perspective(1000px) rotateY(${offset * -5}deg)`;
+	                card.style.zIndex = cards.length - Math.abs(offset);
+	            });
+	        };
+	
+	        const slideCards = (direction) => {
+	            let newIndex = activeCardIndex + direction;
+	            if (newIndex >= 0 && newIndex < cards.length) {
+	                activeCardIndex = newIndex;
+	                updateCards();
+	            }
+	        };
+	
+	        document.addEventListener('DOMContentLoaded', () => {
+	            cards = document.querySelectorAll('.sr_pet-card');
+	            updateCards();
+	
+	            // 마우스/터치 슬라이드
+	            let isDragging = false;
+	            let startPos = 0;
+	
+	            document.addEventListener('mousedown', (e) => {
+	                isDragging = true;
+	                startPos = e.clientX;
+	            });
+	
+	            document.addEventListener('mouseup', (e) => {
+	                if (!isDragging) return;
+	                isDragging = false;
+	                const endPos = e.clientX;
+	                const movedBy = endPos - startPos;
+	                if (movedBy < -50) {
+	                    slideCards(1);
+	                } else if (movedBy > 50) {
+	                    slideCards(-1);
+	                }
+	            });
+	
+	            document.addEventListener('mousemove', (e) => {
+	                if (!isDragging) return;
+	            });
+	
+	            document.addEventListener('touchstart', (e) => {
+	                isDragging = true;
+	                startPos = e.touches[0].clientX;
+	            });
+	
+	            document.addEventListener('touchend', (e) => {
+	                if (!isDragging) return;
+	                isDragging = false;
+	                const endPos = e.changedTouches[0].clientX;
+	                const movedBy = endPos - startPos;
+	                if (movedBy < -50) {
+	                    slideCards(1);
+	                } else if (movedBy > 50) {
+	                    slideCards(-1);
+	                }
+	            });
+	        });
+	
+	    </script>
+	</th:block>
+</body>
+</html>

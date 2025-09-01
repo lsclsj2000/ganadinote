@@ -46,6 +46,12 @@ public interface SnsService {
     
     // home - 게시물
     List<HomeFeedPost> getHomeFeed(Integer mbrCd);
+    // home - 게시물 - 토글 후 최종 liked 반환
+    boolean toggleLike(Integer me, Integer spCd);
+    // home - 게시물 - 좋아요 수
+    long getLikeCount(Integer spCd);
+    // home - 게시물 - 좋아요
+    boolean isLiked(Integer me, Integer spCd);
     
     
 }

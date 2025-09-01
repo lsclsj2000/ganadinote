@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ganadinote.petCard.mapper.PetCardMapper">
+
+
+	<resultMap id="MemberHeaderMap" type="ganadinote.petCard.domain.MemberHeader">
+		<result property="nickname"        column="mbr_nknm"/>
+		<result property="profile"      column="mbr_profile"/>
+	</resultMap>
+	
+	<resultMap id="PetCardMap" type="ganadinote.common.domain.PetCard">
+		<id     property="cardId"       column="card_id"/>
+		<result property="petCd"        column="pet_cd"/>
+		<result property="petName"      column="pet_name"/>
+		<result property="petImageUrl"  column="pet_profile_img_url"/>
+		<result property="introduction" column="card_cn"/>
+		
+		<!-- tags 컬렉션: card_id를 넘겨서 tag_nm 리스트 가져오기 -->
+		<collection property="tags" ofType="string"
+		            select="selectTagNamesByCardId" column="card_id"/>
+	</resultMap>
+	
+	<resultMap id="TagInfoMap" type="ganadinote.common.domain.Tag">
+        <id     property="tagCd"   column="tag_id"/>
+        <result property="tagName" column="tag_nm"/>
+        <result property="upTag"   column="up_tag"/>
+    </resultMap>
+
+	<select id="selectHeaderByMbrCd" parameterType="int" resultMap="MemberHeaderMap">
+		/* 펫 카드 - 회원 헤더 */
+		SELECT
+		  m.mbr_nknm,
+		  m.mbr_profile
+		FROM member m
+		WHERE m.mbr_cd = #{mbrCd}
+	</select>
+	
+	<select id="selectPetCardsByMbrCd" parameterType="int" resultMap="PetCardMap">
+		/* 펫 카드 */
+		SELECT
+		  pc.card_id,
+		  pc.mbr_cd,
+		  pc.pet_cd,
+		  pc.card_cn,
+		  pc.card_reg_ymdt,
+		  p.pet_name,
+		  p.pet_profile_img_url
+		FROM profile_card pc
+		JOIN pet p ON p.pet_cd = pc.pet_cd
+		WHERE pc.mbr_cd = #{mbrCd}
+		ORDER BY pc.card_reg_ymdt ASC, pc.card_id ASC
+	</select>
+
+	<select id="selectTagNamesByCardId" parameterType="int" resultType="string">
+		/* 펫 카드 - 태그 */
+		SELECT t.tag_nm
+		FROM dog_tag dt
+		JOIN tag t ON t.tag_id = dt.tag_id
+		WHERE dt.card_id = #{cardId}
+		ORDER BY t.tag_nm ASC
+	</select>
+	
+	<select id="selectAllTags" resultMap="TagInfoMap">
+        /* 전체 태그 목록 */
+        SELECT t.tag_id, t.tag_nm, t.up_tag
+		FROM tag t
+		ORDER BY t.up_tag IS NOT NULL, t.tag_nm ASC
+    </select>
+
+    <!-- NEW: 카드 소유자 확인 -->
+    <select id="selectOwnerMbrByCardId" parameterType="int" resultType="int">
+        /* 카드 소유자 mbr_cd */
+        SELECT pc.mbr_cd
+        FROM profile_card pc
+        WHERE pc.card_id = #{cardId}
+    </select>
+
+    <!-- NEW: 사진 URL 업데이트 -->
+    <update id="updatePetImageByCardId">
+        /* 펫 카드 - 이미지 URL 갱신 */
+        UPDATE pet p
+	    JOIN profile_card pc ON pc.pet_cd = p.pet_cd
+	    SET p.pet_profile_img_url = #{url}
+	    WHERE pc.card_id = #{cardId}
+    </update>
+
+    <!-- NEW: 소개(한줄 소개) 업데이트 -->
+    <update id="updateCardIntroduction">
+        /* 펫 카드 - 소개 갱신 */
+        UPDATE profile_card
+        SET card_cn = #{intro}
+        WHERE card_id = #{cardId}
+    </update>
+
+    <!-- NEW: 이름으로 tag_id 조회 -->
+    <select id="selectTagIdsByNames" parameterType="list" resultType="int">
+        /* 태그명 → 태그ID */
+        SELECT t.tag_id
+        FROM tag t
+        WHERE t.tag_nm IN
+        <foreach collection="names" item="nm" open="(" separator="," close=")">
+            #{nm}
+        </foreach>
+        ORDER BY t.tag_nm ASC
+    </select>
+
+    <!-- NEW: 기존 매핑 삭제 -->
+    <delete id="deleteDogTagsByCardId" parameterType="int">
+        /* 카드-태그 매핑 삭제 */
+        DELETE FROM dog_tag
+        WHERE card_id = #{cardId}
+    </delete>
+
+    <!-- NEW: 새 매핑 삽입 (배치) -->
+    <insert id="insertDogTags">
+        /* 카드-태그 매핑 삽입 */
+        INSERT INTO dog_tag (card_id, tag_id)
+        VALUES
+        <foreach collection="tagIds" item="tid" separator=",">
+            (#{cardId}, #{tid})
+        </foreach>
+    </insert>
+    
+    <select id="selectPetImageUrlByCardId" parameterType="int" resultType="string">
+		SELECT p.pet_profile_img_url
+		FROM profile_card pc
+		JOIN pet p ON p.pet_cd = pc.pet_cd
+		WHERE pc.card_id = #{cardId}
+	</select>
+
+</mapper>

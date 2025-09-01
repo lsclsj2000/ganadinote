@@ -55,4 +55,12 @@ public interface SnsMapper {
     
     // home - 게시물
     List<HomeFeedPost> selectHomeFeedPosts(@Param("loginMbrCd") Integer loginMbrCd);
+    // home - 게시물 - 좋아요 수
+    long countLikesOfPost(@Param("spCd") Integer spCd);
+    // home - 게시물 - 로그인 회원의 좋아요 여부
+    long existsLike(@Param("spCd") Integer spCd, @Param("mbrCd") Integer mbrCd);
+    // home - 게시물 - 좋아요 추가
+    int insertLike(@Param("spCd") Integer spCd, @Param("mbrCd") Integer mbrCd);
+    // home - 게시물 - 좋아요 취소
+    int deleteLike(@Param("spCd") Integer spCd, @Param("mbrCd") Integer mbrCd);
 }
