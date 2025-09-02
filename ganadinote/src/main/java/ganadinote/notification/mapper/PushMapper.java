@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-
+import ganadinote.common.domain.NotificationHistory;
 import ganadinote.common.domain.PushSubscription;
 import ganadinote.notification.domain.LocationUpdateDTO;
 import ganadinote.notification.domain.PetWithBreedDTO;
@@ -51,5 +51,17 @@ public interface PushMapper {
     List<PushSubscription> findSubscriptionsWithLocation();
     
     // 회원의 위치 정보(위도, 경도)를 업데이트합니다.
-   void updateLocation(LocationUpdateDTO locationUpdateDto);
+    void updateLocation(LocationUpdateDTO locationUpdateDto);
+   
+    // 회원 코드를 기반으로 활성화된 모든 구독 정보를 찾아 리스트로 반환
+    List<PushSubscription> getActiveSubscriptionsByMbrCd(@Param("mbrCd") Integer mbrCd);
+    
+    // 회원 코드로 알림 스케줄(JSON) 데이터를 조회합니다.
+    String getNotificationScheduleByMbrCd(@Param("mbrCd") Integer mbrCd);
+    
+    // 알림 기록 저장 메서드
+    void saveNotificationHistory(NotificationHistory notificationHistory);
+    
+    // 알림 기록 조회 메서드
+    List<NotificationHistory> getNotificationHistory(int mbrCd);
 }

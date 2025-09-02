@@ -2,6 +2,7 @@ package ganadinote.notification.service;
 
 import java.util.List;
 
+import ganadinote.common.domain.NotificationHistory;
 import ganadinote.notification.domain.PetWithBreedDTO;
 import ganadinote.notification.domain.PushSubDTO;
 
@@ -33,4 +34,10 @@ public interface NotificationService {
     
     // 산책에 대한 알림 조건
     public void processWalkAlert(Integer mbrCd);
+    
+    // 산책 알림 프로세스
+    public void processWalkAlertsForScheduledUsers();
+    
+    // 기록된 알림을 조회하는 메서드
+    List<NotificationHistory> getNotificationHistory(int mbrCd);
 }

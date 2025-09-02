@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ganadinote.common.util.TokenUtils;
 import ganadinote.location.domain.LocationDTO;
 import ganadinote.location.domain.LocationResponseDTO;
 import ganadinote.location.service.IpLocationService;
@@ -28,15 +29,36 @@ public class LocationAPIController {
 	@Autowired
 	private IpLocationService ipLocationService;
 	
+	private Integer getMbrCdFromToken() {
+        String mbrCdStr = TokenUtils.getMbrCd();
+        if (mbrCdStr == null || mbrCdStr.trim().isEmpty()) {
+            return null; // 토큰에 회원 코드가 없으면 null 반환
+        }
+        try {
+            return Integer.parseInt(mbrCdStr);
+        } catch (NumberFormatException e) {
+            log.error("회원 코드(mbrCd)를 숫자로 변환하는 데 실패했습니다.", e);
+            return null;
+        }
+    }
+	
 	@PostMapping("/location")
 	public LocationResponseDTO receiveLocation(@RequestBody LocationDTO locationDTO) {
 		
 		LocationResponseDTO responseDTO = new LocationResponseDTO();
 		
 		try{
+			// ⭐️⭐️⭐️ [수정] 토큰에서 회원 코드 가져오기
+			Integer mbrCd = getMbrCdFromToken();
+            if (mbrCd == null) {
+                responseDTO.setLocationName(null);
+                responseDTO.setError("인증되지 않은 사용자입니다.");
+                return responseDTO;
+            }
+            
 			String locationName = locationService.processLocation(locationDTO.getLatitude(),locationDTO.getLongitude());
 			
-			locationService.updateMemberLocation(1, locationDTO.getLatitude(), locationDTO.getLongitude());
+			locationService.updateMemberLocation(mbrCd, locationDTO.getLatitude(), locationDTO.getLongitude());
 			
 			log.info("gps 주소로 위치 정보 처리 시작: {}", locationName);
 			responseDTO.setLocationName(locationName);
@@ -55,7 +77,14 @@ public class LocationAPIController {
 		LocationResponseDTO responseDTO = new LocationResponseDTO();
 		
 		try {
-			// ⭐⭐⭐ [수정] IP 주소 가져오는 로직만 처리
+			// ⭐️⭐️⭐️ [수정] 토큰에서 회원 코드 가져오기
+            Integer mbrCd = getMbrCdFromToken();
+            if (mbrCd == null) {
+                responseDTO.setLocationName(null);
+                responseDTO.setError("인증되지 않은 사용자입니다.");
+                return responseDTO;
+            }
+			
 			String ipAddress = request.getHeader("X-Forwarded-For");
 			if(ipAddress == null || ipAddress.isEmpty()) {
 				ipAddress = request.getRemoteAddr();
@@ -63,12 +92,10 @@ public class LocationAPIController {
 			
 			log.info("IP 주소로 위치 정보 처리 시작: {}", ipAddress);
 			
-			// ⭐⭐⭐ [수정] IP 주소로 위치 정보를 가져오고 DTO 변수를 초기화
 			LocationUpdateDTO ipLocationDto = ipLocationService.getLocationFromIp(ipAddress);
 			
-			// ⭐⭐⭐ [수정] IP 위치 정보가 성공적으로 파악되었는지 확인
 			if (ipLocationDto != null) {
-				locationService.updateMemberLocation(1, ipLocationDto.getLatitude(), ipLocationDto.getLongitude());
+				locationService.updateMemberLocation(mbrCd, ipLocationDto.getLatitude(), ipLocationDto.getLongitude());
 				String locationName = locationService.processLocation(ipLocationDto.getLatitude(), ipLocationDto.getLongitude());
 				
 				responseDTO.setLocationName(locationName);
@@ -77,7 +104,6 @@ public class LocationAPIController {
 				responseDTO.setLongitude(ipLocationDto.getLongitude());
 				
 			} else {
-				// ipLocationDto가 null일 경우, 즉 IP로 위치 파악에 실패한 경우
 				responseDTO.setLocationName(null);
 				responseDTO.setError("IP로 위치 정보 파악 실패");
 			}

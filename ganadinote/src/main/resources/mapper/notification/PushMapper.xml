@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="ganadinote.notification.mapper.PushMapper">
 
-    <resultMap id="petWithBreedResultMap" 		type="ganadinote.notification.domain.PetWithBreedDTO">
+    <resultMap 	id="petWithBreedResultMap" 		type="ganadinote.notification.domain.PetWithBreedDTO">
         <result column="pet_cd" 				property="petCd"/>
         <result column="mbr_cd" 				property="mbrCd"/>
         <result column="pet_name" 				property="petName"/>
@@ -25,6 +25,35 @@
         <result column="dog_size" 				property="dogSize"/>
         <result column="activity_level" 		property="activityLevel"/>
     </resultMap>
+    
+    <resultMap 	id="pushSubscriptionResultMap" 	type="ganadinote.common.domain.PushSubscription">
+	    <id 	column="id" 					property="id" />
+	    <result column="mbr_cd" 				property="mbrCd" />
+	    <result column="endpoint" 				property="endpoint" />
+	    <result column="p256dh" 				property="p256dh" />
+	    <result column="auth" 					property="auth" />
+	    <result column="created_at" 			property="createdAt" />
+	    <result column="is_active" 				property="isActive" />
+	</resultMap>
+	
+	<resultMap 	id="pushSubDTOMap" 				type="ganadinote.notification.domain.PushSubDTO">
+	    <result column="mbr_cd" 				property="mbrCd"/>
+	    <result column="endpoint" 			    property="endpoint"/>
+	    <result column="p256dh" 				property="p256dh"/>
+	    <result column="auth" 				    property="auth"/>
+	    <result column="notification_schedule"  property="notificationSchedule"/>
+	    <result column="is_active" 			    property="isActive"/>
+	</resultMap>
+		
+	<resultMap id="notificationHistoryMap" 		type="ganadinote.common.domain.NotificationHistory">
+	    <id 	column="id" 					property="id"/>
+	    <result column="mbr_cd" 				property="mbrCd"/>
+	    <result column="title" 					property="title"/>
+	    <result column="message" 				property="message"/>
+	    <result column="sent_at" 				property="sentAt"/>
+	    <result column="is_read" 				property="isRead"/>
+	</resultMap>
+	
     
     <select id="getPetInfoForNotification" resultMap="petWithBreedResultMap">
     	/* mbrCd를 통해 받아오는 알림을 위한 pet 정보*/
@@ -51,7 +80,7 @@
             p.mbr_cd = #{mbrCd};
     </select>
     
-    <select id="getSubInfoByMbrCd" resultType="ganadinote.common.domain.PushSubscription">
+    <select id="getSubInfoByMbrCd" resultMap="pushSubscriptionResultMap">
         /* 알림 구독 정보 멤버 코드로 받아오기 */
         SELECT
             id,
@@ -122,8 +151,10 @@
     
     <update id="updateNotificationSchedule">
         /* 회원 코드로 알림 스케줄(JSON) 업데이트 */
-        INSERT INTO member_notification_settings (mbr_cd, notification_schedule)
-        VALUES (#{mbrCd}, #{notificationScheduleJson})
+        INSERT INTO 
+        	member_notification_settings (mbr_cd, notification_schedule)
+        VALUES 
+        	(#{mbrCd}, #{notificationScheduleJson})
         ON DUPLICATE KEY UPDATE
             notification_schedule = VALUES(notification_schedule);
     </update>
@@ -138,14 +169,14 @@
             mbr_cd = #{mbrCd}
     </select>
     
-    <select id="findSubscriptionsBySchedule" resultType="ganadinote.common.domain.PushSubscription">
+    <select id="findSubscriptionsBySchedule" resultMap="pushSubDTOMap">
         /* 스케줄에 맞는 구독 정보 찾기 */
         SELECT
             ps.mbr_cd,
             ps.endpoint,
             ps.p256dh,
             ps.auth,
-            mns.notification_schedule AS notificationSchedule
+            mns.notification_schedule
         FROM
             push_subscription ps
         JOIN
@@ -157,8 +188,10 @@
     
     <update id="updateLocation" parameterType="ganadinote.notification.domain.LocationUpdateDTO">
          /* 회원의 위치 정보(위도, 경도)를 업데이트합니다. */
-        INSERT INTO member_location (mbr_cd, latitude, longitude)
-        VALUES (#{mbrCd}, #{latitude}, #{longitude})
+        INSERT INTO 
+        	member_location (mbr_cd, latitude, longitude)
+        VALUES 
+        	(#{mbrCd}, #{latitude}, #{longitude})
         ON DUPLICATE KEY UPDATE
             latitude = VALUES(latitude),
             longitude = VALUES(longitude);
@@ -192,4 +225,57 @@
             AND ml.latitude IS NOT NULL
             AND ml.longitude IS NOT NULL
     </select>
+    
+    <select id="getActiveSubscriptionsByMbrCd" resultMap="pushSubscriptionResultMap">
+    	/* 회원 코드로 구독중인 데이터를 조회합니다. */
+	    SELECT
+	        id,
+	        mbr_cd,
+	        endpoint,
+	        p256dh,
+	        auth,
+	        created_at,
+	        is_active
+	    FROM
+	        push_subscription
+	    WHERE
+	        mbr_cd = #{mbrCd} AND is_active = 1
+	</select>
+	
+	<select id="getNotificationScheduleByMbrCd" resultType="string">
+		/* 회원 코드로 알림 스케줄(JSON) 데이터를 조회합니다. */
+        SELECT
+            notification_schedule as notificationSchedule
+        FROM
+            member_notification_settings
+        WHERE
+            mbr_cd = #{mbrCd}
+    </select>
+    
+    <insert id="saveNotificationHistory">
+    	/* 알림의 기록을 저장 합니다. */
+	    INSERT INTO 
+	    	notification_history (mbr_cd, title, message, sent_at)
+	    VALUES 
+	    	(#{mbrCd}, #{title}, #{message}, NOW())
+	</insert>
+	
+	<select id="getNotificationHistory" resultMap="notificationHistoryMap">
+		/* 기록된 알림 최근 30개를 조회 합니다 */
+	    SELECT
+	        id,
+	        mbr_cd,
+	        title,
+	        message,
+	        sent_at,
+	        is_read
+	    FROM
+	        notification_history
+	    WHERE
+	        mbr_cd = #{mbrCd}
+	    ORDER BY
+	        sent_at DESC
+		LIMIT 30
+	</select>
+	
 </mapper>

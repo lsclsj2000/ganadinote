@@ -1,0 +1,54 @@
+
+/* 알림 종 아이콘과 드롭다운을 감싸는 컨테이너 */
+.notification-container {
+    position: relative; /* 자식 요소인 드롭다운의 위치 기준점 */
+    display: inline-block;
+}
+
+/* 알림 드롭다운 메뉴 */
+.notification-dropdown {
+    display: none; /* 기본적으로 숨김 */
+    position: absolute; /* 부모 컨테이너에 맞춰 위치 */
+    top: 40px;
+    right: 0;
+    background-color: #fff;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    min-width: 300px;
+    z-index: 1000; /* 다른 요소보다 위에 표시 */
+    padding: 10px;
+}
+
+/* 드롭다운을 보여주는 클래스 */
+.notification-dropdown.show {
+    display: block;
+}
+
+/* 알림 목록 스타일 */
+.notification-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 400px; /* 스크롤바가 생기도록 높이 제한 */
+    overflow-y: auto;
+}
+
+.notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    line-height: 1.4;
+}
+
+.notification-item:hover {
+    background-color: #f1f1f1;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item strong {
+    display: block;
+    margin-bottom: 5px;
+}

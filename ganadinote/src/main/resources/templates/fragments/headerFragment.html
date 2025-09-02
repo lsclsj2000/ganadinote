@@ -8,25 +8,89 @@
 	    <a href="/todo/list">
 	    	<img src="/assets/images/logo/ganadinote-logo.png" alt="Logo" srcset="" style="width:100px;">
 	    </a>
-		<a id="login-state-icon" href="#" class="burger-btn d-block d-xl-none" style="padding-top: 3px;">
-			<i class="bi bi-bell bi-sub fs-4"></i>
-		</a>
+		
+		<div class="notification-container" style="position: relative;">
+			<a id="notification-toggle" href="#" class="burger-btn d-block d-xl-none" style="padding-top: 3px;">
+				<i class="bi bi-bell bi-sub fs-4"></i>
+			</a>
+			<div id="notification-dropdown" class="notification-dropdown">
+				<ul id="notification-list" class="notification-list">
+					</ul>
+			</div>
+		</div>
     </div>
 
     <script th:inline="javascript">
+        // 기존 JS 코드는 유지
         document.addEventListener('DOMContentLoaded', () => {
             const mbrCd = getMbrCdFromToken();
-            const loginIconArea = document.getElementById('login-state-icon');
-
+            const loginIconArea = document.getElementById('notification-toggle');
+            
             if (mbrCd) {
-                // 로그인 상태: 알림 벨 아이콘 유지
-                loginIconArea.href = '/todo/notification'; // 알림 페이지로 링크 변경
+                // 로그인 상태: 알림 기능 활성화 (페이지 이동 없이)
+                loginIconArea.href = 'javascript:void(0);'; // 페이지 이동 방지
             } else {
                 // 로그아웃 상태: "로그인하기" 링크로 변경
                 loginIconArea.href = '/login'; // 로그인 페이지로 링크
                 loginIconArea.innerHTML = '로그인하기';
             }
         });
+
+        // **새롭게 추가되는 JavaScript 코드**
+        const notificationToggle = document.getElementById('notification-toggle');
+        const dropdown = document.getElementById('notification-dropdown');
+        const notificationList = document.getElementById('notification-list');
+        
+        // 종 아이콘 클릭 이벤트 리스너 추가
+        notificationToggle.addEventListener('click', function(e) {
+            const mbrCd = getMbrCdFromToken();
+            if (mbrCd) { // 로그인 상태일 때만 드롭다운 기능 활성화
+                e.preventDefault(); // 페이지 이동을 막습니다
+                dropdown.classList.toggle('show');
+                if (dropdown.classList.contains('show')) {
+                    fetchNotificationHistory();
+                }
+            }
+        });
+        
+        // 드롭다운 바깥 영역 클릭 시 닫기
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target) && !notificationToggle.contains(e.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+        
+        function fetchNotificationHistory() {
+            notificationList.innerHTML = '<li>알림을 불러오는 중...</li>';
+            
+            fetch('/api/push/history')
+            .then(response => response.json())
+            .then(data => {
+                notificationList.innerHTML = '';
+                if (data.length === 0) {
+                    notificationList.innerHTML = '<li>알림 이력이 없습니다.</li>';
+                } else {
+                    data.forEach(item => {
+                        // 서버에서 받은 'sentAt' 문자열을 그대로 사용
+                        // 예시: '2025-09-02 15:30:00'
+                        
+                        const li = document.createElement('li');
+                        li.className = 'notification-item';
+                        
+                        const sentAtText = item.sentAt ? item.sentAt : '날짜 정보 없음';
+
+                        li.innerHTML = `<strong>${item.title}</strong><br>${item.message}<br><small>${sentAtText}</small>`;
+                        
+                        
+                        notificationList.appendChild(li);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('알림 이력 조회 중 오류 발생:', error);
+                notificationList.innerHTML = '<li>알림 이력을 불러오는 데 실패했습니다.</li>';
+            });
+    }
     </script>
 </header>
 </html>
