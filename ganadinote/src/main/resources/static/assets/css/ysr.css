@@ -1,121 +1,109 @@
 @charset "UTF-8";
 /*
 * ysr.css
-* 멍멍그램 SNS 헤더를 위한 커스텀 스타일
-* 이 파일은 화면이 작을 때 상단 고정 헤더로 변경하는 스타일을 담고 있습니다.
+* 이 파일은 모든 화면에서 동일한 스타일을 적용하도록 수정되었습니다.
 */
 
-/* SNS 헤더를 위한 스타일 */
-@media (max-width: 1199px) {
-    #snsHeader {
-    	position: fixed;
-    	top: 0;
-    	left: 0;
-    	width: 100%;
-    	height: 60px;
-    	z-index: 9;
-    	background-color: #ffffff;
-    	border-bottom: 1px solid #dee2e6;
-    	display: flex;
-    	justify-content: space-between;
-    	align-items: center;
-    	padding: 0 1rem;
-    	box-sizing: border-box;
-    	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-   	}
-
-	#snsHeader .logo {
-    	display: block;
-	}
-
-	#snsFooter {
-    	position: fixed;
-   		bottom: 0;
-    	left: 0;
-    	width: 100%;
-    	height: 60px;
-		background-color: #ffffff;
-		border-top: 1px solid #dee2e6;
-		box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-		z-index: 9;
-		display: flex;
-		justify-content: space-around;
-		align-items: center;
-		padding: 0 10px;
-	}
-
-	.footer-tabs {
-    	display: flex;
-    	width: 100%;
-    	justify-content: space-around;
-    	align-items: center;
-	}
-
-	.tab-item {
-    	display: flex;
-    	flex-direction: column;
-    	align-items: center;
-    	text-align: center;
-    	color: #6c757d;
-    	text-decoration: none;
-    	font-size: 12px;
-	}
-
-	.tab-item.active {
-    	color: #435ebe;
-    	font-weight: bold;
-	}
-
-	.tab-item svg {
-    	margin-bottom: 4px;
-    }
-
-    .main-content {
-        padding-top: 60px;
-        padding-bottom: 60px;
-    }
-    
-    #sidebar.active {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 10;
-        height: 100vh;
-        overflow-y: auto;
-    }
-
-    /* app.css의 position: absolute를 덮어쓰기 위해 더 구체적인 선택자 사용 */
-    #sidebar.active .sidebar-wrapper {
-        position: initial;
-    }
-
-    /* 사이드바 래퍼도 100% 높이를 갖도록 설정 */
-    .sidebar-wrapper.active {
-        height: 100%;
-    }
+/* body에 헤더/푸터 높이만큼 패딩을 추가하여 컨텐츠가 가려지지 않도록 합니다. */
+body {
+    padding-top: 60px;
+    padding-bottom: 60px;
 }
 
-/* 사이드바 전체 레이아웃 조정 */
-@media (min-width: 1200px) {
-    /* 화면이 커지면 (1200px 이상) 사이드바는 원래대로 보입니다. */
-	#sidebar {
-    	width: 250px;
-	}
+/* SNS 헤더를 위한 스타일 (모든 화면에서 고정) */
+#snsHeader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    z-index: 9;
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    box-sizing: border-box;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
-	/* 화면이 커지면 snsHeader를 숨깁니다. */
-    #snsHeader {
-        display: none;
-    }
-    
-    #snsFooter {
-        display: none;
-    }
-    
-    .main-content {
-        padding-top: 0;
-        padding-bottom: 0;
-    }
-    
+#snsHeader .logo,
+#snsHeader .header-icons {
+    display: block;
+}
+
+/* 푸터가 모든 화면에서 고정되도록 수정 */
+#snsFooter {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #ffffff;
+    border-top: 1px solid #dee2e6;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 9;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.footer-tabs {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.tab-item.active {
+    color: #435ebe;
+    font-weight: bold;
+}
+
+.tab-item svg {
+    margin-bottom: 4px;
+}
+
+/* 사이드바가 기본적으로 닫히도록 수정합니다. */
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    height: 100vh;
+    overflow-y: auto;
+    width: 280px; /* 사이드바의 너비 설정 */
+    background-color: #fff;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    transform: translateX(-100%); /* 기본적으로 숨겨둡니다. */
+    transition: transform 0.3s ease-in-out;
+}
+
+/* 사이드바가 활성화(열릴) 때의 스타일 */
+#sidebar.active {
+    transform: translateX(0); /* 보일 때 원래 위치로 이동 */
+}
+
+/* app.css의 position: absolute를 덮어쓰기 위해 더 구체적인 선택자 사용 */
+#sidebar.active .sidebar-wrapper {
+    position: initial;
+}
+
+/* 사이드바 래퍼도 100% 높이를 갖도록 설정 */
+.sidebar-wrapper.active {
+    height: 100%;
 }
 
 /* sns-myfeed 프로필 */
@@ -980,7 +968,9 @@
     transform: translate(-50%, -50%);
     width: 100%; /* 카드 하나의 너비 */
     height: 100%;
-    transition: transform 0.5s ease-in-out;
+    transition: transform 0.5s ease-in-out, box-shadow 0.3s ease;
+    cursor: grab;
+    will-change: transform, box-shadow;
 }
 
 .sr_pet-card {
@@ -1200,3 +1190,101 @@
     box-shadow: 0 4px 8px rgba(255,182,193,0.3);
     transform: translateY(-2px);
 }
+
+/* 기존 app.css와 ysr.css의 충돌 방지 및 재정의 */
+.card {
+    box-shadow: none;
+}
+
+
+#snsHeader .d-flex {
+    justify-content: space-around !important;
+}
+
+/* 1) 데스크탑에서도 모바일 스타일을 강제로 유지 */
+@media (min-width: 1200px) {
+  /* (a) 헤더 아이콘/버거 버튼 강제 표시
+     - Bootstrap의 .d-xl-none / app.css의 .burger-btn{display:none}를 무력화 */
+  #snsHeader .burger-btn,
+  #snsHeader .header-icons,
+  #snsHeader .d-xl-none { 
+    display: block !important;
+  }
+
+  /* (b) 사이드바는 기본 닫힘 상태 유지 (항상 햄버거로 열고 닫기) */
+  /* app.css가 .sidebar-wrapper의 left를 움직여 고정시키는 걸 무력화 */
+  #sidebar .sidebar-wrapper {
+    left: 0 !important;          /* app.css의 left 제약 해제 */
+    position: initial !important; /* app.css의 fixed/absolute 제약 무력화(ysr 기본 슬라이드 사용) */
+  }
+  /* 사이드바 자체는 ysr.css의 transform 기반 슬라이드 사용 (기본 닫힘) */
+  #sidebar { 
+    transform: translateX(-100%) !important;
+  }
+  #sidebar.active {
+    transform: translateX(0) !important;
+  }
+
+  /* (c) 메인 영역은 항상 사이드바 여백 제거 (app.css의 margin-left:300px 무력화) */
+  #main { 
+    margin-left: 0 !important;
+  }
+
+  /* (d) 푸터는 데스크탑에서도 항상 표시 */
+  #snsFooter {
+    display: flex !important;
+  }
+}
+
+/* 2) 전 구간 공통 보정(이미 있더라도 안전하게 유지) */
+/* 컨텐츠가 헤더/푸터에 가려지지 않도록 패딩 */
+body { 
+  padding-top: 60px; 
+  padding-bottom: 60px; 
+}
+
+/* 헤더/푸터 고정은 이미 ysr.css에 정의됨(확인차 유지) */
+#snsHeader { position: fixed; top:0; left:0; width:100%; height:60px; z-index:9; }
+#snsFooter { position: fixed; bottom:0; left:0; width:100%; height:60px; z-index:9; }
+
+/* 사이드바: ysr.css의 슬라이드 방식 유지 */
+#sidebar {
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+#sidebar.active { transform: translateX(0); }
+
+@media (min-width: 1200px) {
+  /* 기본은 아예 감춤 */
+  #sidebar {
+    display: none !important;       /* 자리 자체 제거 */
+    transform: none !important;     /* 혹시 남아있던 슬라이드 효과 무력화 */
+  }
+  /* 햄버거로 열었을 때(.active)만 보이게 */
+  #sidebar.active {
+    display: block !important;
+    transform: translateX(0) !important;
+  }
+
+  /* 사이드바 배경(오버레이) 쓰면 이것도 기본 감춤 */
+  .sidebar-backdrop {
+    display: none !important;
+  }
+  .sidebar-backdrop.active {
+    display: block !important;
+  }
+}
+
+/* 콘텐츠를 모바일=100%, 데스크탑=375px 중앙정렬로 */
+.sns-fixed-width {
+  width: 100%;
+}
+
+@media (min-width: 1200px) {
+  .sns-fixed-width {
+    max-width: 375px;
+    margin: 0 auto;                 /* 가운데 정렬 */
+    min-height: calc(100vh - 120px);/* 고정 헤더(60)+푸터(60) 고려 */
+  }
+}
+

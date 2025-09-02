@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class PetDTO {
-    private String petId;
+    private int petId;
     private String userId;
     private String petName;
     private int petBreedId;

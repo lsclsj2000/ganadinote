@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<header id="sidebar" class="active" th:fragment="asideFragment">
-    <div class="sidebar-wrapper active">
+<header id="sidebar" th:fragment="asideFragment">
+    <div class="sidebar-wrapper">
         <div class="sidebar-header">
             <div class="d-flex justify-content-between">
                 <a th:href="@{/todo/list}">
                     <img src="/assets/images/logo/ganadinote-logo.png" alt="Logo" srcset="" style="width: 65%; height: auto;">
                 </a>
                 <div class="toggler">
-                    <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
+                    <a href="#" class="sidebar-hide"><i class="bi bi-x bi-middle"></i></a>
                 </div>
             </div>
         </div>
