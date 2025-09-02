@@ -9,10 +9,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import ganadinote.common.file.FileUtils; // FileUtils import
+
+@Controller
+@RequestMapping("/pet")
+class PetViewController {
+    @GetMapping("/petInfo")
+    public String view() {
+    	return "auth/auth-petInfo";
+    }
+}
 
 @RestController
 @RequestMapping("/pet")
@@ -21,7 +30,6 @@ public class PetController {
 
     private final PetService petService;
     private final ObjectMapper objectMapper;
-    private final FileUtils fileUtils; // FileUtils 주입
 
     @GetMapping("/register")
     public String showPetRegistrationPage() {
@@ -44,8 +52,8 @@ public class PetController {
             
             petDTO.setUserId(userId);
 
-            // 서비스 레이어 호출 시 MultipartFile과 FileUtils 함께 전달
-            boolean isRegistered = petService.registerPet(petDTO, petProfileImg, fileUtils);
+            // 서비스 레이어 호출 시 MultipartFile만 전달
+            boolean isRegistered = petService.registerPet(petDTO, petProfileImg);
 
             if (isRegistered) {
                 return ResponseEntity.ok("반려견 등록이 완료되었습니다.");

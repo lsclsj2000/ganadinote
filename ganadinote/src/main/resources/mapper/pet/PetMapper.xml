@@ -3,23 +3,37 @@
 <mapper namespace="ganadinote.auth.pet.mapper.PetMapper">
 
     <insert id="insertPet" parameterType="ganadinote.auth.pet.dto.PetDTO">
-        INSERT INTO pet (
-            mbr_cd,
-            pet_name,
-            pet_breed,
-            pet_gender,
-            pet_birth_date,
-            pet_weight,
-            pet_color,
-            pet_profile_img_url  ) VALUES (
-            #{userId},
-            #{petName},
-            #{petBreedId},
-            #{petGender},
-            #{petBirthDate},
-            #{petWeight},
-            #{petColor},
-            #{petProfileImgUrl}  )
-    </insert>
-
+	    <selectKey keyProperty="petId" resultType="Integer" order="AFTER">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	    INSERT INTO pet (
+	        mbr_cd,
+	        pet_name,
+	        pet_breed,
+	        pet_gender,
+	        pet_birth_date,
+	        pet_weight,
+	        pet_color,
+	        pet_profile_img_url
+	    ) VALUES (
+	        #{userId},
+	        #{petName},
+	        #{petBreedId},
+	        #{petGender},
+	        #{petBirthDate},
+	        #{petWeight},
+	        #{petColor},
+	        #{petProfileImgUrl}
+	    )
+	</insert>
+	
+	<insert id="insertProfileCard" parameterType="ganadinote.auth.pet.dto.PetDTO">
+	    INSERT INTO profile_card (
+	        mbr_cd,
+	        pet_cd
+	    ) VALUES (
+	        #{userId},
+	        #{petId}
+	    )
+	</insert>
 </mapper>

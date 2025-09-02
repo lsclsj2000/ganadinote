@@ -17,10 +17,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class PetServiceImpl implements PetService {
 
     private final PetMapper petMapper;
+    private final FileUtils fileUtils;
 
     @Override
     @Transactional
-    public boolean registerPet(PetDTO petDTO, MultipartFile petProfileImg, FileUtils fileUtils) {
+    public boolean registerPet(PetDTO petDTO, MultipartFile petProfileImg) {
         
         if (petProfileImg != null && !petProfileImg.isEmpty()) {
             // FileUtils를 사용해 파일을 업로드하고 FileMetaData를 받습니다.
@@ -32,9 +33,15 @@ public class PetServiceImpl implements PetService {
             }
         }
         
-        // 반려견 정보 DB에 삽입
-        int result = petMapper.insertPet(petDTO);
+    	// 1. 반려견 정보 DB에 삽입 (이때 pet_cd가 petDTO 객체에 설정됨)
+        int petResult = petMapper.insertPet(petDTO);
+        if (petResult <= 0) {
+            return false;
+        }
+
+        // 2. profile_card 테이블에 데이터 삽입
+        int cardResult = petMapper.insertProfileCard(petDTO);
         
-        return result > 0;
+        return cardResult > 0;
     }
 }
