@@ -49,6 +49,9 @@
             justify-content: flex-end;
             margin-top: 1rem;
         }
+        .btn.btn-secondary {
+        	background : #4545b6;
+        }
     </style>
 </head>
 <body>
@@ -223,14 +226,14 @@
 	                const isActive = data.isActive;
 	                
 	                if (isActive) {
-	                    statusText.textContent = "현재 알림을 구독 중입니다.";
-	                    subscribeButton.textContent = "알림 구독 취소";
+	                    statusText.textContent = "현재 알림을 받는 중입니다.";
+	                    subscribeButton.textContent = "알림 취소";
 	                    subscribeButton.className = "btn btn-danger small-btn"; // 버튼 크기 수정
 	                    subscribeButton.removeEventListener('click', subscribeUserToPush);
 	                    subscribeButton.addEventListener('click', unsubscribeUser);
 	                } else {
-	                    statusText.textContent = "현재 알림 구독이 되어 있지 않습니다.";
-	                    subscribeButton.textContent = "알림 구독하기";
+	                    statusText.textContent = "현재 알림을 받지 않습니다.";
+	                    subscribeButton.textContent = "알림 받기";
 	                    subscribeButton.className = "btn btn-primary small-btn"; // 버튼 크기 수정
 	                    subscribeButton.removeEventListener('click', unsubscribeUser);
 	                    subscribeButton.addEventListener('click', subscribeUserToPush);
