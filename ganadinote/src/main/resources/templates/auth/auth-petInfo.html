@@ -368,10 +368,10 @@
             });
         });
         
-        // 폼 제출 이벤트
+    	 // 폼 제출 이벤트
         document.getElementById('petRegistrationForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            
+
             // 폼 데이터 가져오기
             const petName = document.getElementById('petName').value;
             const petBreedInput = document.getElementById('petBreed');
@@ -384,13 +384,13 @@
             const petColor = document.getElementById('petColor').value;
             const petProfileImgFile = document.getElementById('petProfileImg').files[0];
 
-            // 유효성 검사 (필요에 따라 추가)
+            // 유효성 검사
             if (!petName || !petBreedId || !petGender || !petBirthDate || isNaN(petWeight)) {
                 alert('모든 필수 정보를 입력해주세요.');
                 return;
             }
 
-            // DTO 객체 생성
+            // DTO 객체 생성 (FormData에 담기 위해 JSON 문자열로 만듭니다)
             const petData = {
                 petName: petName,
                 petBreedId: petBreedId,
@@ -398,9 +398,14 @@
                 petBirthDate: petBirthDate,
                 petWeight: petWeight,
                 petColor: petColor,
-                petProfileImgUrl: '임시_URL', // TODO: 실제 이미지 업로드 후 URL로 대체
             };
-            
+
+            const formData = new FormData();
+            formData.append("petData", JSON.stringify(petData));
+            if (petProfileImgFile) {
+                formData.append("petProfileImg", petProfileImgFile);
+            }
+
             // 토큰 가져오기 (쿠키에서 'Authorization' 값을 찾음)
             const getCookie = (name) => {
                 const cookies = document.cookie.split(';');
@@ -416,28 +421,27 @@
             const token = getCookie('Authorization');
             if (!token) {
                 alert('로그인이 필요합니다.');
-                window.location.href = '/login'; // 로그인 페이지로 리디렉션
+                window.location.href = '/login';
                 return;
             }
 
-            // 서버로 데이터 전송
+            // 서버로 FormData 전송
             fetch('/pet/register', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(petData)
+                body: formData
             })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('서버 응답 오류: ' + response.statusText);
                 }
-                return response.text(); // 응답 본문을 텍스트로 읽음
+                return response.text();
             })
             .then(message => {
-                alert(message); // "반려견 등록이 완료되었습니다."
-                window.location.href = '/my-pet'; // 예시: 마이페이지로 이동
+                alert(message);
+                window.location.href = '/todo/list';
             })
             .catch(error => {
                 console.error('Fetch error:', error);

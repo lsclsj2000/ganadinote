@@ -1,5 +1,6 @@
 package ganadinote.petCard.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import ganadinote.common.util.TokenUtils;
 import ganadinote.petCard.service.PetCardService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -39,9 +41,12 @@ public class petCardController {
         return Integer.valueOf(mbrStr);
     }
 
+    /** 모든 미로그인 예외는 동일하게 리다이렉트 */
     @ExceptionHandler(NotLoggedInException.class)
-    public void handleNotLoggedIn(HttpServletResponse response) throws Exception {
-        response.sendRedirect("http://localhost:81/login");
+    public void handleNotLoggedIn(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // 현재 요청의 도메인/프로토콜을 유지하고 앱 컨텍스트를 고려
+        String loginPath = request.getContextPath() + "/login";
+        response.sendRedirect(loginPath);
     }
 
     @GetMapping

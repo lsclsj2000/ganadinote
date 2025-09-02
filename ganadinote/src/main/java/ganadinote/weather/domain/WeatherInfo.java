@@ -1,8 +1,13 @@
 package ganadinote.weather.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -30,6 +35,25 @@ public class WeatherInfo {
         private Float temp;
         private Float pop; // 강수 확률
         private List<Weather> weather;
+        
+        public LocalTime getTime() {
+            return Instant.ofEpochSecond(dt).atZone(ZoneId.systemDefault()).toLocalTime();
+        }
+        public boolean isRaining() {
+            if (weather == null || weather.isEmpty()) {
+                return false;
+            }
+            Integer weatherId = weather.get(0).getId();
+            return (weatherId >= 200 && weatherId < 600);
+        }
+        
+        public boolean isSnowing() {
+            if (weather == null || weather.isEmpty()) {
+                return false;
+            }
+            Integer weatherId = weather.get(0).getId();
+            return (weatherId >= 600 && weatherId < 700);
+        }
     }
 
     @Data
@@ -66,5 +90,17 @@ public class WeatherInfo {
         }
         Integer weatherId = current.getWeather().get(0).getId();
         return (weatherId >= 200 && weatherId < 600);
+    }
+    public boolean isSnowing() {
+        if (current == null || current.getWeather() == null || current.getWeather().isEmpty()) {
+            return false;
+        }
+        Integer weatherId = current.getWeather().get(0).getId();
+        // 눈 관련 날씨 코드: 600-622
+        return (weatherId >= 600 && weatherId < 700);
+    }
+    public List<Hourly> getHourly() {
+    	// 시간 관련
+        return this.hourly;
     }
 }
