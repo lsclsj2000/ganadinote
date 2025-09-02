@@ -10,16 +10,16 @@
             pet_gender,
             pet_birth_date,
             pet_weight,
-            pet_color
-        ) VALUES (
+            pet_color,
+            pet_profile_img_url  ) VALUES (
             #{userId},
             #{petName},
             #{petBreedId},
             #{petGender},
             #{petBirthDate},
             #{petWeight},
-            #{petColor}
-        )
+            #{petColor},
+            #{petProfileImgUrl}  )
     </insert>
 
 </mapper>
