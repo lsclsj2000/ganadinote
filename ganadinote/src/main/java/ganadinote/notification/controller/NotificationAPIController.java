@@ -1,6 +1,7 @@
 package ganadinote.notification.controller;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ganadinote.common.domain.NotificationHistory;
 import ganadinote.common.util.TokenUtils;
 import ganadinote.location.service.LocationService;
 import ganadinote.notification.domain.PushSubDTO;
@@ -195,4 +197,29 @@ public class NotificationAPIController {
 	            return "Failed to trigger test alert: " + e.getMessage();
 	        }
 	    }
+	 
+	 // 알림 기록 저장
+	 @GetMapping("/history")
+		public List<NotificationHistory> getNotificationHistory() {
+			String mbrCdStr = TokenUtils.getMbrCd();
+			
+			if (mbrCdStr == null || mbrCdStr.trim().isEmpty()) {
+				log.error("유효한 회원 코드가 없습니다.");
+				// 빈 리스트를 반환하여 클라이언트에서 오류를 처리할 수 있도록 함
+				return Collections.emptyList(); 
+			}
+			
+			try {
+				Integer mbrCd = Integer.parseInt(mbrCdStr);
+				 	List<NotificationHistory> historyList = notificationService.getNotificationHistory(mbrCd);
+			        log.info("API 반환 직전, 알림 이력 리스트: {}", historyList);
+				return notificationService.getNotificationHistory(mbrCd);
+			} catch (NumberFormatException e) {
+				log.error("회원 코드(mbrCd) 변환 실패", e);
+				return Collections.emptyList();
+			} catch (Exception e) {
+				log.error("알림 이력 조회 실패", e);
+				return Collections.emptyList();
+			}
+		}
 }

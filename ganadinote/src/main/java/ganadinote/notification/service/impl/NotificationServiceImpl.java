@@ -2,11 +2,14 @@ package ganadinote.notification.service.impl;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ganadinote.common.domain.NotificationHistory;
 import ganadinote.common.domain.PushSubscription;
 import ganadinote.location.domain.LocationDTO;
 import ganadinote.location.service.LocationService;
@@ -25,6 +29,7 @@ import ganadinote.notification.mapper.PushMapper;
 import ganadinote.notification.service.NotificationService;
 import ganadinote.weather.domain.AirPollutionDTO;
 import ganadinote.weather.domain.WeatherInfo;
+import ganadinote.weather.domain.WeatherInfo.Hourly;
 import ganadinote.weather.service.WeatherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -114,6 +119,13 @@ public class NotificationServiceImpl implements NotificationService {
          }
     	return pets;
     }
+    /**
+     * 알림 기록 조회
+     */
+    @Override
+    public List<NotificationHistory> getNotificationHistory(int mbrCd) {
+    	return pushMapper.getNotificationHistory(mbrCd);
+    }
     
     /**
      * 알림 시간 설정
@@ -165,6 +177,18 @@ public class NotificationServiceImpl implements NotificationService {
                         pushService.send(notification);
 
                         log.info("회원 {}의 구독({})에 알림 전송 완료", mbrCd, subscription.getEndpoint());
+                        
+                        // 알림 history 저장
+                        NotificationHistory history = new NotificationHistory();
+                        history.setMbrCd(mbrCd);
+                        history.setTitle("산책 알림");
+                        history.setMessage(message);
+                        history.setSentAt(LocalDateTime.now());
+                        log.info("알림 기록 저장 직전, sentAt 값: {}", history.getSentAt());
+                        
+                        pushMapper.saveNotificationHistory(history);
+                        
+                        log.info("회원 {}의 알림 이력이 성공적으로 저장되었습니다.", mbrCd);
                     } catch (Exception e) {
                         log.error("회원 {} 구독({}) 알림 전송 실패: {}", mbrCd, subscription.getEndpoint(), e.getMessage());
                     }
@@ -244,68 +268,179 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("회원 {}의 산책 알림 처리 시작", mbrNknm);
 
         LocationDTO location = locationService.getMemberLocation(mbrCd);
-        log.info("회원 {}의 현재 위치 정보: 위도 = {}, 경도 = {}", mbrNknm, location != null ? location.getLatitude() : "N/A", location != null ? location.getLongitude() : "N/A");
         if (location == null || location.getLatitude() == 0 || location.getLongitude() == 0) {
             log.warn("회원 {}의 위치 정보가 없어 알림을 처리할 수 없습니다. 기본값 사용.", mbrNknm);
             location = new LocationDTO();
             location.setLatitude(37.5665);
-            location.setLongitude(126.9780); // 서울 기본값
+            location.setLongitude(126.9780);
         }
 
         WeatherInfo weather = weatherService.getWeather(location.getLatitude(), location.getLongitude());
         AirPollutionDTO air = weatherService.getAirPollution(location.getLatitude(), location.getLongitude());
         List<PetWithBreedDTO> pets = mainService.getPetInfoWithBreedByMbrCd(mbrCd);
+        
+        if (weather == null || air == null || pets == null || pets.isEmpty()) {
+            log.warn("날씨, 미세먼지, 또는 펫 정보가 유효하지 않아 알림을 처리할 수 없습니다.");
+            return;
+        }
 
-        if (weather != null && air != null && pets != null && !pets.isEmpty()) {
-            List<String> combinedAlertMessages = new ArrayList<>();
-            boolean isUnwalkableWeather = false;
-
-            // 1. 비/눈이 오는 경우를 먼저 확인하여 모든 강아지에 대해 알림을 한 번만 보냅니다.
-            if (weather.isRaining()) {
-                combinedAlertMessages.add(" 비가 와서 산책하기엔 좋지 않아요. ☂️");
-                isUnwalkableWeather = true;
+        List<String> combinedMessages = new ArrayList<>();
+        
+        // 1. 공통 날씨 (비, 눈, 미세먼지)를 최상단에 표시
+        if (weather.isRaining()) {
+            combinedMessages.add("비가 내리고 있어 산책에 주의하세요. ☂️");
+        }
+        if (weather.isSnowing()) {
+            combinedMessages.add("눈이 내리고 있어 산책에 주의하세요. 🌨️");
+        }
+        
+        if (air.getPm25() != null && air.getPm10() != null) {
+            if (air.getPm25() > 75 || air.getPm10() > 150) {
+                combinedMessages.add("오늘 미세먼지 농도가 높아 산책에 주의가 필요해요. 😷");
             }
-            if (weather.isSnowing()) {
-                combinedAlertMessages.add(" 눈이 오고 있어 산책하기엔 좋지 않아요. 🌨️");
-                isUnwalkableWeather = true;
-            }
-
-            // 2. 각 펫별로 온도와 미세먼지 알림 메시지를 생성합니다.
+        }
+        
+        // 2. 각 강아지별로 온도에 따른 나쁜 시간대 요약
+        if (weather.getHourly() != null && !weather.getHourly().isEmpty()) {
+            
             for (PetWithBreedDTO pet : pets) {
-                if (pet != null) {
-                    if (weather.getTemp() != null) {
-                        if (weather.getTemp() > pet.getMaxTemp()) {
-                            combinedAlertMessages.add(String.format("%s가 산책하기엔 너무 더워요. 🌡️ (현재 %.1f°C)", pet.getPetName(), weather.getTemp()));
-                        } else if (weather.getTemp() < pet.getMinTemp()) {
-                            combinedAlertMessages.add(String.format("%s가 산책하기엔 너무 추워요. ☃️ (현재 %.1f°C)", pet.getPetName(), weather.getTemp()));
-                        }
-                    }
+                Map<String, List<Integer>> badHoursByReason = new LinkedHashMap<>();
+                badHoursByReason.put("heat", new ArrayList<>());
+                badHoursByReason.put("cold", new ArrayList<>());
 
-                    if (air.getPm25() != null && air.getPm10() != null) {
-                        if (air.getPm25() > 75 || air.getPm10() > 150) {
-                            combinedAlertMessages.add(String.format("%s가 산책하기엔 미세먼지 농도가 높아요. 😷", pet.getPetName()));
+                for (Hourly hourly : weather.getHourly()) {
+                    if (hourly.getTemp() != null) {
+                        if (hourly.getTemp() > pet.getMaxTemp()) {
+                            badHoursByReason.get("heat").add(hourly.getTime().getHour());
+                        } else if (hourly.getTemp() < pet.getMinTemp()) {
+                            badHoursByReason.get("cold").add(hourly.getTime().getHour());
                         }
                     }
+                }
+                
+                List<String> petAlerts = new ArrayList<>();
+                if (!badHoursByReason.get("heat").isEmpty()) {
+                    List<String> condensedHeatHours = condenseHours(badHoursByReason.get("heat"));
+                    petAlerts.add(String.join(", ", condensedHeatHours) + "에는 (" + pet.getMaxTemp() + "°C). 보다 높아 너무 더워요🥵");
+                }
+                if (!badHoursByReason.get("cold").isEmpty()) {
+                    List<String> condensedColdHours = condenseHours(badHoursByReason.get("cold"));
+                    petAlerts.add(String.join(", ", condensedColdHours) + "에는 (" + pet.getMinTemp() + "°C). 보다 낮아 너무 추워요🥶");
+                }
+                
+                if (!petAlerts.isEmpty()) {
+                    StringBuilder petMessage = new StringBuilder();
+                    petMessage.append(String.format("%s에게는 ", pet.getPetName()));
+                    petMessage.append(String.join(" ", petAlerts));
+                    combinedMessages.add(petMessage.toString());
                 }
             }
+        }
 
-            // 3. 알림 메시지가 있을 경우 한 번에 전송합니다.
-            if (!combinedAlertMessages.isEmpty()) {
-                String combinedMessage = String.format("%s님, 산책 알림입니다. ", mbrNknm) + String.join(" ", combinedAlertMessages);
-                try {
-                    sendNotification(mbrCd, combinedMessage);
-                    log.info("회원 {}에게 알림 전송 완료: {}", mbrNknm, combinedMessage);
-                } catch (Exception e) {
-                    log.error("회원 {}에게 알림 전송 실패", mbrNknm, e);
-                }
-            } else {
-                // 날씨 조건이 좋지 않을 때만 로그를 남깁니다.
-                if (!isUnwalkableWeather) {
-                     log.info("회원 {}의 강아지들이 산책하기 좋은 날씨입니다.", mbrNknm);
-                }
+        // 3. 최종 메시지 전송
+        if (!combinedMessages.isEmpty()) {
+            String combinedMessage = String.format("%s님, 산책 알림입니다. ", mbrNknm) + String.join(" ", combinedMessages);
+            try {
+                sendNotification(mbrCd, combinedMessage);
+                log.info("회원 {}에게 알림 전송 완료: {}", mbrNknm, combinedMessage);
+            } catch (Exception e) {
+                log.error("회원 {}에게 알림 전송 실패", mbrNknm, e);
             }
         } else {
-            log.warn("날씨, 미세먼지, 또는 펫 정보가 유효하지 않아 알림을 처리할 수 없습니다.");
+            log.info("회원 {}의 강아지들이 산책하기 좋은 날씨입니다.", mbrNknm);
         }
+    }
+
+    /**
+     * 연속된 시간들을 묶어주는 헬퍼 메서드
+     * 예: [9, 10, 11, 14, 15] -> ["9시~11시", "14시~15시"]
+     */
+    private List<String> condenseHours(List<Integer> hours) {
+        if (hours == null || hours.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // 중복 제거 후 오름차순 정렬
+        List<Integer> sortedUniqueHours = hours.stream().sorted().distinct().collect(Collectors.toList());
+        
+        List<String> result = new ArrayList<>();
+        if (sortedUniqueHours.isEmpty()) {
+            return result;
+        }
+        
+        int start = sortedUniqueHours.get(0);
+        int end = sortedUniqueHours.get(0);
+        
+        for (int i = 1; i < sortedUniqueHours.size(); i++) {
+            int currentHour = sortedUniqueHours.get(i);
+            if (currentHour == end + 1) {
+                end = currentHour;
+            } else {
+                result.add(formatHourRange(start, end));
+                start = currentHour;
+                end = currentHour;
+            }
+        }
+        
+        // 마지막 범위 추가
+        result.add(formatHourRange(start, end));
+        
+        return result;
+    }
+    
+    /**
+     * 24시간을 오전/오후로 변환하고 시간 범위를 포맷하는 헬퍼 메서드
+     * 예: 9, 11 -> "오전 9시~11시"
+     * 예: 14, 15 -> "오후 2시~3시"
+     * 예: 22, 23 -> "밤 10시~11시"
+     */
+    private String formatHourRange(int startHour, int endHour) {
+        String startFormatted = formatHour12(startHour);
+        String endFormatted = formatHour12(endHour);
+        
+        if (startHour == endHour) {
+            return startFormatted;
+        } else {
+            // "오전 9시~오후 1시" 처럼 오전/오후 접두사가 다를 때
+            if (getAmPmPrefix(startHour).equals(getAmPmPrefix(endHour))) {
+                // "오전 9시~11시"
+                String prefix = getAmPmPrefix(startHour);
+                if (prefix.equals("밤")) {
+                    return String.format("%s %d시~%d시", prefix, to12Hour(startHour), to12Hour(endHour));
+                }
+                return String.format("%s %d시~%d시", prefix, to12Hour(startHour), to12Hour(endHour));
+            } else {
+                // "오전 11시~오후 1시"
+                return String.format("%s~%s", startFormatted, endFormatted);
+            }
+        }
+    }
+    
+    /**
+     * 24시간을 12시간 표기법으로 변환
+     */
+    private int to12Hour(int hour24) {
+        if (hour24 == 0) return 12; // 자정
+        if (hour24 > 12) return hour24 - 12;
+        return hour24;
+    }
+    
+    /**
+     * 시간대별 접두사(오전, 오후, 밤) 반환
+     */
+    private String getAmPmPrefix(int hour24) {
+        if (hour24 >= 0 && hour24 < 12) {
+            return "오전";
+        }
+        return "오후";
+    }
+    
+    /**
+     * 24시간을 포맷된 문자열로 변환
+     */
+    private String formatHour12(int hour24) {
+        String prefix = getAmPmPrefix(hour24);
+        int hour12 = to12Hour(hour24);
+        return String.format("%s %d시", prefix, hour12);
     }
 }
