@@ -151,7 +151,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void sendNotification(Integer mbrCd, String message) {
         try {
-            List<PushSubscription> subscriptions = pushMapper.getActiveSubscriptionsByMbrCd(mbrCd);
+            List<PushSubDTO> subscriptions = pushMapper.getActiveSubscriptionsByMbrCd(mbrCd);
 
             if (subscriptions != null && !subscriptions.isEmpty()) {
                 // PushService 생성
@@ -164,7 +164,7 @@ public class NotificationServiceImpl implements NotificationService {
                 );
                 String payloadJson = objectMapper.writeValueAsString(payloadMap);
 
-                for (PushSubscription subscription : subscriptions) {
+                for (PushSubDTO subscription : subscriptions) {
                     try {
                         // Subscription 객체 생성
                         Subscription.Keys keys = new Subscription.Keys(subscription.getP256dh(), subscription.getAuth());
@@ -211,7 +211,7 @@ public class NotificationServiceImpl implements NotificationService {
      * 각 회원의 알림 스케줄 데이터를 파싱하고, 현재 시간에 해당하는 경우
      * 날씨, 미세먼지, 펫 정보 등을 확인하여 알림 메시지를 생성한 후 전송합니다.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public void processWalkAlertsForScheduledUsers() {
         DayOfWeek currentDay = LocalDate.now().getDayOfWeek();
         LocalTime currentTime = LocalTime.now().withSecond(0).withNano(0);
@@ -220,11 +220,11 @@ public class NotificationServiceImpl implements NotificationService {
         String timeString = currentTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 
         try {
-            List<PushSubscription> subscriptions = pushMapper.findSubscriptionsBySchedule(dayOfWeekString, timeString);
+            List<PushSubDTO> subscriptions = pushMapper.findSubscriptionsBySchedule(dayOfWeekString, timeString);
             log.info("총 {}개의 알림 스케줄이 조회되었습니다.", subscriptions.size());
 
-            for (PushSubscription subscription : subscriptions) {
-                Integer mbrCd = subscription.getMbrCd();
+            for (PushSubDTO subscription : subscriptions) {
+                int mbrCd = subscription.getMbrCd();
                 String mbrNknm = mainService.getNknmByMbrCd(mbrCd);
 
                 try {

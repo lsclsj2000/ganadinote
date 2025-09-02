@@ -4,7 +4,7 @@ import ganadinote.location.domain.LocationDTO;
 
 public interface LocationService {
 
-	String processLocation(double latitude, double longitude);
+	String processLocation(double latitude, double longitude, Integer mbrCd);
 	
 	// 회원의 위치 정보(위도, 경도)를 업데이트합니다.
 	void updateMemberLocation(Integer mbrCd, Double latitude, Double longitude);

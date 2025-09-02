@@ -6,7 +6,6 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import ganadinote.common.domain.NotificationHistory;
-import ganadinote.common.domain.PushSubscription;
 import ganadinote.notification.domain.LocationUpdateDTO;
 import ganadinote.notification.domain.PetWithBreedDTO;
 import ganadinote.notification.domain.PushSubDTO;
@@ -18,7 +17,7 @@ public interface PushMapper {
     void addSubscription(PushSubDTO dto);
     
     // 회원 코드로 구독 정보 가져오기
-    List<PushSubscription> getSubInfoByMbrCd(@Param("mbrCd") Integer mbrCd);
+    List<PushSubDTO> getSubInfoByMbrCd(@Param("mbrCd") Integer mbrCd);
     
     // 활성화된 구독 정보가 있는지 확인
     Boolean isSubscriptionActive(@Param("mbrCd") int mbrCd);
@@ -36,7 +35,7 @@ public interface PushMapper {
     void reactivateSubscription(@Param("mbrCd") int mbrCd);
     
     // 스케줄에 맞는 구독 정보 찾기
-    List<PushSubscription> findSubscriptionsBySchedule(@Param("dayOfWeek") String dayOfWeek, @Param("time") String time);
+    List<PushSubDTO> findSubscriptionsBySchedule(@Param("dayOfWeek") String dayOfWeek, @Param("time") String time);
     
     // mbrCd를 통해 pet 알림 정보 가져오기
     List<PetWithBreedDTO> getPetInfoForNotification(@Param("mbrCd") String mbrCd);
@@ -48,13 +47,13 @@ public interface PushMapper {
     String getNotificationSchedule(@Param("mbrCd") Integer mbrCd);
 
     // 위치 정보가 포함된 모든 활성화된 구독 정보 가져오기
-    List<PushSubscription> findSubscriptionsWithLocation();
+    List<PushSubDTO> findSubscriptionsWithLocation();
     
     // 회원의 위치 정보(위도, 경도)를 업데이트합니다.
     void updateLocation(LocationUpdateDTO locationUpdateDto);
    
     // 회원 코드를 기반으로 활성화된 모든 구독 정보를 찾아 리스트로 반환
-    List<PushSubscription> getActiveSubscriptionsByMbrCd(@Param("mbrCd") Integer mbrCd);
+    List<PushSubDTO> getActiveSubscriptionsByMbrCd(@Param("mbrCd") Integer mbrCd);
     
     // 회원 코드로 알림 스케줄(JSON) 데이터를 조회합니다.
     String getNotificationScheduleByMbrCd(@Param("mbrCd") Integer mbrCd);

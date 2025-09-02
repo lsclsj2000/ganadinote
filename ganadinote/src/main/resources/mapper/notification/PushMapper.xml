@@ -26,7 +26,7 @@
         <result column="activity_level" 		property="activityLevel"/>
     </resultMap>
     
-    <resultMap 	id="pushSubscriptionResultMap" 	type="ganadinote.common.domain.PushSubscription">
+<!--     <resultMap 	id="pushSubscriptionResultMap" 	type="ganadinote.common.domain.PushSubscription">
 	    <id 	column="id" 					property="id" />
 	    <result column="mbr_cd" 				property="mbrCd" />
 	    <result column="endpoint" 				property="endpoint" />
@@ -34,15 +34,17 @@
 	    <result column="auth" 					property="auth" />
 	    <result column="created_at" 			property="createdAt" />
 	    <result column="is_active" 				property="isActive" />
-	</resultMap>
+	</resultMap> -->
 	
 	<resultMap 	id="pushSubDTOMap" 				type="ganadinote.notification.domain.PushSubDTO">
-	    <result column="mbr_cd" 				property="mbrCd"/>
-	    <result column="endpoint" 			    property="endpoint"/>
-	    <result column="p256dh" 				property="p256dh"/>
-	    <result column="auth" 				    property="auth"/>
-	    <result column="notification_schedule"  property="notificationSchedule"/>
-	    <result column="is_active" 			    property="isActive"/>
+	    <id property="id" 						column="id"/>
+        <result property="endpoint" 			column="endpoint"/>
+        <result property="p256dh" 				column="p256dh"/>
+        <result property="auth" 				column="auth"/>
+        <result property="createdAt" 			column="created_at"/>
+        <result property="notificationSchedule" column="notification_schedule"/>
+        <result property="isActive" 			column="is_active"/>
+        <result property="mbrCd" 				column="mbr_cd"/>
 	</resultMap>
 		
 	<resultMap id="notificationHistoryMap" 		type="ganadinote.common.domain.NotificationHistory">
@@ -80,7 +82,7 @@
             p.mbr_cd = #{mbrCd};
     </select>
     
-    <select id="getSubInfoByMbrCd" resultMap="pushSubscriptionResultMap">
+    <select id="getSubInfoByMbrCd" resultMap="pushSubDTOMap">
         /* 알림 구독 정보 멤버 코드로 받아오기 */
         SELECT
             id,
@@ -226,7 +228,7 @@
             AND ml.longitude IS NOT NULL
     </select>
     
-    <select id="getActiveSubscriptionsByMbrCd" resultMap="pushSubscriptionResultMap">
+    <select id="getActiveSubscriptionsByMbrCd" resultMap="pushSubDTOMap">
     	/* 회원 코드로 구독중인 데이터를 조회합니다. */
 	    SELECT
 	        id,
@@ -257,7 +259,7 @@
 	    INSERT INTO 
 	    	notification_history (mbr_cd, title, message, sent_at)
 	    VALUES 
-	    	(#{mbrCd}, #{title}, #{message}, NOW())
+	    	(#{mbrCd}, #{title}, #{message}, NOW() + INTERVAL 9 HOUR)
 	</insert>
 	
 	<select id="getNotificationHistory" resultMap="notificationHistoryMap">
