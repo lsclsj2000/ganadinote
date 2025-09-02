@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <div th:fragment="snsHomeFragment">
-	<div class="page-heading mt-10">
+	<div class="page-heading">
 	    <section class="section">
 	        <div class="row no-gutter-x">
 	            <div class="col-md-6 offset-md-3">
@@ -100,7 +100,7 @@
 											<div class="sr_feed-img carousel-item mb-3"
 											     th:each="img,iter : ${p.imagePaths}"
 											     th:classappend="${iter.index == 0} ? ' active'">
-												<img th:src="@{${p.imagePaths[0]}}" class="d-block w-100" alt="게시자 이미지">
+												<img th:src="@{${img}}" class="d-block w-100" alt="게시자 이미지">
 											</div>
 										</div>
 								
