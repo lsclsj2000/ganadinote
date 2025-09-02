@@ -88,18 +88,11 @@
 
 <th:block layout:fragment="contents">
     <div class="page-heading mt-3">
-        <h3 th:text="${'안녕하세요, ' + mbrNknm + '님!'}"></h3>
+        <h3 th:text="${'안녕하세요, ' + mbrNknm + ' 님!'}"></h3>
     </div>
     <div class="page-content">
         <section class="row">
             <div class="col-12 col-lg-9">
-                <div th:if="${mbrNknm != '게스트'}">
-                    <h5 class="my-3">내 강아지</h5>
-                    <div id="pet-cards-container">
-                        <p id="loading-message">반려동물 정보를 불러오는 중...</p>
-                    </div>
-                </div>
-
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
@@ -148,40 +141,7 @@
         const getAqiText = (value, type) => { const thresholds = { pm10: [30, 80, 150], pm25: [15, 35, 75] }; let level = 1; if (value > thresholds[type][2]) level = 4; else if (value > thresholds[type][1]) level = 3; else if (value > thresholds[type][0]) level = 2; const levels = [{text: '좋음', className: 'good'}, {text: '보통', className: 'normal'}, {text: '나쁨', className: 'bad'}, {text: '매우 나쁨', className: 'very-bad'}]; return `<span class="${levels[level-1].className}">${levels[level-1].text}</span>`; };
         const getUviText = (uvi) => { let level = '낮음'; if (uvi >= 11) level = '위험'; else if (uvi >= 8) level = '매우 높음'; else if (uvi >= 6) level = '높음'; else if (uvi >= 3) level = '보통'; return level; };
 
-        // --- 2. 반려동물 정보 로드 기능 (원형 프로필로 생성) ---
-        async function fetchAndRenderPets() {
-            const container = document.getElementById('pet-cards-container');
-            const loadingMessage = document.getElementById('loading-message');
-            if (!container || !loadingMessage) return;
-            loadingMessage.style.display = 'block';
-            container.innerHTML = '';
-            try {
-            	const response = await fetch(`/mainapi/pets`);
-                if (!response.ok) throw new Error('서버 응답 오류');
-                const pets = await response.json();
-                loadingMessage.style.display = 'none';
-                if (pets.length === 0) {
-                    container.innerHTML = `<p class="text-muted text-center col-12">등록된 반려동물이 없습니다.</p>`;
-                } else {
-                    pets.forEach(pet => container.insertAdjacentHTML('beforeend', createPetCard(pet.petName, pet.petProfileImgUrl)));
-                }
-            } catch (error) {
-                loadingMessage.style.display = 'none';
-                container.innerHTML = `<p class="text-danger text-center col-12">반려동물 정보를 불러오는 데 실패했습니다.</p>`;
-            }
-        }
-        function createPetCard(petName, profileImgUrl) {
-            const imageUrl = profileImgUrl || '/assets/images/logo/favicon.svg';
-            return `
-                <div class="pet-avatar-item">
-                    <div class="pet-avatar-img-wrapper">
-                        <img src="${imageUrl}" class="pet-avatar-img" alt="${petName} 프로필" onerror="this.onerror=null; this.src='/assets/images/logo/favicon.svg';">
-                    </div>
-                    <p class="pet-avatar-name">${petName}</p>
-                </div>
-            `;
-        }
-        // --- 3. 위치 및 데이터 로드 기능 ---
+        // --- 2. 위치 및 데이터 로드 기능 ---
 		async function getLocationName() {
 		    const statusMessage = document.getElementById('status-message');
 		    const locationNameElement = document.getElementById('entireLocation');
@@ -260,7 +220,7 @@
 		    }
 		}
         
-     // --- 3-1. 날씨 및 미세먼지 데이터 로드 기능 ---
+     // --- 2-1. 날씨 및 미세먼지 데이터 로드 기능 ---
         async function fetchWeatherData(lat, lon) {
             try {
                 const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
@@ -288,7 +248,7 @@
             }
         }
         
-        // --- 4. 데이터 표시 기능 ---
+        // --- 3. 데이터 표시 기능 ---
         function displayWeatherData(data) {
             const current = data.current;
             document.getElementById('current-weather-icon').src = `https://openweathermap.org/img/wn/${current.weather[0].icon}@4x.png`;
@@ -337,15 +297,14 @@
             const minTemp = Math.min(...temps);
             const maxTemp = Math.max(...temps);
             const tempRange = maxTemp - minTemp || 1;
-            const points = hourlyData.map((hour, index) => ({ x: 25 + index * 50, y: 28 - ((hour.temp - minTemp) / tempRange) * 25 }));
+            const points = hourlyData.map((p, index) => ({ x: 25 + index * 50, y: 28 - ((p.temp - minTemp) / tempRange) * 25 }));
             const pathData = points.map((p, i) => i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`).join(' ');
             const dotsHtml = points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="3" class="dot" />`).join('');
             svg.innerHTML = `<path d="${pathData}" class="line" />${dotsHtml}`;
         }
         
-        // --- 5. 페이지가 로드되면 모든 기능을 실행 ---
+        // --- 4. 페이지가 로드되면 모든 기능을 실행 ---
         document.addEventListener('DOMContentLoaded', () => {
-            fetchAndRenderPets();
             getLocationName(); 
         });
     </script>

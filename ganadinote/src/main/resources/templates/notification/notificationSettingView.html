@@ -8,12 +8,46 @@
     <title>알림 설정</title>
     <style>
         .day-label {
-            width: 80px; /* 요일 라벨 너비 증가 */
+            width: 80px;
             min-width: 80px;
         }
         .current-time-display {
-            width: 100px; /* 현재 시간 표시 너비 증가 */
+            width: 100px;
             min-width: 100px;
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .subscription-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: right;
+            gap: 5px;
+        }
+        .small-btn {
+            min-width: 120px;
+            font-size: 0.9rem;
+            padding: 0.25rem 0.5rem;
+        }
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .subscription-group {
+                align-items: flex-start;
+                margin-top: 10px;
+            }
+        }
+        /* 버튼을 오른쪽으로 옮기기 위한 스타일 */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
         }
     </style>
 </head>
@@ -21,10 +55,16 @@
     <th:block layout:fragment="contents">
         <div class="container my-5">
             <h1 class="text-center mb-4">알림 설정</h1>
-             <h3 class="mb-0" th:text="|${mbrNknm ?: '게스트'}|">게스트</h3>
+
             <div class="card p-4">
-                <p id="subscription-status">알림 상태를 확인 중입니다...</p>
-                <button id="toggle-subscribe-button" class="btn btn-primary mt-3" disabled>로딩 중...</button>
+                
+                <div class="header-container">
+                    <h3 th:text="${'안녕하세요, ' + (mbrNknm ?: '게스트') + ' 님!'}">안녕하세요, 게스트 님!</h3>
+                    <div class="subscription-group">
+                         <button id="toggle-subscribe-button" class="btn btn-primary small-btn" disabled>로딩 중...</button>
+                         <p id="subscription-status" class="mb-0">알림 상태를 확인 중입니다...</p>
+                    </div>
+                </div>
                 
                 <hr class="my-4">
                 
@@ -61,8 +101,9 @@
                 <hr class="my-4">
                 
                 <h4>알림 시간 설정</h4>
+                <p>요일별 시간을 선택해주세요:</p>
+                
                 <form id="notification-time-form">
-                    <p>요일별 시간을 선택해주세요:</p>
                     <div id="day-time-options">
                         <div class="d-flex align-items-center mb-2">
                             <label class="form-label mb-0 day-label">월요일</label>
@@ -130,13 +171,14 @@
                             <select class="form-select time-select" data-day="sun">
                                 <option value="">알림 안 받기</option>
                                 <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
-                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></option>
-                                </th:block>
+                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></th:block>
                             </select>
                         </div>
                     </div>
                     <input type="hidden" id="notificationSchedule" name="notificationSchedule" />
-                    <button type="submit" class="btn btn-secondary mt-3">시간 설정하기</button>
+                    <div class="form-actions">
+                         <button type="submit" class="btn btn-secondary">시간 설정하기</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -183,13 +225,13 @@
 	                if (isActive) {
 	                    statusText.textContent = "현재 알림을 구독 중입니다.";
 	                    subscribeButton.textContent = "알림 구독 취소";
-	                    subscribeButton.className = "btn btn-danger mt-3";
+	                    subscribeButton.className = "btn btn-danger small-btn"; // 버튼 크기 수정
 	                    subscribeButton.removeEventListener('click', subscribeUserToPush);
 	                    subscribeButton.addEventListener('click', unsubscribeUser);
 	                } else {
 	                    statusText.textContent = "현재 알림 구독이 되어 있지 않습니다.";
 	                    subscribeButton.textContent = "알림 구독하기";
-	                    subscribeButton.className = "btn btn-primary mt-3";
+	                    subscribeButton.className = "btn btn-primary small-btn"; // 버튼 크기 수정
 	                    subscribeButton.removeEventListener('click', unsubscribeUser);
 	                    subscribeButton.addEventListener('click', subscribeUserToPush);
 	                }
