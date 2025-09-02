@@ -99,7 +99,7 @@
                         <p id="loading-message">반려동물 정보를 불러오는 중...</p>
                     </div>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
@@ -112,7 +112,7 @@
                                         <div class="temp-details">
                                             <p id="current-weather-desc" class="weather-desc">---</p>
                                             <div id="current-temp-main" class="temp-main">--.-<sup>&deg;</sup></div>
-                                            <p id="current-temp-details">체감 --.-&deg; &bull; 습도 --% &bull; 바람 ---m/s</p>
+                                            <p id="current-temp-details">체감 --.-° • 습도 --% • 바람 ---m/s</p>
                                         </div>
                                     </div>
                                     <div class="info-grid">
@@ -182,72 +182,81 @@
             `;
         }
         // --- 3. 위치 및 데이터 로드 기능 ---
-        async function getLocationName() {
+		async function getLocationName() {
 		    const statusMessage = document.getElementById('status-message');
 		    const locationNameElement = document.getElementById('entireLocation');
-		    const weatherContainer = document.getElementById('weather-cards-container'); // ⭐ 추가
+		    const weatherContainer = document.getElementById('weather-cards-container');
 		
 		    const processCoordinates = async (lat, lon) => {
 		        try {
-		            const locResponse = await fetch(`/locationapi/location`, { 
-		                method: 'POST', 
-		                headers: { 'Content-Type': 'application/json' }, 
-		                body: JSON.stringify({ latitude: lat, longitude: lon }) 
+		            const locResponse = await fetch(`/locationapi/location`, {
+		                method: 'POST',
+		                headers: { 'Content-Type': 'application/json' },
+		                body: JSON.stringify({ latitude: lat, longitude: lon })
 		            });
 		            const locData = await locResponse.json();
-		            if (locData.locationName) locationNameElement.textContent = `현재 위치: '${locData.locationName}'`;
-		            
-		            await Promise.all([ fetchWeatherData(lat, lon), fetchAirPollution(lat, lon) ]);
-		            weatherContainer.style.display = 'block'; // ⭐ 추가
-		            statusMessage.style.display = 'none'; // ⭐ 추가: 상태 메시지 숨기기
-		        } catch (error) { 
-		            statusMessage.textContent = "위치/날씨 처리 중 오류 발생"; 
-		            weatherContainer.style.display = 'none';
+		            if (!locResponse.ok || !locData.locationName) {
+		                throw new Error('위치 정보 처리 서버 오류');
+		            }
+		            const fullAddressParts = locData.locationName.split(' ');
+		            if (fullAddressParts.length >= 3) {
+		                const truncatedAddress = fullAddressParts.slice(0, 3).join(' ');
+		                locationNameElement.textContent = `현재 위치: '${truncatedAddress}'`;
+		            } else {
+		                locationNameElement.textContent = `현재 위치: '${locData.locationName}'`;
+		            }
+		            await Promise.all([fetchWeatherData(lat, lon), fetchAirPollution(lat, lon)]);
+		        } catch (error) {
+		            console.error("좌표 처리 중 오류 발생:", error);
+		            throw new Error("위치/날씨 처리 실패");
 		        }
 		    };
-		    
+		
 		    const fetchIpLocation = async () => {
 		        try {
-		            statusMessage.textContent = 'GPS 사용 불가. IP 기반 위치 추정 중...';
-		            
 		            const response = await fetch('/locationapi/ipLocation');
 		            const data = await response.json();
-		
-		            if (data.locationName) {
+		            if (!response.ok || !data.locationName || !data.latitude || !data.longitude) {
+		                throw new Error('IP 기반 위치 정보가 불완전합니다.');
+		            }
+		            const fullAddressParts = data.locationName.split(' ');
+		            if (fullAddressParts.length >= 3) {
+		                const truncatedAddress = fullAddressParts.slice(0, 3).join(' ');
+		                locationNameElement.textContent = `현재 위치(대략): '${truncatedAddress}'`;
+		            } else {
 		                locationNameElement.textContent = `현재 위치(대략): '${data.locationName}'`;
 		            }
-		            
-		            if (data.latitude && data.longitude) {
-		                await Promise.all([ fetchWeatherData(data.latitude, data.longitude), fetchAirPollution(data.latitude, data.longitude) ]);
-		                weatherContainer.style.display = 'block'; // ⭐ 추가
-		                statusMessage.style.display = 'none'; // ⭐ 추가: 상태 메시지 숨기기
-		            } else {
-		                document.getElementById('status-message').textContent = '날씨 정보 불러오기 실패: 위치 정보가 불완전합니다.';
-		                weatherContainer.style.display = 'none';
-		            }
-		
-		        } catch (error) { 
-		            statusMessage.textContent = `오류: ${error.message}`;
-		            weatherContainer.style.display = 'none';
+		            await Promise.all([fetchWeatherData(data.latitude, data.longitude), fetchAirPollution(data.latitude, data.longitude)]);
+		        } catch (error) {
+		            console.error("IP 위치 추정 중 오류 발생:", error);
+		            throw new Error("IP 기반 위치 추정 실패");
 		        }
 		    };
-		    
+		
+		    statusMessage.textContent = '위치 정보 가져오는 중...';
+		    locationNameElement.textContent = '위치 정보를 분석 중입니다...';
+		
 		    try {
-		        if (!navigator.geolocation) { 
-		            await fetchIpLocation(); 
-		            return; 
+		        if (!navigator.geolocation) {
+		            await fetchIpLocation();
+		        } else {
+		            try {
+		                const position = await new Promise((resolve, reject) => {
+		                    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+		                });
+		                await processCoordinates(position.coords.latitude, position.coords.longitude);
+		            } catch (geolocationError) {
+		                console.warn('GPS 위치 정보 가져오기 실패. IP 기반 위치 추정으로 전환.');
+		                await fetchIpLocation();
+		            }
 		        }
-		        
-		        statusMessage.textContent = '위치 정보 가져오는 중...';
-		        locationNameElement.textContent = '위치 정보를 분석 중입니다...';
-		        
-		        const position = await new Promise((resolve, reject) => { 
-		            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 }); 
-		        });
-		        
-		        await processCoordinates(position.coords.latitude, position.coords.longitude);
-		    } catch (error) { 
-		        await fetchIpLocation(); 
+		        weatherContainer.style.display = 'block';
+		    } catch (error) {
+		        console.error("날씨 정보 로드 중 치명적 오류:", error);
+		        statusMessage.textContent = `날씨 정보 불러오기 실패: ${error.message}`;
+		        weatherContainer.style.display = 'none';
+		    } finally {
+		        statusMessage.style.display = 'none';
 		    }
 		}
         

@@ -6,13 +6,19 @@ self.addEventListener('push', function(event) {
     
     if (event.data) {
         try {
-            // 푸시 데이터를 JSON으로 파싱 시도
             const payload = event.data.json();
             
-            // 파싱된 데이터에서 알림 제목과 내용을 안전하게 추출
-            title = payload.notification.title || title;
-            options.body = payload.notification.body || options.body;
-            options.icon = payload.notification.icon || '/images/icon.png';
+            // 'notification' 객체가 있는 경우와 없는 경우를 모두 처리
+            if (payload.notification) { 
+                title = payload.notification.title || title;
+                options.body = payload.notification.body || options.body;
+                options.icon = payload.notification.icon || '/images/icon.png';
+            } else {
+                // 'notification' 키가 없으면 페이로드 자체에서 title, body를 가져옴
+                title = payload.title || title;
+                options.body = payload.body || options.body;
+                options.icon = payload.icon || '/images/icon.png';
+            }
             
         } catch (e) {
             console.error('[Service Worker] 푸시 데이터 파싱 오류:', e);
@@ -21,7 +27,6 @@ self.addEventListener('push', function(event) {
         }
     }
 
-    // 알림 표시
     event.waitUntil(
         self.registration.showNotification(title, options)
     );
