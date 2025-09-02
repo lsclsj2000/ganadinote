@@ -38,4 +38,13 @@ public class LoginController {
             return ResponseEntity.status(401).build();
         }
     }
+    
+    @PostMapping("/api/logout")
+    public ResponseEntity<String> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("Authorization", null); // 쿠키 이름을 "Authorization"으로 설정
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // 유효기간을 0으로 설정하여 쿠키를 즉시 만료시킴
+        response.addCookie(cookie);
+        return ResponseEntity.ok("로그아웃 성공");
+    }
 }
