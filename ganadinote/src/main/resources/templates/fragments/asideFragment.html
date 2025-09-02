@@ -86,27 +86,37 @@
         <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
     </div>
 
-    <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', () => {
-            const mbrCd = getMbrCdFromToken();
-            const loginLogoutItem = document.getElementById('login-logout-item');
-            const link = loginLogoutItem.querySelector('a');
-            const textSpan = loginLogoutItem.querySelector('span');
-
-            if (mbrCd) {
-                // 로그인 상태: 로그아웃 버튼 표시
-                textSpan.textContent = 'Logout';
-                link.addEventListener('click', () => {
-                    removeToken();
-                    window.location.href = '/main'; // 로그인 페이지로 이동
-                });
-            } else {
-                // 로그아웃 상태: 로그인하기 버튼 표시
-                textSpan.textContent = 'Login';
-                link.href = '/login';
-            }
-        });
-    </script>
->>>>>>> refs/heads/develop
+	<script th:inline="javascript">
+		document.addEventListener('DOMContentLoaded', () => {
+	        const loginLogoutItem = document.getElementById('login-logout-item');
+	        const link = loginLogoutItem.querySelector('a');
+	        const textSpan = loginLogoutItem.querySelector('span');
+	        
+	        const mbrCd = getMbrCdFromToken();
+	
+	        if (mbrCd) {
+	            textSpan.textContent = '로그아웃';
+	            link.addEventListener('click', (event) => {
+	                event.preventDefault(); 
+	                
+	                // 1. 로컬 스토리지의 토큰 삭제
+	                removeToken();
+	
+	                // 2. 서버의 로그아웃 API 호출 (쿠키 삭제)
+	                fetch('/api/logout', { method: 'POST' })
+	                    .then(response => {
+	                        window.location.href = '/login';
+	                    })
+	                    .catch(error => {
+	                        console.error('로그아웃 API 호출 오류:', error);
+	                        window.location.href = '/login';
+	                    });
+	            });
+	        } else {
+	            textSpan.textContent = '로그인';
+	            link.href = '/login';
+	        }
+	    });
+	</script>
 </header>
 </html>
