@@ -132,23 +132,29 @@
 								<li class="sr_follow-item" th:each="u : ${followers}">
 									<a th:href="@{/sns/myfeed(m=${u.mbrCd})}" class="d-flex align-items-center text-reset text-decoration-none">
 										<div class="avatar avatar-md">
-										    <img th:src="${u.profilePath != null and !#strings.isEmpty(u.profilePath) 
-									                      ? u.profilePath 
-									                      : '/assets/images/samples/dogdefault.png'}" 
-									           alt="프로필">
+											<img th:src="${u.profilePath != null and !#strings.isEmpty(u.profilePath) ? u.profilePath : '/assets/images/samples/dogdefault.png'}" alt="프로필">
 										</div>
 										<div class="sr_follow-meta">
-											<div class="sr_follow-name" th:text="${u.nickname}">닉네임</div>
-											<div class="sr_follow-sub"  th:text="${u.handle}">@id</div>
+											<div class="sr_follow-name d-flex align-items-center gap-2">
+												<span th:text="${u.nickname}">닉네임</span>
+											</div>
+											<div class="sr_follow-sub" th:text="${u.handle}">@id</div>
 										</div>
 									</a>
-									<div class="sr_feed-actions d-flex align-items-center mb-2">
-										<i class="bi bi-heart text-danger"></i>
+									
+									<!-- ✅ 이 버튼은 ‘팔로워 제거(그 사람이 나를 팔로우하는 관계 삭제)’ -->
+									<div class="sr_feed-actions d-flex align-items-center mb-2" th:if="${isOwner}">
+										<button class="btn btn-link p-0 sr-follow-toggle"
+										        type="button"
+										        data-mode="remove-follower"
+										        th:attr="data-target=${u.mbrCd}">
+											<span class="text-danger"><i class="bi bi-heart-fill icon-mid"></i></span>
+										</button>
 									</div>
 								</li>
 							</ul>
 						</div>
-	
+						
 						<!-- 팔로우 탭 -->
 						<div class="tab-pane fade" id="srFollowingTab" role="tabpanel" aria-labelledby="srFollowingTabBtn">
 							<ul class="sr_follow-list">
@@ -157,23 +163,32 @@
 								<li class="sr_follow-item" th:each="u : ${followings}">
 									<a th:href="@{/sns/myfeed(m=${u.mbrCd})}" class="d-flex align-items-center text-reset text-decoration-none">
 										<div class="avatar avatar-md">
-											<img th:src="${u.profilePath != null and !#strings.isEmpty(u.profilePath) 
-									                      ? u.profilePath 
-									                      : '/assets/images/samples/dogdefault.png'}" 
-									           alt="프로필">
+											<img th:src="${u.profilePath != null and !#strings.isEmpty(u.profilePath) ? u.profilePath : '/assets/images/samples/dogdefault.png'}" alt="프로필">
 										</div>
 										<div class="sr_follow-meta">
-											<div class="sr_follow-name" th:text="${u.nickname}">닉네임</div>
-											<div class="sr_follow-sub"  th:text="${u.handle}">@id</div>
+											<div class="sr_follow-name d-flex align-items-center gap-2">
+												<span th:text="${u.nickname}">닉네임</span>
+												<span class="badge bg-light-secondary"
+													  th:if="${isOwner and u.followsMe}"
+													  style="color:#6c6c6c;font-size:x-small;">나를 팔로우 중</span>
+											</div>
+											<div class="sr_follow-sub" th:text="${u.handle}">@id</div>
 										</div>
 									</a>
-									<div class="sr_feed-actions d-flex align-items-center mb-2">
-										<i class="bi bi-heart text-danger"></i>
+
+									<!-- ✅ 이 버튼은 ‘내가 언팔(내가 그를 팔로우하는 관계 삭제)’ -->
+									<div class="sr_feed-actions d-flex align-items-center mb-2" th:if="${isOwner}">
+										<button class="btn btn-link p-0 sr-follow-toggle"
+										        type="button"
+										        data-mode="toggle-following"
+										        th:attr="data-target=${u.mbrCd}">
+											<span class="text-danger"><i class="bi bi-heart-fill icon-mid"></i></span>
+										</button>
 									</div>
-								</li>
+							    </li>
 							</ul>
 						</div>
-	        		</div>
+					</div>
 	      		</div>
 			</div>
 		</div>

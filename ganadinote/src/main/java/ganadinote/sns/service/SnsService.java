@@ -24,9 +24,11 @@ public interface SnsService {
     // myfeed - 게시물 대표이미지
     List<FeedPost> getMyFeedPosts(Integer mbrCd);
     // myfeed- 팔로워 목록
-    List<FollowUser> getFollowers(Integer mbrCd);
+    List<FollowUser> getFollowers(Integer loginMbrCd, Integer viewMbrCd);
     // myfeed- 팔로우 목록
-    List<FollowUser> getFollowings(Integer mbrCd);
+    List<FollowUser> getFollowings(Integer loginMbrCd, Integer viewMbrCd);
+    // myfeed - 팔로워 제거
+    boolean removeFollower(Integer me, Integer followerMbrCd);
     // myfeed - 프로필 수정 내역 조회
     Member getMemberProfile(Integer mbrCd);
     // myfeed - 프로필 수정 - 닉네임 유효성 검증

@@ -30,9 +30,11 @@ public interface SnsMapper {
     // myfeed - 게시물 대표이미지
     List<SnsPost> selectPostsByMember(Integer mbrCd);
     // myfeed- 팔로워 목록
-    List<FollowUser> selectFollowersOfMember(Integer mbrCd);
+    List<FollowUser> selectFollowersOfMember(@Param("loginMbrCd") Integer loginMbrCd,
+            								 @Param("viewMbrCd") Integer viewMbrCd);
     // myfeed- 팔로우 목록
-    List<FollowUser> selectFollowingsByMember(Integer mbrCd);
+    List<FollowUser> selectFollowingsByMember(@Param("loginMbrCd") Integer loginMbrCd,
+            								  @Param("viewMbrCd") Integer viewMbrCd);
     // myfeed - 프로필 수정 내역 조회
     Member selectMemberById(Integer mbrCd);
     // myfeed - 프로필 수정 - 닉네임 유효성 검증

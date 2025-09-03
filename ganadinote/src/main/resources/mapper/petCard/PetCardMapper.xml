@@ -129,5 +129,23 @@
 		JOIN pet p ON p.pet_cd = pc.pet_cd
 		WHERE pc.card_id = #{cardId}
 	</select>
+	
+	<select id="selectPetIdByCardId" parameterType="int" resultType="int">
+		SELECT pet_cd
+		FROM profile_card
+		WHERE card_id = #{cardId}
+	</select>
+	
+	<select id="selectPetImageUrlByPetId" parameterType="int" resultType="string">
+		SELECT pet_profile_img_url
+		FROM pet
+		WHERE pet_cd = #{petId}
+	</select>
+	
+	<update id="updatePetImageByPetId">
+		UPDATE pet
+		SET pet_profile_img_url = #{url}
+		WHERE pet_cd = #{petId}
+	</update>
 
 </mapper>

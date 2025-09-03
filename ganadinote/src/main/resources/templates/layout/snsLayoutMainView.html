@@ -543,6 +543,67 @@
 		  });
 		}
 	</script>
-
+	
+	<script>
+		  document.addEventListener('DOMContentLoaded', () => {
+		    const modal = document.getElementById('srFollowModal');
+		    if (!modal) return;
+		
+		    modal.addEventListener('click', async (e) => {
+		      const btn = e.target.closest('.sr-follow-toggle');
+		      if (!btn) return;
+		
+		      const li = btn.closest('.sr_follow-item');
+		      const target = parseInt(btn.getAttribute('data-target'), 10);
+		      if (!target || target <= 0) return;
+		
+		      const mode = btn.getAttribute('data-mode'); // "remove-follower" | "toggle-following"
+		
+		      try {
+		        if (mode === 'remove-follower') {
+		          // 팔로워 탭: 그 사람이 ‘나’를 팔로우하는 행 삭제 (follow_mbr_cd=그, following_mbr_cd=나)
+		          const res = await fetch('/sns/api/follower/remove', {
+		            method: 'POST',
+		            headers: {'Content-Type': 'application/json;charset=UTF-8'},
+		            credentials: 'same-origin',
+		            body: JSON.stringify({ followerMbrCd: target })
+		          });
+		          const data = await res.json();
+		          if (!res.ok || !data.ok) throw new Error(data.message || '처리 실패');
+		
+		          // 목록에서 제거
+		          li?.remove();
+		
+		          // (선택) 상단 팔로워 카운트 감소
+		          // document.querySelector('[data-follow-tab="followers"] strong')?.textContent = String(Number(...) - 1);
+		
+		        } else if (mode === 'toggle-following') {
+		          // 팔로우 탭: 내가 그를 팔로우하는 행 토글 (follow_mbr_cd=나, following_mbr_cd=그)
+		          const res = await fetch('/sns/api/follow/toggle', {
+		            method: 'POST',
+		            headers: {'Content-Type': 'application/json;charset=UTF-8'},
+		            credentials: 'same-origin',
+		            body: JSON.stringify({ targetMbrCd: target })
+		          });
+		          const data = await res.json();
+		          if (!res.ok || !data.ok) throw new Error(data.message || '처리 실패');
+		
+		          // 더 이상 팔로우하지 않는다면 목록에서 제거
+		          if (!data.following) {
+		            li?.remove();
+		            // (선택) 상단 팔로우 카운트 감소
+		            // document.querySelector('[data-follow-tab="following"] strong')?.textContent = String(Number(...) - 1);
+		          } else {
+		            // 다시 팔로우되었다면 하트 유지(채움)
+		            btn.innerHTML = '<span class="text-danger"><i class="bi bi-heart-fill icon-mid"></i></span>';
+		          }
+		        }
+		      } catch (err) {
+		        console.error(err);
+		        alert(err.message || '네트워크 오류가 발생했습니다.');
+		      }
+		    });
+		  });
+	</script>
 </body>
 </html>
