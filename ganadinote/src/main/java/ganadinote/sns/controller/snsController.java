@@ -122,8 +122,8 @@ public class snsController {
         long followerCount  = snsService.countFollowersOfMember(viewMbrCd);
         long followingCount = snsService.countFollowingsByMember(viewMbrCd);
         var myPosts    = snsService.getMyFeedPosts(viewMbrCd);
-        var followers  = snsService.getFollowers(viewMbrCd);
-        var followings = snsService.getFollowings(viewMbrCd);
+        var followers  = snsService.getFollowers(loginMbrCd, viewMbrCd);
+        var followings = snsService.getFollowings(loginMbrCd, viewMbrCd);
 
         // 1) 프로필 조회 + 표시용 값 계산
         var profile = snsService.getMemberProfile(viewMbrCd);
@@ -335,5 +335,20 @@ public class snsController {
         long likeCount = snsService.getLikeCount(spCd);
 
         return Map.of("ok", true, "liked", liked, "likeCount", likeCount);
+    }
+    
+    // 팔로워 제거 (그 사람이 나를 팔로우하는 관계 삭제)
+    @PostMapping("/api/follower/remove")
+    @ResponseBody
+    public Map<String, Object> removeFollower(@RequestBody Map<String, Integer> body) {
+        Integer me = requireLoginOrRedirect();
+
+        Integer follower = body.get("followerMbrCd");
+        if (follower == null) follower = body.get("targetMbrCd"); // 호환
+        if (follower == null || follower <= 0) return Map.of("ok", false, "message", "잘못된 대상");
+        if (me.equals(follower)) return Map.of("ok", false, "message", "본인은 대상이 될 수 없습니다.");
+
+        boolean removed = snsService.removeFollower(me, follower);
+        return Map.of("ok", true, "removed", removed);
     }
 }

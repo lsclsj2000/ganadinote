@@ -120,14 +120,21 @@ public class SnsServiceImpl implements SnsService {
     
     // myfeed- 팔로워 목록
     @Override @Transactional(readOnly = true)
-    public List<FollowUser> getFollowers(Integer mbrCd) {
-        return snsMapper.selectFollowersOfMember(mbrCd);
+    public List<FollowUser> getFollowers(Integer loginMbrCd, Integer viewMbrCd) {
+        return snsMapper.selectFollowersOfMember(loginMbrCd, viewMbrCd);
     }
     
     // myfeed- 팔로우 목록
     @Override @Transactional(readOnly = true)
-    public List<FollowUser> getFollowings(Integer mbrCd) {
-        return snsMapper.selectFollowingsByMember(mbrCd);
+    public List<FollowUser> getFollowings(Integer loginMbrCd, Integer viewMbrCd) {
+        return snsMapper.selectFollowingsByMember(loginMbrCd, viewMbrCd);
+    }
+    
+    // myfeed- 팔로워 제거
+    @Override
+    public boolean removeFollower(Integer me, Integer followerMbrCd) {
+        // followers: follow_mbr_cd = follower, following_mbr_cd = me
+        return snsMapper.deleteFollow(followerMbrCd, me) > 0;
     }
     
     // home - 게시물

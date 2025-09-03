@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import ganadinote.common.util.TokenUtils;
 import ganadinote.petCard.service.PetCardService;
+import ganadinote.sns.service.SnsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import lombok.extern.log4j.Log4j2;
 public class petCardController {
 	
 	private final PetCardService petCardService;
+	private final SnsService snsService; 
 
     private static class NotLoggedInException extends RuntimeException {
         private static final long serialVersionUID = 1L;
@@ -51,27 +53,28 @@ public class petCardController {
 
     @GetMapping
     public String getPetfileCardList(Model model,
-        							 @RequestParam(name = "m", required = false) Integer targetMbrCd) {
-        Integer loginMbrCd = requireLoginOrRedirect();
-
-        // 보고자 하는 카드 주인 결정 (파라미터 없으면 본인)
-        Integer ownerMbrCd = (targetMbrCd != null) ? targetMbrCd : loginMbrCd;
-        boolean isOwner = loginMbrCd.equals(ownerMbrCd);
-
-        // 1) 헤더(닉네임/프로필) — 카드 주인 기준
-        var header = petCardService.getHeader(ownerMbrCd);
-        model.addAttribute("header", header);
-
-        // 2) 펫 카드(사진/이름/소개/태그) — 카드 주인 기준
-        var petCards = petCardService.getPetCards(ownerMbrCd);
-        model.addAttribute("petCards", petCards);
-
-        // 3) 뷰 제어용 플래그
-        model.addAttribute("isOwner", isOwner);
-        model.addAttribute("viewMbrCd", ownerMbrCd);   // (선택) 템플릿/JS에서 필요시 사용
-
-        return "petCard/petCardView";
-    }
+    								 @RequestParam(name = "m", required = false) Integer targetMbrCd) {
+		Integer loginMbrCd = requireLoginOrRedirect();
+		
+		Integer ownerMbrCd = (targetMbrCd != null) ? targetMbrCd : loginMbrCd;
+		boolean isOwner = loginMbrCd.equals(ownerMbrCd);
+		
+		var header = petCardService.getHeader(ownerMbrCd);
+		var petCards = petCardService.getPetCards(ownerMbrCd);
+		
+		model.addAttribute("header", header);
+		model.addAttribute("petCards", petCards);
+		model.addAttribute("isOwner", isOwner);
+		model.addAttribute("viewMbrCd", ownerMbrCd);
+		
+		// ✅ 내 카드가 아니면 팔로우 상태 내려주기
+		if (!isOwner) {
+		boolean isFollowing = snsService.isFollowing(loginMbrCd, ownerMbrCd);
+		model.addAttribute("isFollowing", isFollowing);
+		}
+		
+		return "petCard/petCardView";
+	}
     
     @GetMapping("/updatePetCard")
     public String updatePetCardView(Model model,
@@ -105,7 +108,8 @@ public class petCardController {
     @ResponseBody
     public ResponseEntity<?> updateOneCard(
             @RequestParam("cardId") Integer cardId,
-            @RequestParam(value = "image", required = false) MultipartFile imageFile, // ← 변경
+            @RequestParam(value = "petId", required = false) Integer petId, // ★ 추가
+            @RequestParam(value = "image", required = false) MultipartFile imageFile,
             @RequestParam(value = "introduction", required = false) String introduction,
             @RequestParam(value = "tags", required = false) List<String> tagNames,
             @RequestParam(value = "tagsChanged", required = false) Boolean tagsChanged
@@ -116,10 +120,16 @@ public class petCardController {
             return ResponseEntity.status(403).body(Map.of("message", "본인 카드만 수정할 수 있습니다."));
         }
 
+        // ★ petId가 비어오면 cardId로 조회해서 보정
+        if (petId == null) {
+            petId = petCardService.getPetIdByCardId(cardId);
+        }
+
         String imageUrl = null;
         if (imageFile != null && !imageFile.isEmpty()) {
-            log.info("[petCard/update] cardId={}, image={}, size={}", cardId, imageFile.getOriginalFilename(), imageFile.getSize());
-            imageUrl = petCardService.saveAndUpdateCardImage(cardId, imageFile);
+            log.info("[petCard/update] cardId={}, petId={}, image={}, size={}",
+                     cardId, petId, imageFile.getOriginalFilename(), imageFile.getSize());
+            imageUrl = petCardService.saveAndUpdateCardImageByPetId(petId, imageFile); // ★ 변경
         }
         if (introduction != null) {
             petCardService.updateIntroduction(cardId, introduction);
@@ -130,10 +140,12 @@ public class petCardController {
 
         return ResponseEntity.ok(Map.of(
                 "cardId", cardId,
+                "petId",  petId,
                 "imageUrl", imageUrl,
                 "introduction", introduction,
                 "tags", tagNames
         ));
     }
+
 
 }

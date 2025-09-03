@@ -16,7 +16,7 @@
 
 <body>
 	<th:block layout:fragment="contents">
-		<div class="mt-10">
+		<div style="padding-top:20px; padding-bottom:0px;">
 			<div class="row no-gutter-x">
 		        <section class="section sr_user-profile-section">
 					<div class="sr_user-profile-container">
@@ -33,9 +33,19 @@
 						
 						<!-- 남의 카드일 때 -->
 						<div class="sr_feed-actions d-flex align-items-center" th:if="${!isOwner}">
-							<button class="btn btn-link p-0 sr-like-btn" type="button">
-								<span class="text-danger"><i class="bi bi-heart icon-mid"></i></span>
+							<button class="btn btn-link p-0 sr-follow-btn"
+							        type="button"
+							        th:attr="data-target=${viewMbrCd}, data-following=${isFollowing}">
+								<!-- 빈 하트(미팔로우) -->
+								<span class="text-danger" th:if="${!isFollowing}">
+									<i class="bi bi-heart icon-mid"></i>
+								</span>
+								<!-- 채운 하트(팔로우 중) -->
+								<span class="text-danger" th:if="${isFollowing}">
+									<i class="bi bi-heart-fill icon-mid"></i>
+								</span>
 							</button>
+							
 							<a class="btn btn-link p-0" th:href="@{/sns/myfeed(m=${viewMbrCd})}" style="margin-left:5px;">
 								<svg class="bi" width="1em" height="1em" fill="currentColor">
 									<use style="color:#3c3c3c;" xlink:href="/assets/vendors/bootstrap-icons/bootstrap-icons.svg#box-arrow-in-down-right"/>
@@ -143,6 +153,67 @@
 	        });
 	
 	    </script>
+	    
+	    <script>
+			document.addEventListener('DOMContentLoaded', () => {
+			  const followBtn = document.querySelector('.sr-follow-btn');
+			  if (!followBtn) return;
+			
+			  followBtn.addEventListener('click', async () => {
+			    const targetMbrCd = parseInt(followBtn.getAttribute('data-target'), 10);
+			    const nowFollowing = (String(followBtn.getAttribute('data-following')) === 'true');
+			
+			    // 방어: 이상한 타겟
+			    if (!targetMbrCd || targetMbrCd <= 0) {
+			      alert('잘못된 대상입니다.'); return;
+			    }
+			
+			    try {
+			      const res = await fetch('/sns/api/follow/toggle', {
+			        method: 'POST',
+			        headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+			        credentials: 'same-origin',
+			        body: JSON.stringify({ targetMbrCd })
+			      });
+			
+			      // 미로그인 → 로그인 화면으로 리다이렉트되는 구조(@ExceptionHandler) 대응
+			      // fetch로는 302가 성공처럼 보일 수 있으므로, 결과가 HTML이면 location으로 넘김
+			      const ct = res.headers.get('content-type') || '';
+			      if (ct.includes('text/html')) {
+			        // 아마 로그인 페이지가 왔을 가능성 → 그냥 페이지 이동
+			        location.href = '/login';
+			        return;
+			      }
+			
+			      if (!res.ok) {
+			        let msg = '처리 중 오류가 발생했습니다.';
+			        try { const d = await res.json(); msg = d?.message || d?.msg || msg; } catch {}
+			        alert(msg); return;
+			      }
+			
+			      const data = await res.json();
+			      if (!data.ok) {
+			        alert(data.message || '처리할 수 없습니다.');
+			        return;
+			      }
+			
+			      // 서버가 돌려준 최종 상태로 UI 갱신
+			      const following = !!data.following;
+			      followBtn.setAttribute('data-following', String(following));
+			
+			      // 하트 아이콘 토글: 기존 span들을 싹 교체
+			      const html = following
+			        ? '<span class="text-danger"><i class="bi bi-heart-fill icon-mid"></i></span>'
+			        : '<span class="text-danger"><i class="bi bi-heart icon-mid"></i></span>';
+			      followBtn.innerHTML = html;
+			
+			    } catch (e) {
+			      console.error(e);
+			      alert('네트워크 오류가 발생했습니다.');
+			    }
+			  });
+			});
+		</script>
 	</th:block>
 </body>
 </html>

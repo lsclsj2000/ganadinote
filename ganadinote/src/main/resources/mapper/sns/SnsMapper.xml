@@ -15,6 +15,8 @@
 		<result property="nickname" 	column="mbr_nknm"/>
 		<result property="handle"   	column="handle"/>
 		<result property="profilePath" 	column="mbr_profile"/>
+		<result property="iFollow"      column="i_follow"/>
+		<result property="followsMe"   column="follows_me"/>
 	</resultMap>
 	
 	<resultMap id="homeFeedMap" type="ganadinote.sns.domain.HomeFeedPost">
@@ -74,29 +76,45 @@
 		ORDER BY sp_reg_ymdt DESC
 	 </select>
 	 
-	<select id="selectFollowersOfMember" parameterType="int" resultMap="followUserMap">
-		/* myfeed- 팔로워 목록 */
+	<select id="selectFollowersOfMember" parameterType="map" resultMap="followUserMap">
+		/* myfeed- 팔로워 목록(u가 나를 팔로우) */
 		SELECT
-		  m.mbr_cd,
-		  m.mbr_nknm,
-		  CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
-		  m.mbr_profile
-		FROM follow f
-		JOIN member m ON m.mbr_cd = f.follow_mbr_cd
-		WHERE f.following_mbr_cd = #{mbrCd}
-		ORDER BY f.follow_ymdt DESC
+	    m.mbr_cd,
+	    m.mbr_nknm,
+	    CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
+	    m.mbr_profile,
+	    /* 내가 u를 팔로우? */
+	    EXISTS(
+	      SELECT 1 FROM follow f2
+	      WHERE f2.follow_mbr_cd   = #{loginMbrCd}
+	        AND f2.following_mbr_cd = m.mbr_cd
+	    ) AS i_follow,
+	    /* u가 나를 팔로우? (이 쿼리 자체가 followers이므로 true) */
+	    TRUE AS follows_me
+	  FROM follow f
+	  JOIN member m ON m.mbr_cd = f.follow_mbr_cd
+	  WHERE f.following_mbr_cd = #{viewMbrCd}
+	  ORDER BY f.follow_ymdt DESC
 	</select>
 	
-	<select id="selectFollowingsByMember" parameterType="int" resultMap="followUserMap">
-		/* myfeed- 팔로우 목록 */
+	<select id="selectFollowingsByMember" parameterType="map" resultMap="followUserMap">
+		/* myfeed- 팔로우 목록 (내가 u를 팔로우) */
 		SELECT
 		  m.mbr_cd,
 		  m.mbr_nknm,
 		  CONCAT('@', SUBSTRING_INDEX(m.mbr_email, '@', 1)) AS handle,
-		  m.mbr_profile
+		  m.mbr_profile,
+		  /* 내가 u를 팔로우? (이 쿼리 자체가 followings이므로 true) */
+		  TRUE AS i_follow,
+		  /* u가 나를 팔로우? */
+		  EXISTS(
+		    SELECT 1 FROM follow f2
+		    WHERE f2.follow_mbr_cd    = m.mbr_cd
+		      AND f2.following_mbr_cd = #{loginMbrCd}
+		  ) AS follows_me
 		FROM follow f
 		JOIN member m ON m.mbr_cd = f.following_mbr_cd
-		WHERE f.follow_mbr_cd = #{mbrCd}
+		WHERE f.follow_mbr_cd = #{viewMbrCd}
 		ORDER BY f.follow_ymdt DESC
 	</select>
 	
