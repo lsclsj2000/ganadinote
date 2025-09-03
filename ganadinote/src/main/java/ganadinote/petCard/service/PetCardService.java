@@ -30,4 +30,10 @@ public interface PetCardService {
     // 펫 카드 수정 - 태그 수정
     void replaceTagsByNames(Integer petId, List<String> tagNames);
     
+    // 펫 카드 수정 - 카드별 펫 아이디 불러오기
+    Integer getPetIdByCardId(Integer cardId);
+    
+    // 펫 카드 수정 - 사진 업데이트
+    String  saveAndUpdateCardImageByPetId(Integer petId, MultipartFile imageFile);
+    
 }

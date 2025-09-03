@@ -56,7 +56,7 @@ public class PetCardServiceImpl implements PetCardService {
         if (imageFile == null || imageFile.isEmpty()) return null;
 
         // 1) 실제 파일 저장 → 상대 URL 리턴 (예: /attachment/pet/20250901/image/uuid.jpg)
-        FileMetaData meta = fileUtils.uploadFile(imageFile, "pet");
+        FileMetaData meta = fileUtils.uploadFile(imageFile, "sns");
         if (meta == null) throw new RuntimeException("파일 저장 실패");
         String newUrl = meta.getFilePath();
 
@@ -89,6 +89,34 @@ public class PetCardServiceImpl implements PetCardService {
         if (tagIds != null && !tagIds.isEmpty()) {
             petCardMapper.insertDogTags(petId, tagIds);
         }
+    }
+    
+    // 펫 카드 수정 - 카드별 펫 아이디 불러오기
+    @Override
+    public Integer getPetIdByCardId(Integer cardId) {
+        return petCardMapper.selectPetIdByCardId(cardId);
+    }
+
+    // 펫 카드 수정 - 사진 업데이트
+    @Override
+    public String saveAndUpdateCardImageByPetId(Integer petId, MultipartFile imageFile) {
+        if (imageFile == null || imageFile.isEmpty()) return null;
+
+        FileMetaData meta = fileUtils.uploadFile(imageFile, "sns");
+        if (meta == null) throw new RuntimeException("파일 저장 실패");
+        String newUrl = meta.getFilePath();
+
+        String oldUrl = petCardMapper.selectPetImageUrlByPetId(petId);
+
+        int updated = petCardMapper.updatePetImageByPetId(petId, newUrl); // ★ pet 단독 UPDATE
+        if (updated == 0) {
+            throw new IllegalStateException("이미지 URL 업데이트 실패 (petId=" + petId + ")");
+        }
+
+        if (oldUrl != null && !oldUrl.isBlank() && !oldUrl.equals(newUrl)) {
+            fileUtils.deleteQuietly(oldUrl);
+        }
+        return newUrl;
     }
     
 }

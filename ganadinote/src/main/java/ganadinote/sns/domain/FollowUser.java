@@ -8,4 +8,6 @@ public class FollowUser {
     private String nickname;
     private String handle;
     private String profilePath;
+    private Boolean iFollow;
+    private Boolean followsMe;
 }

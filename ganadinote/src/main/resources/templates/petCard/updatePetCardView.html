@@ -16,7 +16,7 @@
 
 <body>
 	<th:block layout:fragment="contents">
-		<div class="mt-4">
+		<div>
 			<div class="row no-gutter-x">
 				<section class="sr_pet-cards-container">
 				  <div class="sr_pet-card-navigation sr_nav-left"  onclick="slideCards(-1)"></div>
@@ -63,7 +63,7 @@
 
 		</div>
 		<!-- 버튼 그룹 -->
-        <div class="sr_profile-buttons mt-3 mb-10">
+        <div class="sr_profile-buttons mt-3 mb-9">
 			<a th:href="@{/petCard}" class="sr_btn-profile">취소</a>
 			<button id="btn-savePetCard" type="button" class="sr_btn-profile">저장</button>
 		</div>
@@ -249,39 +249,34 @@
 			// 저장 (모든 dirty 항목)
 			// ======================
 			async function onSaveAllCards() {
-				if (dirty.size === 0) {                 // ★ 추가
-				  alert('변경된 내용이 없습니다.');
-				  return;
-				}
+			  if (dirty.size === 0) { alert('변경된 내용이 없습니다.'); return; }
 			
-				const jobs = Array.from(dirty.entries()).map(async ([cardId, d]) => {
-				  const form = new FormData();
-				  form.append('cardId', cardId);
-				
-				  if (d.intro !== undefined) form.append('introduction', d.intro);
-				
-				  // ★ 태그 변경 플래그: d.tags가 정의되어 있다면, 변경이 있었던 것
-				  if (d.tags !== undefined) {
-				    form.append('tagsChanged', 'true');       // 빈 배열도 변경으로 인식
-				    d.tags.forEach(t => form.append('tags', t));  // 요소가 0개면 tags 파라미터가 안 들어가므로 flag가 중요!
-				  }
-				
-				  if (d.file !== undefined) form.append('image', d.file);
-				
-				  const res = await fetch('/petCard/update', { method: 'POST', body: form });
-				  if (!res.ok) throw new Error('서버 오류');
-				  return cardId;
-				});
+			  const jobs = Array.from(dirty.entries()).map(async ([cardId, d]) => {
+			    const form = new FormData();
+			    form.append('cardId', cardId);
+			    if (d.petId !== undefined) form.append('petId', d.petId); // ★ 추가
 			
-				try {
-				  await Promise.all(jobs);
-				  dirty.clear();
-				  alert('모든 변경 사항이 저장되었습니다.');
-				  window.location.href = '/petCard';
-				} catch (err) {
-				  console.error(err);
-				  alert('저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
-				}
+			    if (d.intro !== undefined) form.append('introduction', d.intro);
+			    if (d.tags !== undefined) {
+			      form.append('tagsChanged', 'true');
+			      d.tags.forEach(t => form.append('tags', t));
+			    }
+			    if (d.file !== undefined) form.append('image', d.file);
+			
+			    const res = await fetch('/petCard/update', { method: 'POST', body: form });
+			    if (!res.ok) throw new Error('서버 오류');
+			    return cardId;
+			  });
+			
+			  try {
+			    await Promise.all(jobs);
+			    dirty.clear();
+			    alert('모든 변경 사항이 저장되었습니다.');
+			    window.location.href = '/petCard';
+			  } catch (err) {
+			    console.error(err);
+			    alert('저장 중 오류가 발생했습니다. 다시 시도해 주세요.');
+			  }
 			}
 	
 			// ======================
@@ -319,19 +314,20 @@
 	
 				// 카드별 파일/소개 이벤트 바인딩
 				cards.forEach((cardEl, idx) => {
-					const cardId = Number(cardEl.dataset.cardId); // ★ cardId
+					const cardId = Number(cardEl.dataset.cardId);
+					const petId  = Number(cardEl.dataset.petId);
 					// 파일 업로드
 					const fileInput = cardEl.querySelector('.sr_file-input');
 					const img = cardEl.querySelector('.sr_pet-card-image');
 					if (fileInput && img) {
-						fileInput.addEventListener('change', () => {
-							const file = fileInput.files && fileInput.files[0];
-							if (!file) return;
-							const url = URL.createObjectURL(file);
-							img.src = url;               // 미리보기
-							markDirty(cardId, { file }); // 변경 기록
-							setTimeout(() => URL.revokeObjectURL(url), 0); 
-						});
+					  fileInput.addEventListener('change', () => {
+					    const file = fileInput.files && fileInput.files[0];
+					    if (!file) return;
+					    const url = URL.createObjectURL(file);
+					    img.src = url;
+					    markDirty(cardId, { file, petId }); // ★ petId도 dirty에 함께 저장
+					    setTimeout(() => URL.revokeObjectURL(url), 0);
+					  });
 					}
 					// 한줄 소개
 					const bioDisplay = cardEl.querySelector('.sr_pet-bio-display');

@@ -93,10 +93,10 @@
         <!-- 작성자 영역 -->
         <article class="p-3 bg-white border rounded-3 mb-3">
           <div class="d-flex align-items-start gap-3">
-			<a th:href="@{/petCard(m=${viewMbrCd})}">
+			<a th:href="@{/petCard(m=${post.mbrCd})}">
 			  <img class="author-avatar"
 			       th:src="${post.mbrProfile != null ? post.mbrProfile : 'https://placehold.co/96x96'}"
-			       alt="작성자" />
+			       th:alt="${post.mbrNknm} ?: '작성자'"/>
 			</a>
             <div class="flex-grow-1">
               <strong th:text="${post.mbrNknm}">닉네임</strong>
@@ -161,9 +161,11 @@
 
             <li th:each="c : ${comments}" class="comment-item p-3" th:classappend="${c.commentParentId > 0} ? ' child-reply' : ''">
               <div class="d-flex align-items-start gap-2">
-				<a th:href="@{/petCard(m=${viewMbrCd})}"><img class="comment-avatar"
-				     th:src="${#strings.isEmpty(c.mbrProfile) ? 'https://placehold.co/72x72' : c.mbrProfile}"
-				     alt="아바타" /></a>
+				<a th:href="@{/petCard(m=${c.mbrCd})}">
+				  <img class="comment-avatar"
+				       th:src="${#strings.isEmpty(c.mbrProfile) ? 'https://placehold.co/72x72' : c.mbrProfile}"
+				       th:alt="${c.authorNickname} ?: '아바타'" />
+				</a>
                 <div class="flex-grow-1">
                   <div class="d-flex align-items-center justify-content-between">
                     <div>
