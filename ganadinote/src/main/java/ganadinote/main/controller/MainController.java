@@ -39,4 +39,10 @@ public class MainController {
 		
 		return "weather/weatherView";
 	}
+	
+	@GetMapping("/")
+	public String index() {
+		return "redirect:/todo/list";
+	}
+	
 }
