@@ -79,3 +79,18 @@ document.addEventListener('DOMContentLoaded', () => {
 		console.log('✅ 로그인된 회원의 mbr_cd:', mbrCd);
 	}
 });
+
+
+// 로그아웃 시 데모 이메일/비밀번호 불러오기
+async function doLogout() {
+  try {
+    await fetch('/api/logout', { method: 'POST' }); // 서버 쿠키 삭제
+  } finally {
+    // 클라이언트 저장값 정리
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('lastLoginEmail');
+
+    // 데모 계정 자동 프리필 모드로 로그인 페이지 이동
+    window.location.href = '/login?prefill=demo';
+  }
+}

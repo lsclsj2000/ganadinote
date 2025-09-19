@@ -23,17 +23,20 @@
 						</a>
                     </div>
                     <h1 class="auth-title">로그인</h1>
-                    <p class="auth-subtitle mb-5">계정으로 로그인하여 나만의 노트를 작성해보세요.</p>
+                    <p class="auth-subtitle mb-0">계정으로 로그인하여</p>
+                    <p class="auth-subtitle mb-5">우리 댕댕이 노트를 작성해보세요.</p>
 
                     <form id="login-form" action="#" method="post">
 					    <div class="form-group position-relative has-icon-left mb-4">
-					        <input type="text" class="form-control form-control-xl" placeholder="이메일" name="mbrEmail" required>
+					        <input id="login-email" type="text" class="form-control form-control-xl"
+							       placeholder="이메일" name="mbrEmail" required autocomplete="username">
 					        <div class="form-control-icon">
 					            <i class="bi bi-person"></i>
 					        </div>
 					    </div>
 					    <div class="form-group position-relative has-icon-left mb-4">
-					        <input type="password" class="form-control form-control-xl" placeholder="비밀번호" name="mbrPw" required>
+					        <input id="login-password" type="password" class="form-control form-control-xl"
+							       placeholder="비밀번호" name="mbrPw" required autocomplete="current-password">
 					        <div class="form-control-icon">
 					            <i class="bi bi-shield-lock"></i>
 					        </div>
@@ -50,44 +53,69 @@
     </div>
 
         <script>
-	    document.addEventListener('DOMContentLoaded', () => {
-	        const loginForm = document.getElementById('login-form');
-	        if (loginForm) {
-	            loginForm.addEventListener('submit', async (event) => {
-	                event.preventDefault(); 
-	
-	                const formData = new FormData(loginForm);
-	                const requestBody = Object.fromEntries(formData.entries());
-	
-	                try {
-	                    const response = await fetch('/api/login', {
-	                        method: 'POST',
-	                        headers: {
-	                            'Content-Type': 'application/json'
-	                        },
-	                        body: JSON.stringify(requestBody)
-	                    });
-	
-	                    if (response.ok) {
-	                        const data = await response.json();
-	                        localStorage.setItem('authToken', data.token);
-	                        console.log('로그인 성공! 토큰이 로컬 스토리지에 저장되었습니다.');
-
-                            // [수정!] 로그인 성공 후 이동할 페이지를 /main에서 /todo/list로 변경합니다.
-	                        window.location.href = '/todo/list'; 
-
-	                    } else {
-	                        console.error('로그인 실패');
-	                        alert('이메일 또는 비밀번호가 올바르지 않습니다.');
-	                    }
-	                } catch (error) {
-	                    console.error('로그인 요청 중 오류 발생:', error);
-	                    alert('로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
-	                }
-	            });
-	        }
-	    });
-	</script>
+			document.addEventListener('DOMContentLoaded', () => {
+			  const emailEl = document.getElementById('login-email');
+			  const pwEl    = document.getElementById('login-password');
+			
+			  const params = new URLSearchParams(location.search);
+			  const mode = params.get('prefill'); // 'demo' | '0' | null
+			
+			  if (mode === 'demo') {
+			    // 항상 데모 계정으로 강제 채우기
+			    if (emailEl) emailEl.value = 'tori_ne@ganadinote.com';
+			    if (pwEl)    pwEl.value    = 'toritoto9';
+			  } else {
+			    const skipPrefill = mode === '0';
+			    if (!skipPrefill) {
+			      const lastEmail = localStorage.getItem('lastLoginEmail');
+			
+			      if (emailEl && !emailEl.value) {
+			        emailEl.value = lastEmail || 'tori_ne@ganadinote.com';
+			      }
+			      if (pwEl && !pwEl.value && !lastEmail) {
+			        pwEl.value = 'toritoto9';
+			      }
+			    }
+			  }
+			
+			  const loginForm = document.getElementById('login-form');
+			  if (loginForm) {
+			    loginForm.addEventListener('submit', async (event) => {
+			      event.preventDefault();
+			
+			      const formData = new FormData(loginForm);
+			      const requestBody = Object.fromEntries(formData.entries());
+			
+			      try {
+			        const response = await fetch('/api/login', {
+			          method: 'POST',
+			          headers: { 'Content-Type': 'application/json' },
+			          body: JSON.stringify(requestBody)
+			        });
+			
+			        if (response.ok) {
+			          const data = await response.json();
+			          localStorage.setItem('authToken', data.token);
+			
+			          // 데모 이메일이면 기록 안 남기기 (다음엔 비번도 자동 채우게 하려면 지우는 게 깔끔)
+			          if (requestBody.mbrEmail === 'tori_ne@ganadinote.com') {
+			            localStorage.removeItem('lastLoginEmail');
+			          } else {
+			            localStorage.setItem('lastLoginEmail', requestBody.mbrEmail || '');
+			          }
+			
+			          window.location.href = '/todo/list';
+			        } else {
+			          alert('이메일 또는 비밀번호가 올바르지 않습니다.');
+			        }
+			      } catch (error) {
+			        console.error('로그인 요청 중 오류:', error);
+			        alert('로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+			      }
+			    });
+			  }
+			});
+		</script>
 </body>
 
 </html>

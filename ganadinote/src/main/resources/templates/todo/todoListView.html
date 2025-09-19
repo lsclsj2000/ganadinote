@@ -61,8 +61,7 @@
 		</div>
 		<div class="calendar-grid"></div>
 	</div>
-	<button class="add-todo-btn" onclick="location.href='/todo/addView'">할
-		일 추가</button>
+	<button class="add-todo-btn" onclick="location.href='/todo/addView'">할 일 추가</button>
 
 	<div class="modal" id="todoModal">
 		<div class="modal-content">
@@ -167,6 +166,16 @@
                         modalTitle.textContent = date;
                         addNewTodoBtn.style.display = 'block';
                         modalTodoList.innerHTML = '';
+                        
+                        addNewTodoBtn.onclick = () => {
+                            const params = new URLSearchParams({
+                                date,
+                                petId: currentSelectedPetId
+                            });
+                            window.location.href = `/todo/addView?${params.toString()}`;
+                            // 완전 동일하게만 원한다면: window.location.href = '/todo/addView';
+                        };
+                        
                         const csrfMeta = document.querySelector("meta[name='_csrf']");
                         const token = csrfMeta ? csrfMeta.getAttribute("content") : null;
                         if (todosForThisDay.length > 0) {
