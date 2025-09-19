@@ -6,7 +6,6 @@
 .routine-list-page,
 .routine-add-page {
 	margin-top: 20px;
-    padding: 15px; /* 양쪽 패딩을 조금 더 주어 여백 확보 */
 }
 
 .page-heading h3 {

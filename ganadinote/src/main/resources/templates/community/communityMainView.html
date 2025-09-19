@@ -54,7 +54,7 @@
 	    }
 	    .chip.active{background:#e9ecef;font-weight:600}
 
-	    .post-card{border-bottom:1px solid #f1f1f1;padding:20px 8px}
+	    .post-card{border-bottom:1px solid #f1f1f1;}
 	    .card-text{font-size:.7rem;color:#6c757d}
 	    .small{font-size:.7rem}
 
@@ -82,6 +82,7 @@
 
 <body>
 <th:block layout:fragment="contents">
+  <div class="row no-gutter-x">
   <div class="mobile-wrap">
 
     <!-- 상단 검색 + 대상 선택 -->
@@ -118,7 +119,7 @@
       <button id="btnMore" class="btn btn-outline-secondary btn-sm w-100" style="display:none">더보기</button>
     </div>
   </div>
-
+</div>
   <!-- 새 글 쓰기 버튼 -->
   <div class="fab">
     <a th:href="@{/community/addPost}" class="btn btn-primary rounded-pill px-3 py-2">글쓰기</a>
