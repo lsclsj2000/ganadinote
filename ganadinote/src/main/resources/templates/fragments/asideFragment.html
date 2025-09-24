@@ -88,35 +88,25 @@
 
 	<script th:inline="javascript">
 		document.addEventListener('DOMContentLoaded', () => {
-	        const loginLogoutItem = document.getElementById('login-logout-item');
-	        const link = loginLogoutItem.querySelector('a');
-	        const textSpan = loginLogoutItem.querySelector('span');
-	        
-	        const mbrCd = getMbrCdFromToken();
-	
-	        if (mbrCd) {
-	            textSpan.textContent = '로그아웃';
-	            link.addEventListener('click', (event) => {
-	                event.preventDefault(); 
-	                
-	                // 1. 로컬 스토리지의 토큰 삭제
-	                removeToken();
-	
-	                // 2. 서버의 로그아웃 API 호출 (쿠키 삭제)
-	                fetch('/api/logout', { method: 'POST' })
-	                    .then(response => {
-	                        window.location.href = '/login';
-	                    })
-	                    .catch(error => {
-	                        console.error('로그아웃 API 호출 오류:', error);
-	                        window.location.href = '/login';
-	                    });
-	            });
-	        } else {
-	            textSpan.textContent = '로그인';
-	            link.href = '/login';
-	        }
-	    });
+		  const loginLogoutItem = document.getElementById('login-logout-item');
+		  const link = loginLogoutItem.querySelector('a');
+		  const textSpan = loginLogoutItem.querySelector('span');
+		
+		  const mbrCd = getMbrCdFromToken();
+		
+		  if (mbrCd) {
+		    textSpan.textContent = '로그아웃';
+		    link.href = '#';
+		    link.addEventListener('click', (event) => {
+		      event.preventDefault();
+		      removeToken();
+		      doLogout();
+		    });
+		  } else {
+		    textSpan.textContent = '로그인';
+		    link.href = '/login';
+		  }
+		});
 	</script>
 </header>
 </html>

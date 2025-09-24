@@ -21,7 +21,7 @@ public interface NotificationService {
     void reactivateSubscription(int mbrCd);
     
     // 알림 발송
-    void sendNotification(Integer mbrCd, String message);
+    void sendNotification(Integer mbrCd, String title, String body);
     
     // mbrCd를 통해 pet의 정보를 가져옴
     List<PetWithBreedDTO> getPetInfoForNotification(String mbrCd);
@@ -40,4 +40,10 @@ public interface NotificationService {
     
     // 기록된 알림을 조회하는 메서드
     List<NotificationHistory> getNotificationHistory(int mbrCd);
+    
+    // 회원에게 즉시 테스트 알림을 전송합니다.
+    void sendTestNotification(Integer mbrCd);
+    
+    // 알림 메시지
+    String getWalkAlertMessage(Integer mbrCd);
 }
