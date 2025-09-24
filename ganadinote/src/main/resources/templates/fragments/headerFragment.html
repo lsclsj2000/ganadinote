@@ -78,9 +78,10 @@
                         li.className = 'notification-item';
                         
                         const sentAtText = item.sentAt ? item.sentAt : '날짜 정보 없음';
+						
+						const formattedMessage = item.message.replace(/\n/g, '<br>');
 
-                        li.innerHTML = `<strong>${item.title}</strong><br>${item.message}<br><small>${sentAtText}</small>`;
-                        
+						li.innerHTML = `<strong>${item.title}</strong><br>${formattedMessage}<br><small>${sentAtText}</small>`;
                         
                         notificationList.appendChild(li);
                     });

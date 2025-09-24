@@ -124,13 +124,18 @@ public class NotificationAPIController {
 	 */
 	@GetMapping("/send")
 	public String sendPushNotification(@RequestParam Integer mbrCd, @RequestParam String message) {
-		try {
-			notificationService.sendNotification(mbrCd, message);
-			return "Notification sent successfully";
-		} catch (Exception e) {
-			log.error("알림 전송 실패", e);
-			return "Failed to send notification";
-		}
+	    try {
+	        // 알림 제목을 "알림"으로 고정하고, message를 본문으로 사용합니다.
+	        String title = "알림";
+	        String body = message;
+	        
+	        notificationService.sendNotification(mbrCd, title, body);
+	        
+	        return "Notification sent successfully";
+	    } catch (Exception e) {
+	        log.error("알림 전송 실패", e);
+	        return "Failed to send notification";
+	    }
 	}
 	
 	/**
@@ -197,6 +202,32 @@ public class NotificationAPIController {
 	            return "Failed to trigger test alert: " + e.getMessage();
 	        }
 	    }
+	 
+	 /**
+		 * 테스트 알림을 즉시 전송하는 API.
+		 * 알림 설정 페이지의 "테스트 알림 받아보기" 버튼과 연결됩니다.
+		 * 토큰에서 회원 코드를 추출하여 해당 회원에게 즉시 알림을 보냅니다.
+		 */
+		@PostMapping("/send-test")
+		public String sendTestNotification() {
+			String mbrCdStr = TokenUtils.getMbrCd();
+			if (mbrCdStr == null || mbrCdStr.trim().isEmpty()) {
+				log.error("토큰에 유효한 회원 코드가 없습니다.");
+				return "fail";
+			}
+			
+			try {
+				Integer mbrCd = Integer.parseInt(mbrCdStr);
+				// 테스트 알림 전송 로직 호출
+				notificationService.sendTestNotification(mbrCd);
+				log.info("회원 코드 {}에게 테스트 알림을 성공적으로 전송했습니다.", mbrCd);
+				return "success";
+			} catch (Exception e) {
+				log.error("테스트 알림 전송 실패", e);
+				return "fail";
+			}
+		}
+	 
 	 
 	 // 알림 기록 저장
 	 @GetMapping("/history")

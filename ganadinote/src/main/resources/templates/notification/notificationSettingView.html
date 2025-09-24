@@ -49,6 +49,12 @@
             justify-content: flex-end;
             margin-top: 1rem;
         }
+        /* 추가: 테스트 알림 버튼 스타일 */
+        .btn.btn-info {
+            background : #17a2b8;
+            color: white;
+            border-color: #17a2b8;
+        }
         .btn.btn-secondary {
         	background : #4545b6;
         }
@@ -134,8 +140,7 @@
                             <select class="form-select time-select" data-day="wed">
                                 <option value="">알림 안 받기</option>
                                 <th:block th:each="hour : ${#numbers.sequence(5, 24)}">
-                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></option>
-                                </th:block>
+                                    <option th:value="|${hour}:00|" th:text="|${hour}시|"></th:block>
                             </select>
                         </div>
                         <div class="d-flex align-items-center mb-2">
@@ -180,6 +185,7 @@
                     </div>
                     <input type="hidden" id="notificationSchedule" name="notificationSchedule" />
                     <div class="form-actions">
+                         <button type="button" id="send-test-notification" class="btn btn-info me-2">테스트 알림 받아보기</button>
                          <button type="submit" class="btn btn-secondary">시간 설정하기</button>
                     </div>
                 </form>
@@ -197,6 +203,8 @@
 	    const statusText = document.getElementById('subscription-status');
 	    const notificationTimeForm = document.getElementById('notification-time-form');
 	    const hiddenScheduleInput = document.getElementById('notificationSchedule');
+	    // 추가: 테스트 알림 버튼 요소 가져오기
+	    const testNotificationButton = document.getElementById('send-test-notification');
 	
 	    // 유틸리티 함수
 	    function urlBase64ToUint8Array(base64String) {
@@ -231,12 +239,16 @@
 	                    subscribeButton.className = "btn btn-danger small-btn"; // 버튼 크기 수정
 	                    subscribeButton.removeEventListener('click', subscribeUserToPush);
 	                    subscribeButton.addEventListener('click', unsubscribeUser);
+	                    // 추가: 구독 중일 때만 테스트 버튼 활성화
+	                    testNotificationButton.disabled = false;
 	                } else {
 	                    statusText.textContent = "현재 알림을 받지 않습니다.";
 	                    subscribeButton.textContent = "알림 받기";
 	                    subscribeButton.className = "btn btn-primary small-btn"; // 버튼 크기 수정
 	                    subscribeButton.removeEventListener('click', unsubscribeUser);
 	                    subscribeButton.addEventListener('click', subscribeUserToPush);
+	                    // 추가: 구독 중이 아닐 때 테스트 버튼 비활성화
+	                    testNotificationButton.disabled = true;
 	                }
 	            } else {
 	                statusText.textContent = "알림 상태를 불러오는 데 실패했습니다. 다시 시도해주세요.";
@@ -323,8 +335,27 @@
 	        }
 	    }
 	    
+	    // 추가: 테스트 알림 전송 함수
+	    async function sendTestNotification() {
+	        try {
+	            // 테스트 알림 전송 API 호출
+	            const response = await fetch('/api/push/send-test', {
+	                method: 'POST'
+	            });
+	            const result = await response.text();
+	            if (result === 'success') {
+	                alert('테스트 알림이 전송되었습니다. 잠시 후 알림을 확인해주세요!');
+	            } else {
+	                alert('테스트 알림 전송에 실패했습니다. 알림 구독 상태를 확인해주세요.');
+	            }
+	        } catch (error) {
+	            console.error('테스트 알림 전송 오류:', error);
+	            alert('네트워크 오류가 발생했습니다.');
+	        }
+	    }
+	
 	    // 알림 스케줄을 백엔드에서 불러와 UI에 적용
-async function loadNotificationSchedule() {
+		async function loadNotificationSchedule() {
 		    try {
 		        const response = await fetch(`/api/push/schedule`);
 		        if (response.ok) {
@@ -419,6 +450,9 @@ async function loadNotificationSchedule() {
 	            alert('네트워크 오류가 발생했습니다.');
 	        }
 	    });
+	
+	    // 추가: 테스트 알림 버튼에 이벤트 리스너 추가
+	    testNotificationButton.addEventListener('click', sendTestNotification);
 	    
 	    // 페이지 로드 시 초기 상태 설정
 	    document.addEventListener('DOMContentLoaded', async () => {
